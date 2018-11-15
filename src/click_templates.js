@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn", "eqeqeq" : "warn", "no-redeclare" : "warn", "no-extra-semi" : "off" */
+
 submit_laudo = {
   ob_tardio: function () {
     try {
@@ -1219,3 +1221,5 @@ function change_presentation() {
     $('#form_dorso_label').html('Dorso');
   }
 }
+
+export { submit_laudo, calculate_history }

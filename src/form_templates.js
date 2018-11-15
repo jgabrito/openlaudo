@@ -1,3 +1,7 @@
+
+/* eslint no-unused-vars: "warn" */
+import { calculate_history } from './click_templates.js'
+
 form_templates = {
     ob_tardio : `<form id="rendered-form"><div class="rendered-form">
     <div class="">
@@ -440,3 +444,5 @@ form_templates = {
 
 
 }
+
+export default form_templates

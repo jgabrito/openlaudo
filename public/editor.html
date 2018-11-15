@@ -1,37 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>openlaudo</title>
 
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <!-- FORM FORM FORM -->
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700,300">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
   <!-- Include stylesheet -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-
-
+  <link rel="stylesheet" href="/css/style.css">
 
 
   <!-- Include the JQuery library -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <!-- Compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <!-- Include the Quill library -->
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+  <!-- Include the Vue library -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script> -->
   <!-- Include the local Quill library -->
   <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
-  <script src="js/templates.js?v=0.2"></script>
+  <!-- these will be taken care of by webpack
+  <script src="js/templates.js"></script>
   <script src="js/descriptors.js"></script>
-  <script src="js/click_templates.js?v=0.2"></script>
-  <script src="js/form_templates.js?v=0.2"></script>
-
-
+  <script src="js/click_templates.js"></script>
+  <script src="js/form_templates.js"></script>
+  -->
 </head>
 
 <body>
+  <noscript>
+    <strong>We're sorry but openlaudo doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+  </noscript>
+  <!-- Create the editor container -->
+
+  <div id="container">
 
 
   <!-- Create the editor container -->
@@ -182,8 +190,8 @@
         </div>
       </div>
 
-      <!-- FORMS CLICKS -->
-      <div class="col-5">
+      <!-- DESCRIPTORS DESCRIPTORS -->
+      <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Busque descritores..." title="Type in a name" />
 
         <ul id="app" class="collapsible popout">
           <li v-for="card in cards" :key="card.title">
@@ -222,9 +230,11 @@
 
 
   <!-- Include the sidebar (vue) library -->
-  <script src="js/sidebar.js"></script>
-
+  <!-- webpack will take care of this too
+    <script src="js/sidebar.js"></script> 
+  -->
+  
 
   <!-- FORM FORM FORM -->
-
 </body>
+</html>
