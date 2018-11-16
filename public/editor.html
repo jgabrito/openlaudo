@@ -37,196 +37,59 @@
   <noscript>
     <strong>We're sorry but openlaudo doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
   </noscript>
-  <!-- Create the editor container -->
-
-  <div id="container">
-
 
   <!-- Create the editor container -->
-  <div id="container">
+  
+  <div id="main_container" class="container-fluid d-flex flex-column h-100">
+    <div id="template_nav"></div>
 
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
-    <!-- NAV BAR -->
+    <div class="row zero-margin flex-grow-1" id='container'>
+      <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
+      <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
+      <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
 
-    <!-- These divs list the groups of each modality dropdowns. Each modality has many groups, each group is a specialty, ie each group is its self a list of the dropdown options for each specialty. These groups are the target of the dropdown triggers bellow -->
+      <!-- These divs list the groups of each modality dropdowns. Each modality has many groups, each group is a specialty, ie each group is its self a list of the dropdown options for each specialty. These groups are the target of the dropdown triggers bellow -->
 
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
-    <!-- USG USG USG -->
+      <!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG -->
+      <!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG --><!-- USG USG USG -->
 
+      <!-- TC TC TC --><!-- DROPDOWN DROPDOWN DROPDOWN DROPDOWN --><!-- TC TC TC --><!-- TC TC TC -->
+      <!-- TC TC TC --><!-- DROPDOWN DROPDOWN DROPDOWN DROPDOWN --><!-- TC TC TC --><!-- TC TC TC -->
 
-    <div id="usg_dropdowns">
-      <ul v-for="specialty in modality" v-bind:id="specialty.metadata.specialty_id" class="dropdown-content">
-        <li v-for="exam in specialty.mascaras">
-          <a href="#!" v-on:click="html_format_template(exam)">{{exam.nickname}}</a>
-        </li>
-      </ul>
-    </div>
+      <!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM -->
+      <!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM --><!-- RM RM RM -->
 
+      <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
+      <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
+      <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
 
-    <!-- TC TC TC -->
-    <!-- DROPDOWN DROPDOWN DROPDOWN DROPDOWN -->
-    <!-- TC TC TC -->
-    <!-- TC TC TC -->
-    <!-- TC TC TC -->
-    <!-- DROPDOWN DROPDOWN DROPDOWN DROPDOWN -->
-    <!-- TC TC TC -->
-    <!-- TC TC TC -->
+      <!-- Theses <nav>s  are lists (one for each modality) that hold all the specialties available for them, and each specialt is a trigger whose target are the dropdown classes above, ie, the lists of exams. -->    
 
-    <div id="tc_dropdowns">
-      <ul v-for="specialty in modality" v-bind:id="specialty.metadata.specialty_id" class="dropdown-content">
-        <li v-for="exam in specialty.mascaras">
-          <a href="#!" v-on:click="html_format_template(exam)">{{exam.nickname}}</a>
-        </li>
-      </ul>
-    </div>
-
-
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-    <!-- RM RM RM -->
-
-    <div id="rm_dropdowns">
-      <ul v-for="specialty in modality" v-bind:id="specialty.metadata.specialty_id" class="dropdown-content">
-        <li v-for="exam in specialty.mascaras">
-          <a href="#!" v-on:click="html_format_template(exam)">{{exam.nickname}}</a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
-    <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
-    <!-- TRIGGERS NAV BAR TRIGGERS NAV BAR NAV BAR NAV BAR NAV BAR TRIGERS -->
-
-    <!-- Theses <nav>s  are lists (one for each modality) that hold all the specialties available for them, and each specialt is a trigger whose target are the dropdown classes above, ie, the lists of exams. -->
-
-    <!-- NAV BAR USG USG USG USG USG USG USG  TRIGGERS-->
-
-    <nav id=nav_usg>
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo right">Open Laudo</a>
-        <ul id="usg_triggers" class="left hide-on-med-and-down">
-          <!-- Dropdown Triggers -->
-          <li v-for="specialty in modality">
-            <a href="#!" class="dropdown-trigger" v-bind:data-target="specialty.metadata.specialty_id" v-bind:name="specialty.metadata.specialty_name" v-on:click="change_specialty(specialty.metadata.specialty_name)">{{specialty.metadata.specialty_nickname}}</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <!-- NAV BAR TC TC TC TC TC TC TC TC TRIGGERS -->
-    <nav id=nav_tc>
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo right">Open Laudo</a>
-        <ul id="tc_triggers" class="left hide-on-med-and-down">
-          <!-- Dropdown Triggers -->
-          <li v-for="specialty in modality">
-            <a href="#!" class="dropdown-trigger" v-bind:data-target="specialty.metadata.specialty_id" v-on:click="change_specialty(specialty.metadata.specialty_name)">{{specialty.metadata.specialty_nickname}}</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-
-    <!-- NAV BAR RM RM RM RM RM RM RM RM RM RM  TRIGGERS -->
-    <nav id=nav_rm>
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo right">Open Laudo</a>
-        <ul id="rm_triggers" class="left hide-on-med-and-down">
-          <!-- Dropdown Triggers -->
-          <li v-for="specialty in modality">
-            <a href="#!" class="dropdown-trigger" v-bind:data-target="specialty.metadata.specialty_id" v-on:click="change_specialty(specialty.metadata.specialty_name)">{{specialty.metadata.specialty_nickname}}</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-
-    <!-- EXAM TYPE SELECTOR -->
-    <div class="row">
-      <ul class="tabs" id="modality_selector">
-        <li class="tab"><a href="#nav_usg" onclick="v_descriptors_ul.set_modality('usg')">USG</a></li>
-        <li class="tab"><a href="#nav_tc" onclick="v_descriptors_ul.set_modality('tc')">TC</a></li>
-        <li class="tab"><a href="#nav_rm" onclick="v_descriptors_ul.set_modality('rm')">RM</a></li>
-      </ul>
-    </div>
-
-
-    <!-- ROW WITH RTF_EDITOR AND FINDINGS DESCRIPTORS -->
-    <div class="row" id="two_col_row">
-
+      <!-- ROW WITH RTF_EDITOR AND FINDINGS DESCRIPTORS -->
       <!-- RTF_EDITOR -->
-      <div id="all_editor" class="col-7">
-        <div id="editor">
-
-          <p><br></p>
-        </div>
+      <div id="all_editor" class="col-7 d-flex flex-column">
+        <div id="editor"> </div>
       </div>
-
-      <!-- DESCRIPTORS DESCRIPTORS -->
-      <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Busque descritores..." title="Type in a name" />
-
+      
+        
+      <!-- FORMS CLICKS -->
+      <div class="col-5 d-flex flex-column">
         <ul id="app" class="collapsible popout">
           <li v-for="card in cards" :key="card.title">
             <div class="collapsible-header "><img :src="card.src" class="circle vignette "><span class="headline white--text" v-html="card.title" style="margin-top:20px;"></span></div>
             <div class="collapsible-body white" id="form_div"><span class="headline white--text" v-html="card.description"></span>
-
               <!-- HERE ENTERS THE CLICK FORM -->
               <!-- HERE ENTERS THE CLICK FORM -->
               <!-- HERE ENTERS THE CLICK FORM -->
-              
-
-
-              <!-- HERE ENDS THE CLICK FORM -->
-              <!-- HERE ENDS THE CLICK FORM -->
-              <!-- HERE ENDS THE CLICK FORM -->
-            </div>
+            </div>        
         </ul>
 
         <!-- DESCRIPTORS DESCRIPTORS -->
-        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Busque descritores..." title="Type in a name">
-
-        <ul id="descriptors_ul">
-          <li v-for="descriptor in v_descriptors">
-            <a href="#!" v-on:click="format_descriptor(descriptor.body)"><b>{{descriptor.title}}</b></a>
-            <p href="#!"> {{descriptor.body}}</p>
-            <!-- v-on:dblclick="format_descriptor(descriptor.body)" used to double click and insert text -->
-
-          </li>
-        </ul>
-
+        <div id="descriptor_list"> </div>
       </div>
     </div>
-
-  </div>
-
+</div>
+  
 
 
   <!-- Include the sidebar (vue) library -->

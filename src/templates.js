@@ -1,5 +1,28 @@
+function normalize_templates (templates) {
+  const output_templates = []
 
-const templates = {
+  for (let m_data of Object.values(templates)) {
+    for (let s_data of Object.values(m_data['specialties'])) {
+      for (let t_data of Object.values(s_data['mascaras'])) {
+        t_data = {
+          specialty: s_data['metadata']['specialty_name'],
+          modality: m_data['metadata']['modality_name'],
+          name: t_data['name'],
+          nickname: t_data['nickname'],
+          title: t_data['title'],
+          technique: t_data['tecnique'],
+          body: t_data['body'],
+          conc: t_data['conc']
+        }
+        output_templates.push(t_data)
+      }
+    }
+  }
+
+  return output_templates
+}
+
+var base_templates = {
   'usg': {
     'metadata': {
       'modality_name': 'usg'
@@ -507,4 +530,6 @@ const templates = {
   }
 }
 
-export default templates
+const normalized_templates = normalize_templates(base_templates)
+
+export { base_templates, normalized_templates }

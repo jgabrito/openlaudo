@@ -1,4 +1,24 @@
-const descriptors = {
+function normalize_descriptors (descriptors) {
+  const output_descriptors = []
+
+  for (let s_data of Object.values(descriptors)) {
+    for (let m_data of Object.values(s_data['modalities'])) {
+      for (let f_data of Object.values(m_data['findings'])) {
+        f_data = {
+          specialty: s_data['metadata']['specialty_name'],
+          modality: m_data['metadata']['modality_name'],
+          title: f_data['title'],
+          body: f_data['body']
+        }
+        output_descriptors.push(f_data)
+      }
+    }
+  }
+
+  return output_descriptors
+}
+
+var base_descriptors = {
   'neuro': {
     'metadata': {
       'specialty_name': 'neuro'
@@ -1394,7 +1414,7 @@ const descriptors = {
   },
   'obstetrico': {
     'metadata': {
-      'specialty_name': null
+      'specialty_name': 'obstetrico'
     },
     'modalities': {
       'tc': {
@@ -1516,4 +1536,6 @@ const descriptors = {
   }
 }
 
-export default descriptors
+const normalized_descriptors = normalize_descriptors(base_descriptors)
+
+export { base_descriptors, normalized_descriptors }

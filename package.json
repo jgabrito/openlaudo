@@ -8,6 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "lodash": "^4.17.11",
+    "minimongo": "^5.0.1",
+    "simpl-schema": "^1.5.3",
     "vue": "^2.5.17"
   },
   "devDependencies": {

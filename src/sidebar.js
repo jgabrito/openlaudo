@@ -1,9 +1,11 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn" */
+import Vue from 'vue'
 
 import { submit_laudo } from './click_templates.js'
-import templates from './templates.js'
-import descriptors from './descriptors.js'
-import Vue from 'vue'
+import { base_descriptors as descriptors } from './descriptors.js'
+
+import TemplateNav from './components/TemplateNav.vue'
+import DescriptorList from './components/DescriptorList.vue'
 
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
@@ -32,20 +34,19 @@ var toolbarOptions = [
 
 // define function to run when 'COPIAR' tool is pressed
 const myhandlers = { 'COPIAR': function () {
-  htmlStr = quill.root.innerHTML
-  textStr = quill.getText()
+// htmlStr = quill.root.innerHTML
+// textStr = quill.getText()
 
   copySelection()
 } }
 
 // code that inserts the editor on the page
+// TODO: move the editor to a Vue component to solve sizing issues.
 var quill = new Quill('#editor', {
   modules: {
     toolbar: {
-
       container: toolbarOptions,
       handlers: myhandlers
-
     }
   },
   theme: 'snow'
@@ -61,22 +62,22 @@ function copySelection () {
 
 // inserts simple template to quill
 // also changes clickable template that shows on the right
-function format_template (exam, usg) {
-  var tecniqueTitle = ''
+function format_template (exam) {
+  var techniqueTitle = ''
   var analysisTitle = ''
-  if (exam.tecnique) {
-    tecniqueTitle = '\nTécnica\n'
+  if (exam.technique !== '') {
+    techniqueTitle = '\nTécnica\n'
     analysisTitle = '\nAnálise\n'
   }
   var conclusaoTitle = ''
-  if (usg) {
+  if (exam.conc !== '') {
     conclusaoTitle = 'Conclusão\n'
   }
 
   quill.setContents([
     { insert: exam.title + '\n', attributes: { bold: true, align: 'center' } },
-    { insert: tecniqueTitle, attributes: { bold: true, align: 'justify' } },
-    { insert: exam.tecnique + '\n' },
+    { insert: techniqueTitle, attributes: { bold: true, align: 'justify' } },
+    { insert: exam.technique + '\n' },
     { insert: analysisTitle, attributes: { bold: true, align: 'justify' } },
     { insert: exam.body + '\n\n', attributes: { align: 'justify' } },
     { insert: conclusaoTitle, attributes: { bold: true } },
@@ -104,95 +105,6 @@ function format_template (exam, usg) {
     }
   }
 }
-
-// TOP MENU TOP MENU TOP MENU TOP MENU
-// TOP MENU TOP MENU TOP MENU TOP MENU
-// TOP MENU TOP MENU TOP MENU TOP MENU
-
-// TRIGGERS TRIGGERS TRIGGERS
-// TRIGGERS TRIGGERS TRIGGERS
-// These buttons correspond to the specialties inside each modality. When a modality button is clicked, these specialties are updated on the top most menu bar
-
-new Vue({
-  el: '#usg_triggers',
-  data: {
-    modality: templates.usg.specialties
-  },
-  methods: {
-    change_specialty: function (specialty) {
-      v_descriptors_ul.set_specialty(specialty)
-    }
-  }
-
-})
-
-new Vue({
-  el: '#tc_triggers',
-  data: {
-    modality: templates.tc.specialties
-  },
-  methods: {
-    change_specialty: function (specialty) {
-      v_descriptors_ul.set_specialty(specialty)
-    }
-  }
-
-})
-
-new Vue({
-  el: '#rm_triggers',
-  data: {
-    modality: templates.rm.specialties
-  },
-  methods: {
-    change_specialty: function (specialty) {
-      v_descriptors_ul.set_specialty(specialty)
-    }
-  }
-
-})
-
-// DROPDOWNDS DROPDOWNDS DROPDOWNDS
-// DROPDOWNDS DROPDOWNDS DROPDOWNDS
-
-// these are the menus that drop down with the report titles for each specialty
-// when clicked, they insert the template to the quill editor
-
-new Vue({
-  el: '#usg_dropdowns',
-  data: {
-    modality: templates.usg.specialties
-  },
-  methods: {
-    html_format_template: function (exam) {
-      format_template(exam, true)
-    }
-  }
-})
-
-new Vue({
-  el: '#tc_dropdowns',
-  data: {
-    modality: templates.tc.specialties
-  },
-  methods: {
-    html_format_template: function (exam) {
-      format_template(exam, false)
-    }
-  }
-})
-
-new Vue({
-  el: '#rm_dropdowns',
-  data: {
-    modality: templates.rm.specialties
-  },
-  methods: {
-    html_format_template: function (exam) {
-      format_template(exam, false)
-    }
-  }
-})
 
 // CLICKS CLICKS CLICKS
 // CLICKS CLICKS CLICKS
@@ -223,66 +135,80 @@ const collpasible_app = new Vue({
 // DESCRIPTORS DESCRIPTORS DESCRIPTORS DESCRIPTORS
 
 // insert descriptor in quill
-function format_descriptor (text) {
+function format_descriptor (descriptor) {
+  var selection = null
   try {
-    selectionIndex = quill.getSelection().index
+    selection = quill.getSelection()
   } catch (err) {
     quill.focus()
-    selectionIndex = quill.getSelection().index
+    selection = quill.getSelection()
     console.warn(err)
   }
 
-  quill.insertText(selectionIndex, text)
+  quill.insertText((selection) ? selection.index : 0, descriptor.body)
 }
 
 // vue
 const v_descriptors_ul = new Vue({
-  el: '#descriptors_ul',
+  el: '#descriptor_list',
+
   data: {
-    selected_modality: 'usg',
-    selected_specialty: 'cep',
-    v_descriptors: descriptors.cep.modalities.tc.findings
+    modality: 'usg',
+    specialty: 'abdome'
   },
 
+  template: `
+    <DescriptorList v-on:descriptor-chosen="format_descriptor" 
+      v-bind:modality="modality" v-bind:specialty="specialty"> 
+    </DescriptorList>
+  `,
+
   methods: {
-
-    format_descriptor: format_descriptor,
-
-    set_modality: function (new_modality) {
-      this.selected_modality = new_modality
-      this.v_descriptors = descriptors[this.selected_specialty].modalities[this.selected_modality].findings
-    },
-
+    format_descriptor,
     set_specialty: function (new_specialty) {
-      this.selected_specialty = new_specialty
-      this.v_descriptors = descriptors[this.selected_specialty].modalities[this.selected_modality].findings
+      console.log('set_specialty:')
+      console.log(new_specialty)
+      this.specialty = new_specialty
     },
-
-    nl2br: function (text) {
-      return nl2br(text)
+    set_modality: function (new_modality) {
+      console.log('set_modality:')
+      console.log(new_modality)
+      this.modality = new_modality
     }
+  },
 
+  components: {
+    DescriptorList
   }
-
 })
 
-// function to update v_descriptors_ul vue
-function update_descriptors (specific_descriptors) {
-  v_descriptors_ul.v_descriptors = specific_descriptors
-}
+// TOP MENU TOP MENU TOP MENU TOP MENU
+// TOP MENU TOP MENU TOP MENU TOP MENU
+// TOP MENU TOP MENU TOP MENU TOP MENU
+
+// these are the menus that drop down with the report titles for each specialty
+// when clicked, they insert the template to the quill editor
+
+const template_nav = new Vue({
+  el: '#template_nav',
+  methods: {
+    format_template,
+    set_specialty: v_descriptors_ul.set_specialty,
+    set_modality: v_descriptors_ul.set_modality
+  },
+  template: `
+    <TemplateNav v-on:template-chosen="format_template" 
+      v-on:specialty-changed="set_specialty"
+      v-on:modality-changed="set_modality">
+    </TemplateNav>
+  `,
+  components: { TemplateNav }
+})
 
 $(document).ready(function () {
-  $('.dropdown-trigger').dropdown({ constrainWidth: false })
+  // $('.dropdown-trigger').dropdown({ constrainWidth: false })
   $('.tabs').tabs()
   $('.form_select_init').formSelect()
 })
-
-function nl2br (str, is_xhtml) {
-  if (typeof str === 'undefined' || str === null) {
-    return ''
-  }
-  var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>'
-  return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2')
-}
 
 export { v_descriptors_ul }
