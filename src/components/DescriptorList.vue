@@ -18,7 +18,7 @@
 
 <style scoped>
   #search-input {
-    background-image: url('/images/searchicon.png');
+    background-image: url('../assets/images/searchicon.png');
     background-position: 10px 12px;
     background-repeat: no-repeat;
     width: 100%;

@@ -7,6 +7,8 @@ import { base_descriptors as descriptors } from './descriptors.js'
 import TemplateNav from './components/TemplateNav.vue'
 import DescriptorList from './components/DescriptorList.vue'
 
+import ultrasound_icon from './assets/images/ultrasound_icon.png'
+
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 
@@ -119,7 +121,7 @@ const collpasible_app = new Vue({
   mounted: function () { $('.collapsible').collapsible() },
   data: {
     cards: [
-      { title: '', src: '/images/ultrasound_icon.png', description: '' }
+      { title: '', src: ultrasound_icon, description: '' }
     ]
   },
   methods: {

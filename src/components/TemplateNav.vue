@@ -29,8 +29,8 @@
 
 <script>
 // TODO: visual feedback of currently selected modality and specialty
-// TODO: make specialty list include all specialties, independently of the 
-// avaliability of templates for that specialty, otherwise descriptors for that 
+// TODO: make specialty list include all specialties, independently of the
+// avaliability of templates for that specialty, otherwise descriptors for that
 // combination will not show up in the descriptor list
 
 import _ from 'lodash'
