@@ -2,15 +2,23 @@
   <div class="d-flex flex-column flex-grow-1">
     <div>
       <input type="text" id="search-input" v-on:keyup="search_input_changed"
-        placeholder="Busque descritores..." title="Busque descritores" />
+        placeholder="Buscar..." title="Buscar" />
     </div>
-    <ul id="descriptors_ul" class="flex-grow-1">
-      <li v-for="descriptor in descriptors" v-bind:key="descriptor._id">
-        <a href="#!" v-on:click="$emit('descriptor-chosen', descriptor)">
-          <b>{{descriptor.title}}</b>
+    <ul v-if="expanded" id="assets_ul" class="flex-grow-1">
+      <li
+        v-for="asset in assets" v-bind:key="asset._id">
+        <a href="#!" v-on:click="$emit('asset-chosen', asset)">
+          <b>{{assetInterface.get_title(asset)}}</b>
         </a>
-        <p href="#!"> {{descriptor.body}}</p>
-        <!-- v-on:dblclick="format_descriptor(descriptor.body)" used to double click and insert text -->
+        <p href="#!"> {{assetInterface.get_body(asset)}}</p>
+        <!-- v-on:dblclick="format_asset(asset.body)" used to double click and insert text -->
+      </li>
+    </ul>
+    <ul v-else id="assets_ul" class="flex-grow-1">
+      <li v-for="asset in assets" v-bind:key="asset._id">
+        <a href="#!" v-on:click="$emit('asset-chosen', asset)">
+          {{assetInterface.get_title(asset)}}
+        </a>
       </li>
     </ul>
   </div>
@@ -30,14 +38,14 @@
     /*margin-right: 40px;*/
   }
 
-  #descriptors_ul {
+  #assets_ul {
     list-style-type: none;
     padding: 10px 0px 0px 0px;
     margin: 0px;
     overflow-y: scroll;
   }
 
-  #descriptors_ul li a {
+  #assets_ul li a {
     border: 1px solid #ddd;
     margin-top: -1px; /* Prevent double borders */
     background-color: #f6f6f6;
@@ -48,7 +56,7 @@
     display: block;
   }
 
-  #descriptors_ul li p {
+  #assets_ul li p {
     border: 1px solid #ddd;
     margin-top: -1px; /* Prevent double borders */
     margin-bottom: 7px;
@@ -62,14 +70,13 @@
     word-wrap: break-word;
   }
 
-  #descriptors_ul li a:hover:not(.header) {
+  #assets_ul li a:hover:not(.header) {
     background-color: #eee;
   }
 </style>
 
 <script>
 import _ from 'lodash'
-import * as db from '../db.js'
 
 export default {
   data: function () {
@@ -79,30 +86,42 @@ export default {
     }
   },
 
-  props: [ 'modality', 'specialty' ],
+  /*
+    assetInterface: Object containing the following callbacks:
+      get_title, get_body, get_sort_key : take an asset reference as input and return
+        the corresponding information
+      find_assets(selector, options, search_expression) : reroutes the call to the
+        appropriate entry in the DB backend and returns a promise for the data
+  */
+  props: {
+    modality: Object,
+    specialty: Object,
+    expanded: Boolean,
+    assetInterface: Object
+  },
 
   computed: {
-    descriptors: function () {
-      return _.sortBy(Array.from(this.dataset.values()), _.property('nickname'))
+    assets: function () {
+      return _.sortBy(Array.from(this.dataset.values()), this.assetInterface.get_sort_key)
     }
   },
 
   watch: {
     modality: function () {
-      this.refresh_descriptors()
+      this.refresh_assets()
     },
     specialty: function () {
-      this.refresh_descriptors()
+      this.refresh_assets()
     },
     search_expression: function () {
-      this.refresh_descriptors()
+      this.refresh_assets()
     }
   },
 
   methods: {
     search_input_changed: _.debounce(
       function (event) {
-        console.log('DescriptorList.search_input_changed')
+        console.log('assetList.search_input_changed')
         console.log(event.target.value)
         this.search_expression = event.target.value
       },
@@ -114,43 +133,43 @@ export default {
       }
     ),
 
-    refresh_descriptors: function () {
-      // Overwrite any ongoing request and clear the descriptor list
+    refresh_assets: function () {
+      // Overwrite any ongoing request and clear the asset list
       if (this._db_promise !== undefined) delete this._db_promise
       this.dataset = new Map()
 
-      let my_promise = this._db_promise = db.find_descriptors(
+      let my_promise = this._db_promise = this.assetInterface.find_assets(
         {
-          modality: this.modality,
-          specialty: this.specialty
+          modality: this.modality.name,
+          specialty: this.specialty.name
         },
         {},
         this.search_expression
       )
         .then((data) => {
-        // Success
-        // Only actually update the list for the most recent request
+          // Success
+          // Only actually update the list for the most recent request
           if (this._db_promise === my_promise) {
-            console.log('DescriptorList.refresh_descriptors: data received')
+            console.log('assetList.refresh_assets: data received')
             console.log(this)
             console.log(data)
             this.dataset = data
           }
         },
         (error) => {
-          console.log('DescriptorList.refresh_descriptors: bumped')
+          console.log('assetList.refresh_assets: bumped')
           console.log(this)
           console.log(error)
         })
         .then(() => {
-        // Finally:
+          // Finally:
           if (this._db_promise === my_promise) delete this._db_promise
         })
     }
   },
 
   created: function () {
-    this.refresh_descriptors()
+    this.refresh_assets()
   },
 
   beforeDestroy: function () {

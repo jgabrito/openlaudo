@@ -1,66 +1,66 @@
 
 export default {
   'modalities': {
-   'tc' : {
+    'tc': {
       'name': 'tc',
       'nickname': 'TC'
     },
-    'usg' : {
+    'usg': {
       'name': 'usg',
       'nickname': 'USG'
     },
-    'rm' : {
+    'rm': {
       'name': 'rm',
       'nickname': 'RM'
     },
-    'rx' : {
+    'rx': {
       'name': 'rx',
       'nickname': 'RX'
     }
   },
 
   'specialties': {
-    'abdome' : {
+    'abdome': {
       'name': 'abdome',
       'nickname': 'Abdome',
       'modalities': 'all'
     },
-    'obstetrico' : {
+    'obstetrico': {
       'name': 'obstetrico',
       'nickname': 'OB/GYN',
       'modalities': 'all'
     },
-    'doppler' : {
+    'doppler': {
       'name': 'doppler',
       'nickname': 'Doppler',
       'modalities': [ 'usg' ]
     },
-    'msk' : {
+    'msk': {
       'name': 'msk',
       'nickname': 'MSK',
       'modalities': 'all'
     },
-    'superficial' : {
+    'superficial': {
       'name': 'superficial',
       'nickname': 'Superficial',
       'modalities': [ 'usg' ]
     },
-    'neuro' : {
+    'neuro': {
       'name': 'neuro',
       'nickname': 'Neuro',
       'modalities': 'all'
     },
-    'torax' : {
+    'torax': {
       'name': 'torax',
       'nickname': 'Tórax',
       'modalities': 'all'
     },
-    'cep' : {
+    'cep': {
       'name': 'cep',
       'nickname': 'CEP',
       'modalities': 'all'
     },
-    'mama' : {
+    'mama': {
       'name': 'mama',
       'nickname': 'Mama',
       'modalities': 'all'

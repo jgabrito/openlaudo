@@ -37,19 +37,15 @@
 </template>
 
 <script>
-// TODO: visual feedback of currently selected modality and specialty
-// TODO: make specialty list include all specialties, independently of the
-// avaliability of templates for that specialty, otherwise descriptors for that
-// combination will not show up in the descriptor list
 
 import _ from 'lodash'
 import * as db from '../db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
 import base_metadata from '../base_metadata.js'
 
-function _valid_modality_for_specialty(modality, specialty) {
+function _valid_modality_for_specialty (modality, specialty) {
   if (specialty.modalities === 'all') return true
-  else return specialty.modalities.includes(modality.name) 
+  else return specialty.modalities.includes(modality.name)
 }
 
 export default {
@@ -71,7 +67,7 @@ export default {
   components: { DropdownTrigger },
 
   computed: {
-    modalities : function() {
+    modalities: function () {
       return _.sortBy(Object.values(this.metadata.modalities), _.property('nickname'))
     },
 
@@ -100,7 +96,7 @@ export default {
       return `${this.current_modality.name}-${specialty.name}`
     },
 
-    get_valid_specialties: function() {
+    get_valid_specialties: function () {
       let specialties = Object.values(this.metadata.specialties)
       specialties = _.filter(specialties, (s) => (_valid_modality_for_specialty(this.current_modality, s)))
       specialties = _.sortBy(specialties, _.property('nickname'))
@@ -109,8 +105,7 @@ export default {
 
     set_modality: function (new_modality_name) {
       this.current_modality = this.metadata.modalities[new_modality_name]
-      if (! _valid_modality_for_specialty(this.current_modality, this.current_specialty))
-        this.set_specialty(this.get_valid_specialties()[0].name)
+      if (!_valid_modality_for_specialty(this.current_modality, this.current_specialty)) { this.set_specialty(this.get_valid_specialties()[0].name) }
       this.$emit('modality-changed', this.current_modality)
     },
 
@@ -158,17 +153,17 @@ export default {
     this.refresh_templates()
   },
 
-  mounted: function() {
+  mounted: function () {
     this.$nextTick(function () {
       let els = this.$el.getElementsByClassName('tabs')
-      this._tabs = new window.M.Tabs.init(els)
+      this._tabs = window.M.Tabs.init(els)
     })
   },
 
   beforeDestroy: function () {
-      if (this._tabs) {
-        for (let i=0; i<this._tabs.length; i++) this._tabs[i].destroy()
-        delete this._tabs
+    if (this._tabs) {
+      for (let i = 0; i < this._tabs.length; i++) this._tabs[i].destroy()
+      delete this._tabs
     }
     if (this._db_promise !== undefined) delete this._db_promise
   }

@@ -5,9 +5,13 @@ import { submit_laudo } from './click_templates.js'
 import { base_descriptors as descriptors } from './descriptors.js'
 
 import TemplateNav from './components/TemplateNav.vue'
-import DescriptorList from './components/DescriptorList.vue'
-
+import AssetList from './components/AssetList.vue'
+import * as db from './db.js'
+import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
+
+const initial_modality = base_metadata.modalities['tc']
+const initial_specialty = base_metadata.specialties['cep']
 
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
@@ -150,19 +154,29 @@ function format_descriptor (descriptor) {
   quill.insertText((selection) ? selection.index : 0, descriptor.body)
 }
 
+const descriptor_interface = {
+  get_title: (a) => (a.title),
+  get_body: (a) => (a.body),
+  get_sort_key: (a) => (a.title),
+  find_assets: function (selector, options, search_expression) {
+    return db.find_descriptors(selector, options, search_expression)
+  }
+}
+
 // vue
 const v_descriptors_ul = new Vue({
   el: '#descriptor_list',
 
   data: {
-    modality: 'usg',
-    specialty: 'abdome'
+    modality: initial_modality,
+    specialty: initial_specialty,
+    descriptor_interface
   },
 
   template: `
-    <DescriptorList v-on:descriptor-chosen="format_descriptor" 
-      v-bind:modality="modality" v-bind:specialty="specialty"> 
-    </DescriptorList>
+    <AssetList expanded v-bind:modality="modality" v-bind:specialty="specialty"
+      v-bind:asset-interface="descriptor_interface" v-on:asset-chosen="format_descriptor" > 
+    </AssetList>
   `,
 
   methods: {
@@ -180,7 +194,7 @@ const v_descriptors_ul = new Vue({
   },
 
   components: {
-    DescriptorList
+    AssetList
   }
 })
 
@@ -193,13 +207,19 @@ const v_descriptors_ul = new Vue({
 
 const template_nav = new Vue({
   el: '#template_nav',
+  data: {
+    initial_modality,
+    initial_specialty
+  },
   methods: {
     format_template,
     set_specialty: v_descriptors_ul.set_specialty,
     set_modality: v_descriptors_ul.set_modality
   },
   template: `
-    <TemplateNav template-dropdowns initial-modality-name="tc" initial-specialty-name="cep"
+    <TemplateNav template-dropdowns 
+      v-bind:initial-modality-name="initial_modality.name" 
+      v-bind:initial-specialty-name="initial_specialty.name"
       v-on:template-chosen="format_template" 
       v-on:specialty-changed="set_specialty"
       v-on:modality-changed="set_modality">
