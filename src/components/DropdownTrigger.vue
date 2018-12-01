@@ -7,22 +7,19 @@
 </template>
 
 <script>
-export default {
-  props: [ 'target', 'textContent' ],
 
-  mounted: function () {
-    this.$nextTick(function () {
-      console.log('DropdownTrigger.nexttick:')
-      console.log(this.$el)
-      this._dropdown = new window.M.Dropdown(this.$el, { constrainWidth: false })
-    })
+import materialize_mixin from './materialize_mixin.js'
+
+export default {
+  data: function () {
+    return {
+      materialize_recursive: false,
+      materialize_classes: [ 'dropdown' ]
+    }
   },
 
-  beforeDestroy: function () {
-    if (this._dropdown) {
-      this._dropdown.destroy()
-      this._dropdown = null
-    }
-  }
+  props: [ 'target', 'textContent' ],
+
+  mixins: [ materialize_mixin ]
 }
 </script>

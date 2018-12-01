@@ -217,7 +217,7 @@ const template_nav = new Vue({
     set_modality: v_descriptors_ul.set_modality
   },
   template: `
-    <TemplateNav template-dropdowns 
+    <TemplateNav template-dropdowns tabs
       v-bind:initial-modality="initial_modality" 
       v-bind:initial-specialty="initial_specialty"
       v-on:template-chosen="format_template" 

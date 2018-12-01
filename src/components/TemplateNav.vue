@@ -26,9 +26,9 @@
       </ul>
     </div>
     <div class="nav-content">
-      <ul class="tabs">
+      <ul v-bind:class="{tabs : tabs}">
         <li v-for="modality in modalities" v-bind:key="modality.name"
-            v-bind:class="{ tab : true, active : (modality === current_modality) }">
+            v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
           <a href="#" v-on:click="set_modality(modality.name)">{{modality.nickname}}</a>
         </li>
       </ul>
@@ -41,16 +41,20 @@
 import * as db from '../db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
 import metadata_mixin from './metadata_mixin.js'
+import materialize_mixin from './materialize_mixin.js'
 
 export default {
   data: function () {
     return {
-      dataset: null // Immutable
+      dataset: null, // Immutable
+      materialize_classes: [ 'tabs' ],
+      materialize_recursive: true
     }
   },
 
   props: {
-    templateDropdowns: Boolean
+    templateDropdowns: Boolean,
+    tabs: Boolean
   },
 
   components: { DropdownTrigger },
@@ -120,22 +124,11 @@ export default {
     this.refresh_templates()
   },
 
-  mounted: function () {
-    this.$nextTick(function () {
-      let els = this.$el.getElementsByClassName('tabs')
-      this._tabs = window.M.Tabs.init(els)
-    })
-  },
-
   beforeDestroy: function () {
-    if (this._tabs) {
-      for (let i = 0; i < this._tabs.length; i++) this._tabs[i].destroy()
-      delete this._tabs
-    }
     if (this._db_promise !== undefined) delete this._db_promise
   },
 
-  mixins: [ metadata_mixin ]
+  mixins: [ metadata_mixin, materialize_mixin ]
 }
 
 </script>
