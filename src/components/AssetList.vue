@@ -76,20 +76,22 @@
 </style>
 
 <script>
+
 import _ from 'lodash'
 
 export default {
   data: function () {
     return {
       search_expression: '',
-      dataset: new Map()
+      dataset: null // Immutable
     }
   },
 
   /*
     assetInterface: Object containing the following callbacks:
-      get_title, get_body, get_sort_key : take an asset reference as input and return
+      get_title, get_body: take an asset reference as input and return
         the corresponding information
+      sort_key: string
       find_assets(selector, options, search_expression) : reroutes the call to the
         appropriate entry in the DB backend and returns a promise for the data
   */
@@ -102,7 +104,11 @@ export default {
 
   computed: {
     assets: function () {
-      return _.sortBy(Array.from(this.dataset.values()), this.assetInterface.get_sort_key)
+      if (this.dataset) {
+        return this.dataset.toList().sort((a, b) => (
+          a.get(this.assetInterface.sort_key).localeCompare(b.get(this.assetInterface.sort_key))
+        )).toJS()
+      } else return []
     }
   },
 
@@ -136,7 +142,7 @@ export default {
     refresh_assets: function () {
       // Overwrite any ongoing request and clear the asset list
       if (this._db_promise !== undefined) delete this._db_promise
-      this.dataset = new Map()
+      this.dataset = null
 
       let my_promise = this._db_promise = this.assetInterface.find_assets(
         {

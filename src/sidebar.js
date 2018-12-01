@@ -157,7 +157,7 @@ function format_descriptor (descriptor) {
 const descriptor_interface = {
   get_title: (a) => (a.title),
   get_body: (a) => (a.body),
-  get_sort_key: (a) => (a.title),
+  sort_key: 'title',
   find_assets: function (selector, options, search_expression) {
     return db.find_descriptors(selector, options, search_expression)
   }
@@ -218,8 +218,8 @@ const template_nav = new Vue({
   },
   template: `
     <TemplateNav template-dropdowns 
-      v-bind:initial-modality-name="initial_modality.name" 
-      v-bind:initial-specialty-name="initial_specialty.name"
+      v-bind:initial-modality="initial_modality" 
+      v-bind:initial-specialty="initial_specialty"
       v-on:template-chosen="format_template" 
       v-on:specialty-changed="set_specialty"
       v-on:modality-changed="set_modality">

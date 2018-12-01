@@ -38,53 +38,41 @@
 
 <script>
 
-import _ from 'lodash'
 import * as db from '../db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
-import base_metadata from '../base_metadata.js'
-
-function _valid_modality_for_specialty (modality, specialty) {
-  if (specialty.modalities === 'all') return true
-  else return specialty.modalities.includes(modality.name)
-}
+import metadata_mixin from './metadata_mixin.js'
 
 export default {
   data: function () {
     return {
-      metadata: base_metadata,
-      current_modality: base_metadata.modalities[this.initialModalityName],
-      current_specialty: base_metadata.specialties[this.initialSpecialtyName],
-      dataset: new Map()
+      dataset: null // Immutable
     }
   },
 
   props: {
-    templateDropdowns: Boolean,
-    initialModalityName: String,
-    initialSpecialtyName: String
+    templateDropdowns: Boolean
   },
 
   components: { DropdownTrigger },
 
   computed: {
-    modalities: function () {
-      return _.sortBy(Object.values(this.metadata.modalities), _.property('nickname'))
-    },
-
-    specialties: function () {
-      return this.get_valid_specialties()
-    },
 
     report_templates: function () {
+      let entries = this.dataset
+      if (entries === null) return new Map()
+
+      entries = entries.sort((a, b) => (
+        a.get('nickname').localeCompare(b.get('nickname'))
+      ))
+      entries = entries.groupBy((t) => (t.get('specialty')))
+      entries = entries.sortBy(
+        (v, k) => (k),
+        (a, b) => (a.localeCompare(b))
+      )
       const output = new Map()
-      for (let t of _.sortBy(Array.from(this.dataset.values()), _.property('nickname'))) {
-        let items = output.get(t.specialty)
-        if (items === undefined) {
-          items = []
-          output.set(t.specialty, items)
-        }
-        items.push(t)
-      }
+      entries.forEach((v, k) => {
+        output.set(k, v.toJS())
+      })
       console.log('ModalityNav: computed templates')
       console.log(output)
       return output
@@ -96,31 +84,10 @@ export default {
       return `${this.current_modality.name}-${specialty.name}`
     },
 
-    get_valid_specialties: function () {
-      let specialties = Object.values(this.metadata.specialties)
-      specialties = _.filter(specialties, (s) => (_valid_modality_for_specialty(this.current_modality, s)))
-      specialties = _.sortBy(specialties, _.property('nickname'))
-      return specialties
-    },
-
-    set_modality: function (new_modality_name) {
-      this.current_modality = this.metadata.modalities[new_modality_name]
-      if (!_valid_modality_for_specialty(this.current_modality, this.current_specialty)) { this.set_specialty(this.get_valid_specialties()[0].name) }
-      this.$emit('modality-changed', this.current_modality)
-    },
-
-    set_specialty: function (new_specialty_name) {
-      console.log('TemplateNav.set_specialty:')
-      this.current_specialty = this.metadata.specialties[new_specialty_name]
-      console.log(new_specialty_name)
-      console.log(this.current_specialty)
-      this.$emit('specialty-changed', this.current_specialty)
-    },
-
     refresh_templates: function () {
       if (!this.templateDropdowns) return
       if (this._db_promise !== undefined) delete this._db_promise
-      this.dataset = new Map()
+      this.dataset = null
 
       let my_promise = this._db_promise = db.find_templates({ modality: this.current_modality.name })
         .then((data) => {
@@ -166,7 +133,9 @@ export default {
       delete this._tabs
     }
     if (this._db_promise !== undefined) delete this._db_promise
-  }
+  },
+
+  mixins: [ metadata_mixin ]
 }
 
 </script>

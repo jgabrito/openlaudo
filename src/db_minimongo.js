@@ -1,4 +1,5 @@
 import minimongo from 'minimongo'
+import { OrderedMap, fromJS } from 'immutable'
 
 const localDb = new minimongo.MemoryDb()
 
@@ -19,7 +20,7 @@ class _Collection {
   }
 
   // Arguments: Mongo-style selector and options
-  // Promise result: order-preserving map of _id -> records
+  // Promise result: immutable order-preserving map of _id -> records
   find (selector, options) {
     console.log('_Collection.find selector:')
     console.log(this._coll)
@@ -30,8 +31,8 @@ class _Collection {
         (data) => {
           console.log('_Collection.find received:')
           console.log(data)
-          const output = new Map()
-          for (let d of data) output.set(d._id, d)
+          let output = new OrderedMap()
+          for (let d of data) output = output.set(d._id, fromJS(d))
           resolve(output)
         },
         reject)
