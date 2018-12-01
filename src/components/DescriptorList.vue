@@ -128,8 +128,8 @@ export default {
         this.search_expression
       )
         .then((data) => {
-          // Success
-          // Only actually update the list for the most recent request
+        // Success
+        // Only actually update the list for the most recent request
           if (this._db_promise === my_promise) {
             console.log('DescriptorList.refresh_descriptors: data received')
             console.log(this)
@@ -143,7 +143,7 @@ export default {
           console.log(error)
         })
         .then(() => {
-          // Finally:
+        // Finally:
           if (this._db_promise === my_promise) delete this._db_promise
         })
     }

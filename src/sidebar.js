@@ -199,7 +199,8 @@ const template_nav = new Vue({
     set_modality: v_descriptors_ul.set_modality
   },
   template: `
-    <TemplateNav v-on:template-chosen="format_template" 
+    <TemplateNav template-dropdowns initial-modality-name="tc" initial-specialty-name="cep"
+      v-on:template-chosen="format_template" 
       v-on:specialty-changed="set_specialty"
       v-on:modality-changed="set_modality">
     </TemplateNav>
@@ -209,7 +210,7 @@ const template_nav = new Vue({
 
 $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })
-  $('.tabs').tabs()
+  // $('.tabs').tabs()
   $('.form_select_init').formSelect()
 })
 

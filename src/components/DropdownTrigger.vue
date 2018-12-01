@@ -1,6 +1,6 @@
 <template>
-  <a href="#!" class="dropdown-trigger" v-bind:data-target="target" v-bind:name="name"
-    v-on:click="$emit('trigger-selected')">
+  <a href='#!' class="dropdown-trigger" v-bind:data-target="target"
+    v-on:click="$emit('click')">
     {{textContent}}
     <slot></slot>
   </a>
@@ -8,10 +8,12 @@
 
 <script>
 export default {
-  props: [ 'target', 'name', 'textContent' ],
+  props: [ 'target', 'textContent' ],
 
   mounted: function () {
     this.$nextTick(function () {
+      console.log('DropdownTrigger.nexttick:')
+      console.log(this.$el)
       this._dropdown = new window.M.Dropdown(this.$el, { constrainWidth: false })
     })
   },
