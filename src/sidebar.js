@@ -2,10 +2,10 @@
 import Vue from 'vue'
 
 import { submit_laudo } from './click_templates.js'
-import { base_descriptors as descriptors } from './descriptors.js'
 
 import TemplateNav from './components/TemplateNav.vue'
 import AssetList from './components/AssetList.vue'
+import DescriptorDialog from './components/descriptor_dialog.js'
 import * as db from './db.js'
 import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
@@ -228,10 +228,30 @@ const template_nav = new Vue({
   components: { TemplateNav }
 })
 
+var descriptor_dialog = null
+function descriptor_dialog_close () {
+/*  if (descriptor_dialog) {
+    descriptor_dialog.destroy(true)
+    descriptor_dialog = null
+  } */
+}
+
 $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })
   // $('.tabs').tabs()
   $('.form_select_init').formSelect()
+  $('.fixed-action-btn').floatingActionButton()
+
+  $('#descriptor_edit_button').on('click', function () {
+    var el = document.createElement('div')
+    document.body.appendChild(el)
+    if (!descriptor_dialog) {
+      descriptor_dialog = new DescriptorDialog(el, v_descriptors_ul.modality, v_descriptors_ul.specialty, { close: descriptor_dialog_close })
+    }
+    descriptor_dialog.set_modality(v_descriptors_ul.modality)
+    descriptor_dialog.set_specialty(v_descriptors_ul.specialty)
+    descriptor_dialog.show()
+  })
 })
 
 export { v_descriptors_ul }

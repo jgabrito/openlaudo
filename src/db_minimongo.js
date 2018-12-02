@@ -1,13 +1,46 @@
 import minimongo from 'minimongo'
 import { OrderedMap, fromJS } from 'immutable'
+import _ from 'lodash'
 
 const localDb = new minimongo.MemoryDb()
+
+const _network_delay = 2000
 
 const db_interface = {
   get_collection
 }
 
 const db_promise = Promise.resolve(db_interface)
+
+// Thin layer on top of the minimongo APi
+class _DumbCursor {
+  constructor (find_result) {
+    this._find_result = find_result
+  }
+
+  get_capabilities () {
+    return {
+      events: false
+    }
+  }
+
+  fetch () {
+    return new Promise((resolve, reject) => {
+      let delay = Math.random() * _network_delay
+
+      setTimeout(() => {
+        this._find_result.fetch(
+          (data) => {
+            let output = new OrderedMap()
+            for (let d of data) output = output.set(d._id, fromJS(d))
+            resolve(output)
+          },
+          reject
+        )
+      }, delay)
+    })
+  }
+}
 
 // Simple promise-based wrapper around the minimongo API
 class _Collection {
@@ -22,35 +55,36 @@ class _Collection {
   // Arguments: Mongo-style selector and options
   // Promise result: immutable order-preserving map of _id -> records
   find (selector, options) {
-    console.log('_Collection.find selector:')
-    console.log(this._coll)
-    console.log(selector)
-    console.log(options)
-    return new Promise((resolve, reject) => {
-      this._coll.find(selector, options).fetch(
-        (data) => {
-          console.log('_Collection.find received:')
-          console.log(data)
-          let output = new OrderedMap()
-          for (let d of data) output = output.set(d._id, fromJS(d))
-          resolve(output)
-        },
-        reject)
-    })
+    return new _DumbCursor(this._coll.find(selector, options))
   }
 
   // Arguments: Mongo-style selector and options
   // Promise result: fetched record or null
   findOne (selector, options) {
     return new Promise((resolve, reject) => {
-      this._coll.findOne(selector, options, resolve, reject)
+      // Random delay to simulate network
+      let delay = Math.random() * _network_delay
+
+      setTimeout(() => {
+        this._coll.findOne(selector, options, resolve, reject)
+      }, delay)
     })
   }
 
   // Arguments: array of records to be upserted
   upsert (docs) {
     return new Promise((resolve, reject) => {
-      this._coll.upsert(docs, null, resolve, reject)
+      // Random delay to simulate network
+      let delay = Math.random() * _network_delay
+
+      setTimeout(() => {
+        this._coll.upsert(docs, null,
+          (data) => {
+            resolve(_.map(data, _.property('_id')))
+          },
+          reject
+        )
+      }, delay)
     })
   }
 }
@@ -71,8 +105,4 @@ function get_db_promise () {
   return db_promise
 }
 
-function log_db () {
-  console.log(localDb)
-}
-
-export { get_db_promise, generate_uid, log_db }
+export { get_db_promise, generate_uid }

@@ -2,7 +2,7 @@
 <template>
   <nav class="nav-extended">
     <div class="nav-wrapper">
-      <a href="#!" class="brand-logo right">Open Laudo</a>
+      <a v-if="tabs" href="#!" class="brand-logo right">Open Laudo</a>
       <ul class="left hide-on-med-and-down">
         <li v-for="specialty in specialties"
           v-bind:key="get_specialty_id(specialty)"
@@ -42,6 +42,7 @@ import * as db from '../db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
 import metadata_mixin from './mixins/metadata_mixin.js'
 import materialize_mixin from './mixins/materialize_mixin.js'
+import db_mixin from './mixins/db_mixin.js'
 
 export default {
   data: function () {
@@ -77,8 +78,6 @@ export default {
       entries.forEach((v, k) => {
         output.set(k, v.toJS())
       })
-      console.log('ModalityNav: computed templates')
-      console.log(output)
       return output
     }
   },
@@ -88,47 +87,18 @@ export default {
       return `${this.current_modality.name}-${specialty.name}`
     },
 
-    refresh_templates: function () {
-      if (!this.templateDropdowns) return
-      if (this._db_promise !== undefined) delete this._db_promise
-      this.dataset = null
-
-      let my_promise = this._db_promise = db.find_templates({ modality: this.current_modality.name })
-        .then((data) => {
-          console.log('ModalityNav: fill_modality_dropdown: received')
-          console.log(this)
-          console.log(this.modality)
-          console.log(data)
-          this.dataset = data
-        }, (error) => {
-          console.log('ModalityNav: fill_modality_dropdown: bumped')
-          console.log(this)
-          console.log(this.modality)
-          console.log(error)
-        })
-        .then(() => {
-        // Finally:
-          if (this._db_promise === my_promise) delete this._db_promise
-        })
+    find_function: function () {
+      return db.find_templates({ modality: this.current_modality.name })
     }
   },
 
   watch: {
     current_modality: function () {
-      this.refresh_templates()
+      this.refresh_dataset()
     }
   },
 
-  // TODO: must continuously reflect changes made to the backend DB
-  created: function () {
-    this.refresh_templates()
-  },
-
-  beforeDestroy: function () {
-    if (this._db_promise !== undefined) delete this._db_promise
-  },
-
-  mixins: [ metadata_mixin, materialize_mixin ]
+  mixins: [ metadata_mixin, materialize_mixin, db_mixin ]
 }
 
 </script>

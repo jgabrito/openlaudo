@@ -39,12 +39,21 @@
     <strong>We're sorry but openlaudo doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
   </noscript>
 
-  <!-- Create the editor container -->
-  
+  <!-- Floating action button -->
+  <div class="fixed-action-btn">
+    <a class="btn-floating btn-large red">
+      <i class="large material-icons">mode_edit</i>
+    </a>
+    <ul>
+      <li><a href="#!" id="descriptor_edit_button" class="btn-floating red"><i class="material-icons">more</i></a></li>
+    </ul>
+  </div>
+
+  <!-- Create the editor container -->  
   <div id="main_container" class="container-fluid d-flex flex-column h-100">
     <div id="template_nav"></div>
 
-    <div class="row zero-margin flex-grow-1" id='container'>
+    <div class="d-flex flex-row flex-grow-1" id='container'>
       <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
       <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
       <!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR --><!-- NAV BAR -->
@@ -68,13 +77,12 @@
 
       <!-- ROW WITH RTF_EDITOR AND FINDINGS DESCRIPTORS -->
       <!-- RTF_EDITOR -->
-      <div id="all_editor" class="col-7 d-flex flex-column">
+      <div id="all_editor" class="flex-grow-1">
         <div id="editor"> </div>
       </div>
-      
         
       <!-- FORMS CLICKS -->
-      <div class="col-5 d-flex flex-column">
+      <div class="d-flex flex-column pl-4 pr-2" style="width: 40%;">
         <ul id="app" class="collapsible popout">
           <li v-for="card in cards" :key="card.title">
             <div class="collapsible-header "><img :src="card.src" class="circle vignette "><span class="headline white--text" v-html="card.title" style="margin-top:20px;"></span></div>
@@ -89,7 +97,7 @@
         <div id="descriptor_list"> </div>
       </div>
     </div>
-</div>
+  </div>
   
 
 

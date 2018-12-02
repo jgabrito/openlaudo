@@ -45,10 +45,7 @@ export default {
     },
 
     set_specialty: function (new_specialty_name) {
-      console.log('TemplateNav.set_specialty:')
       this.current_specialty = this.metadata.specialties[new_specialty_name]
-      console.log(new_specialty_name)
-      console.log(this.current_specialty)
       this.$emit('specialty-changed', this.current_specialty)
     }
   }
