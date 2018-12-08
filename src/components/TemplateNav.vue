@@ -40,8 +40,8 @@
 
 import * as db from '../db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
-import metadata_mixin from './metadata_mixin.js'
-import materialize_mixin from './materialize_mixin.js'
+import metadata_mixin from './mixins/metadata_mixin.js'
+import materialize_mixin from './mixins/materialize_mixin.js'
 
 export default {
   data: function () {

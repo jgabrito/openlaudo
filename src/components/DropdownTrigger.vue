@@ -8,7 +8,7 @@
 
 <script>
 
-import materialize_mixin from './materialize_mixin.js'
+import materialize_mixin from './mixins/materialize_mixin.js'
 
 export default {
   data: function () {

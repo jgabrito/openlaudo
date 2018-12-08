@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import base_metadata from '../base_metadata.js'
+import base_metadata from '../../base_metadata.js'
 
 function valid_modality_for_specialty (modality, specialty) {
   if (specialty.modalities === 'all') return true
