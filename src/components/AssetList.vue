@@ -78,7 +78,6 @@
 
 <script>
 
-import _ from 'lodash'
 import { fromJS } from 'immutable'
 import db_mixin from './mixins/db_mixin.js'
 

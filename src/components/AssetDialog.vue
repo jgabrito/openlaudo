@@ -3,9 +3,9 @@
   <div v-bind:class="container_classes['client_area']">
     <div class="d-flex flex-column" style="width:40%;">
       <ModSpecSelector v-bind:initial-modality="initialModality"
-		   v-bind:initial-specialty="initialSpecialty"
-		   v-on:specialty-changed="set_specialty"
-		   v-on:modality-changed="set_modality">
+                       v-bind:initial-specialty="initialSpecialty"
+                       v-on:specialty-changed="set_specialty"
+                       v-on:modality-changed="set_modality">
       </ModSpecSelector>
 
       <div class="input-field">
@@ -16,9 +16,9 @@
 
       <AssetList v-bind:modality="current_modality" v-bind:specialty="current_specialty"
                  v-bind:search-expression="search_expression"
-		 v-bind:asset-interface="assetInterface"
-		 v-on:asset-chosen="asset_chosen"
-		 v-on:asset-changed="asset_changed" >
+                 v-bind:asset-interface="assetInterface"
+                 v-on:asset-chosen="asset_chosen"
+                 v-on:asset-changed="asset_changed" >
       </AssetList>
 
       <div class="p-2">
@@ -30,9 +30,9 @@
 
     <div class="flex-grow-1 d-flex flex-column p-3 m-3 border">
       <AssetEditor v-if="current_asset !== null"
-		   v-bind:asset="current_asset" v-bind:input-asset="current_input_asset"
-		   v-bind:key="current_asset._id"
-		   v-on:content-changed="input_asset_changed" >
+                   v-bind:asset="current_asset" v-bind:input-asset="current_input_asset"
+                   v-bind:key="current_asset._id"
+                   v-on:content-changed="input_asset_changed" >
 
         <a slot="remove_button" v-bind:class="button_classes.remove"
            v-on:click="button_clicked('remove')">
@@ -157,14 +157,14 @@ export default {
       return {
         'dialog_main_container': {
           'modal': this.modal,
-	  'w-75': true,
+          'w-75': true,
           'h-75': true
         },
         'client_area': {
-	  'w-100': true,
-	  'h-100': true,
-	  'd-flex': true,
-	  'flex-row': true
+          'w-100': true,
+          'h-100': true,
+          'd-flex': true,
+          'flex-row': true
         }
       }
     },

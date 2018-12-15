@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn" */
 import Vue from 'vue'
+import _ from 'lodash'
 
 import { submit_laudo } from './click_templates.js'
 
@@ -170,11 +171,13 @@ const v_descriptors_ul = new Vue({
   data: {
     modality: initial_modality,
     specialty: initial_specialty,
+    search_expression: '',
     descriptor_interface
   },
 
   template: `
     <AssetList expanded v-bind:modality="modality" v-bind:specialty="specialty"
+      v-bind:searchExpression="search_expression"
       v-bind:asset-interface="descriptor_interface" v-on:asset-chosen="format_descriptor" > 
     </AssetList>
   `,
@@ -236,6 +239,17 @@ function descriptor_dialog_close () {
   } */
 }
 
+const descriptor_search_input_changed = _.throttle(
+  (event) => {
+    v_descriptors_ul.search_expression = event.target.value
+  },
+  1000,
+  {
+    leading: false,
+    trailing: true
+  }
+)
+
 $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })
   // $('.tabs').tabs()
@@ -252,6 +266,8 @@ $(document).ready(function () {
     descriptor_dialog.set_specialty(v_descriptors_ul.specialty)
     descriptor_dialog.show()
   })
+
+  $('#descriptor_search_input').on('keyup', descriptor_search_input_changed)
 })
 
 export { v_descriptors_ul }
