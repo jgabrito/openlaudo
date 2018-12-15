@@ -1,42 +1,35 @@
 <template>
-  <div class="flex-grow-1 d-flex flex-column">
-    <div class="input-field">
-      <i class="material-icons prefix"> search </i>
-      <input type="text" id="search_input" v-on:keyup="search_input_changed"
-        placeholder="Buscar..." />
-    </div>
-
-    <ul v-if="(! searching) && expanded" id="assets_ul" class="flex-grow-1">
-      <li v-for="asset in assets" v-bind:key="asset._id">
-        <a href="#!" v-on:click="asset_clicked(asset)">
-          <b>{{assetInterface.get_title(asset)}}</b>
-        </a>
-        <p href="#!"> {{assetInterface.get_body(asset)}}</p>
-      </li>
-    </ul>
-    <ul v-else-if="(! searching)" id="assets_ul" class="flex-grow-1">
-      <li v-for="asset in assets" v-bind:key="asset._id">
-        <a href="#!" v-on:click="asset_clicked(asset)"
-            v-bind:class="{ selected : (current_asset_id === asset._id)}">
-          {{assetInterface.get_title(asset)}}
-        </a>
-      </li>
-    </ul>
-    <div v-else class="flex-grow-1 d-flex flex-column align-items-center justify-content-center">
-      <div  class="preloader-wrapper big active">
-        <div class="spinner-layer spinner-red">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
-          </div>
+<div class="flex-grow-1 d-flex flex-column">
+  <ul v-if="(! searching) && expanded" id="assets_ul" class="flex-grow-1">
+    <li v-for="asset in assets" v-bind:key="asset._id">
+      <a href="#!" v-on:click="asset_clicked(asset)">
+        <b>{{assetInterface.get_title(asset)}}</b>
+      </a>
+      <p href="#!"> {{assetInterface.get_body(asset)}}</p>
+    </li>
+  </ul>
+  <ul v-else-if="(! searching)" id="assets_ul" class="flex-grow-1">
+    <li v-for="asset in assets" v-bind:key="asset._id">
+      <a href="#!" v-on:click="asset_clicked(asset)"
+         v-bind:class="{ selected : (current_asset_id === asset._id)}">
+        {{assetInterface.get_title(asset)}}
+      </a>
+    </li>
+  </ul>
+  <div v-else class="flex-grow-1 d-flex flex-column align-items-center justify-content-center">
+    <div  class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-red">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
         </div>
       </div>
     </div>
-
   </div>
+</div>
 </template>
 
 <style scoped>
@@ -92,7 +85,6 @@ import db_mixin from './mixins/db_mixin.js'
 export default {
   data: function () {
     return {
-      search_expression: '',
       selected_asset_id_stack: [],
       current_asset: null
     }
@@ -109,6 +101,7 @@ export default {
   props: {
     modality: Object,
     specialty: Object,
+    searchExpression : String,
     expanded: Boolean,
     assetInterface: Object
   },
@@ -139,7 +132,7 @@ export default {
       this.refresh_dataset(true)
     },
 
-    search_expression: function () {
+    searchExpression: function () {
       this.refresh_dataset(false)
     },
 
@@ -194,19 +187,6 @@ export default {
       this.$emit('asset-chosen', asset)
     },
 
-    search_input_changed: _.throttle(
-      function (event) {
-        console.log('assetList.search_input_changed')
-        console.log(event.target.value)
-        this.search_expression = event.target.value
-      },
-      1000,
-      {
-        leading: false,
-        trailing: true,
-      }
-    ),
-
     find_function: function () {
       return this.assetInterface.find_assets(
         {
@@ -214,7 +194,7 @@ export default {
           specialty: this.specialty.name
         },
         {},
-        this.search_expression
+        this.searchExpression
       )
     }
   },

@@ -2,13 +2,20 @@
 <div id="dialog_main_container" v-bind:class="container_classes['dialog_main_container']">
   <div v-bind:class="container_classes['client_area']">
     <div class="d-flex flex-column" style="width:40%;">
-      <TemplateNav v-bind:initial-modality="initialModality"
+      <ModSpecSelector v-bind:initial-modality="initialModality"
 		   v-bind:initial-specialty="initialSpecialty"
 		   v-on:specialty-changed="set_specialty"
 		   v-on:modality-changed="set_modality">
-      </TemplateNav>
+      </ModSpecSelector>
+
+      <div class="input-field">
+        <i class="material-icons prefix"> search </i>
+        <input type="text" id="search_input" v-on:keyup="search_input_changed"
+               placeholder="Buscar..." />
+      </div>
       
       <AssetList v-bind:modality="current_modality" v-bind:specialty="current_specialty"
+                 v-bind:search-expression="search_expression"
 		 v-bind:asset-interface="assetInterface"
 		 v-on:asset-chosen="asset_chosen"
 		 v-on:asset-changed="asset_changed" >
@@ -70,7 +77,8 @@ import { fromJS } from 'immutable'
 import _ from 'lodash'
 
 import AssetList from './AssetList.vue'
-import TemplateNav from './TemplateNav.vue'
+//import TemplateNav from './TemplateNav.vue'
+import ModSpecSelector from './ModSpecSelector.vue'
 import materialize_mixin from './mixins/materialize_mixin.js'
 
 export default {
@@ -78,6 +86,7 @@ export default {
     return {
       current_modality: this.initialModality,
       current_specialty: this.initialSpecialty,
+      search_expression: '',
       current_asset: null,
       input_asset_store: {},
       ongoing_upsert: false,
@@ -149,6 +158,7 @@ export default {
         'dialog_main_container': {
           'modal': this.modal,
 	  'w-75': true,
+          'h-75' : true,
         },
 	'client_area' : {
 	  'w-100' : true,
@@ -175,6 +185,19 @@ export default {
     set_specialty: function (specialty) {
       this.current_specialty = specialty
     },
+    
+    search_input_changed: _.throttle(
+      function (event) {
+        console.log('assetList.search_input_changed')
+        console.log(event.target.value)
+        this.search_expression = event.target.value
+      },
+      1000,
+      {
+        leading: false,
+        trailing: true,
+      }
+    ),
 
     show: function () {
       if (this.modal) this.get_instances('modal')[0].open()
@@ -308,7 +331,8 @@ export default {
   },
 
   components: {
-    TemplateNav,
+    //    TemplateNav,
+    ModSpecSelector,
     AssetList
     /*
       AssetEditor: expected from derived components; behaves as a managed input element
