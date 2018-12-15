@@ -29,7 +29,10 @@
       <ul v-bind:class="{tabs : tabs}">
         <li v-for="modality in modalities" v-bind:key="modality.name"
             v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
-          <a href="#" v-on:click="set_modality(modality.name)">{{modality.nickname}}</a>
+          <a href="#" v-on:click="set_modality(modality.name)"
+             v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
+            {{modality.nickname}}
+          </a>
         </li>
       </ul>
     </div>
