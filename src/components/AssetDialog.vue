@@ -13,32 +13,32 @@
         <input type="text" id="search_input" v-on:keyup="search_input_changed"
                placeholder="Buscar..." />
       </div>
-      
+
       <AssetList v-bind:modality="current_modality" v-bind:specialty="current_specialty"
                  v-bind:search-expression="search_expression"
 		 v-bind:asset-interface="assetInterface"
 		 v-on:asset-chosen="asset_chosen"
 		 v-on:asset-changed="asset_changed" >
       </AssetList>
-      
+
       <div class="p-2">
         <a v-bind:class="button_classes['add']" v-on:click="button_clicked('add')">
           Adicionar...
         </a>
       </div>
     </div>
-    
+
     <div class="flex-grow-1 d-flex flex-column p-3 m-3 border">
       <AssetEditor v-if="current_asset !== null"
 		   v-bind:asset="current_asset" v-bind:input-asset="current_input_asset"
 		   v-bind:key="current_asset._id"
 		   v-on:content-changed="input_asset_changed" >
-	
+
         <a slot="remove_button" v-bind:class="button_classes.remove"
            v-on:click="button_clicked('remove')">
           Remover
         </a>
-	
+
         <div v-if="ongoing_upsert" slot="submit_button" style="text-align:center;">
           <div class="preloader-wrapper small active">
             <div class="spinner-layer spinner-red-only">
@@ -77,7 +77,7 @@ import { fromJS } from 'immutable'
 import _ from 'lodash'
 
 import AssetList from './AssetList.vue'
-//import TemplateNav from './TemplateNav.vue'
+// import TemplateNav from './TemplateNav.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
 import materialize_mixin from './mixins/materialize_mixin.js'
 
@@ -158,14 +158,14 @@ export default {
         'dialog_main_container': {
           'modal': this.modal,
 	  'w-75': true,
-          'h-75' : true,
+          'h-75': true
         },
-	'client_area' : {
-	  'w-100' : true,
-	  'h-100' : true,
-	  'd-flex' : true,
-	  'flex-row' : true,
-	}
+        'client_area': {
+	  'w-100': true,
+	  'h-100': true,
+	  'd-flex': true,
+	  'flex-row': true
+        }
       }
     },
 
@@ -185,17 +185,15 @@ export default {
     set_specialty: function (specialty) {
       this.current_specialty = specialty
     },
-    
+
     search_input_changed: _.throttle(
       function (event) {
-        console.log('assetList.search_input_changed')
-        console.log(event.target.value)
         this.search_expression = event.target.value
       },
       1000,
       {
         leading: false,
-        trailing: true,
+        trailing: true
       }
     ),
 
@@ -208,16 +206,10 @@ export default {
     },
 
     asset_chosen: function (asset) {
-      console.log('AssetDialog.asset_chosen')
-      console.log(asset)
-      console.log(this)
       this.current_asset = asset
     },
 
     asset_changed: function (asset) {
-      console.log('AssetDialog.asset_changed')
-      console.log(asset)
-      console.log(this)
       this.current_asset = asset
       if (!asset) return
 

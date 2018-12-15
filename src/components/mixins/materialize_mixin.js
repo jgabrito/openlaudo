@@ -58,9 +58,6 @@ export default {
       }
 
       const _do_initialize_class = (ControlClass, name, options) => {
-        console.log('materialize_options')
-        console.log(name)
-        console.log(options)
         if (this.$el.classList.contains(name)) { this._materialize_controls.push(new ControlClass(this.$el, options)) }
         if (this.materialize_recursive) {
           let elems = this.$el.getElementsByClassName(name)

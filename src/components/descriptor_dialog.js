@@ -87,8 +87,8 @@ class DescriptorDialog {
     })
   }
 
-  destroy (detach_element=true) {
-    this._detach_element = true;
+  destroy (detach_element = true) {
+    this._detach_element = true
     this._vm.$destroy()
   }
 

@@ -9,7 +9,7 @@ export default {
     return {
       dataset: null,
       db_ready: false,
-      searching: false,
+      searching: false
     }
   },
 
@@ -29,29 +29,29 @@ export default {
       if (!this._cursor.get_capabilities()['events']) {
         if (this._db_promise !== undefined) delete this._db_promise
       } else {
-        //TODO
+        // TODO
       }
       if (this._refresh_timeout) {
         clearTimeout(this._refresh_timeout)
         this._refresh_timeout = null
       }
-     
+
       delete this._cursor
     },
 
-    refresh_dataset: function (active=false) {
+    refresh_dataset: function (active = false) {
       if (!this.db_ready) return
 
       this.cleanup_cursor()
 
       this._cursor = this.find_function()
       if (!this._cursor) return
-      
+
       if (this._cursor.get_capabilities()['events']) {
         // TODO
       } else {
         if (active) this.searching = true
-        
+
         let my_promise = this._db_promise = this._cursor.fetch()
           .then(
             (data) => {

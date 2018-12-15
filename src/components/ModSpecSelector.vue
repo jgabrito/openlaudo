@@ -25,34 +25,32 @@ import metadata_mixin from './mixins/metadata_mixin.js'
 import materialize_mixin from './mixins/materialize_mixin.js'
 
 export default {
-  data : function() {
+  data: function () {
     return {
-      materialize_classes : [ 'select' ],
-      materialize_recursive : true,
+      materialize_classes: [ 'select' ],
+      materialize_recursive: true
     }
   },
 
   methods: {
-    get_value_for_control : function(name) {
+    get_value_for_control: function (name) {
       if (name === 'modality') {
         return this.current_modality.name
-      }
-      else if (name === 'specialty') {
+      } else if (name === 'specialty') {
         return this.current_specialty.name
       }
     },
 
-    control_value_changed : function(name, value) {
+    control_value_changed: function (name, value) {
       if (name === 'modalities') {
         this.set_modality(value)
-      }
-      else if (name === 'specialty') {
+      } else if (name === 'specialty') {
         this.set_specialty(value)
       }
     }
   },
 
-  mixins : [ metadata_mixin, materialize_mixin ],
+  mixins: [ metadata_mixin, materialize_mixin ]
 }
 
 </script>

@@ -89,7 +89,7 @@ export default {
       current_asset: null
     }
   },
-  
+
   /*
     assetInterface: Object containing the following callbacks:
       get_title, get_body: take an asset reference as input and return
@@ -101,25 +101,23 @@ export default {
   props: {
     modality: Object,
     specialty: Object,
-    searchExpression : String,
+    searchExpression: String,
     expanded: Boolean,
     assetInterface: Object
   },
 
   computed: {
     current_asset_id: function () {
-      console.log('current_asset_id')
-      console.log(this.current_asset)
       if (this.current_asset) return this.current_asset._id
       else return null
     },
 
-    assets: function() {
-      if (! this.dataset) return []
-      
+    assets: function () {
+      if (!this.dataset) return []
+
       return this.dataset.toList().sort((a, b) => (
         a.get(this.assetInterface.sort_key).localeCompare(b.get(this.assetInterface.sort_key))
-      )).toJS()      
+      )).toJS()
     }
   },
 
@@ -142,14 +140,13 @@ export default {
       let selected_asset_id_stack = this.selected_asset_id_stack
       let new_current_asset = null
 
-      if (! this.dataset) {
+      if (!this.dataset) {
         this.current_asset = null
         return
       }
-      
+
       for (let i = selected_asset_id_stack.length - 1; i >= 0; i--) {
         let imm_asset = dataset.get(selected_asset_id_stack[i])
-        console.log(imm_asset)
         if (imm_asset) {
           if (!imm_asset.equals(fromJS(current_asset))) {
             new_current_asset = imm_asset.toJS()
@@ -180,8 +177,6 @@ export default {
     },
 
     asset_clicked: function (asset) {
-      console.log('asset_clicked')
-      console.log(asset)
       this.push_selected_asset_id(asset._id)
       this.current_asset = asset
       this.$emit('asset-chosen', asset)
