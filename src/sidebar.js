@@ -1,5 +1,7 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn" */
 import Vue from 'vue'
+import VueQuill from 'vue-quill'
+
 import _ from 'lodash'
 
 import { submit_laudo } from './click_templates.js'
@@ -11,6 +13,8 @@ import * as db from './db.js'
 import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
 
+Vue.use(VueQuill)
+
 const initial_modality = base_metadata.modalities['tc']
 const initial_specialty = base_metadata.specialties['cep']
 
@@ -18,7 +22,7 @@ const initial_specialty = base_metadata.specialties['cep']
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 
 // this list determinates the tools that are displayed in the top tool bar of the editor
-var toolbarOptions = [
+const toolbarOptions = [
   [{ 'font': [] }],
   ['bold', 'italic', 'underline', 'strike'], // toggled buttons
   [{ 'size': ['small', false, 'large', 'huge'] }], // custom dropdown
@@ -41,15 +45,13 @@ var toolbarOptions = [
 
 // define function to run when 'COPIAR' tool is pressed
 const myhandlers = { 'COPIAR': function () {
-// htmlStr = quill.root.innerHTML
-// textStr = quill.getText()
+  // htmlStr = quill.root.innerHTML
+  // textStr = quill.getText()
 
   copySelection()
 } }
 
-// code that inserts the editor on the page
-// TODO: move the editor to a Vue component to solve sizing issues.
-var quill = new Quill('#editor', {
+const quill_config = {
   modules: {
     toolbar: {
       container: toolbarOptions,
@@ -57,10 +59,28 @@ var quill = new Quill('#editor', {
     }
   },
   theme: 'snow'
+}
+
+// code that inserts the editor on the page
+// TODO: move the editor to a Vue component to solve sizing issues.
+const quill_comp = new Vue({
+  el: '#editor',
+
+  template: `
+    <quill class="h-100" v-model="content" output="html" ref="editor" 
+       v-bind:config="config" > 
+    </quill>
+  `,
+
+  data: {
+    content: '',
+    config: quill_config
+  }
 })
 
 // function to copy content
 function copySelection () {
+  const quill = quill_comp.$refs.editor.editor
   var len = quill.getLength()
   quill.setSelection(0, len)
   document.execCommand('copy')
@@ -70,6 +90,7 @@ function copySelection () {
 // inserts simple template to quill
 // also changes clickable template that shows on the right
 function format_template (exam) {
+  const quill = quill_comp.$refs.editor.editor
   var techniqueTitle = ''
   var analysisTitle = ''
   if (exam.technique !== '') {
@@ -143,11 +164,12 @@ const collpasible_app = new Vue({
 
 // insert descriptor in quill
 function format_descriptor (descriptor) {
+  const quill = quill_comp.$refs.editor.editor
   var selection = null
   try {
     selection = quill.getSelection()
   } catch (err) {
-    quill.focus()
+    quill.focusEditor()
     selection = quill.getSelection()
     console.warn(err)
   }
