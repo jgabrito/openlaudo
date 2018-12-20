@@ -16,7 +16,7 @@
 
       <AssetList v-bind:modality="current_modality" v-bind:specialty="current_specialty"
                  v-bind:search-expression="search_expression"
-                 v-bind:asset-interface="assetInterface"
+                 v-bind:asset-interface="asset_interface"
                  v-on:asset-chosen="asset_chosen"
                  v-on:asset-changed="asset_changed" >
       </AssetList>
@@ -77,11 +77,11 @@ import { fromJS } from 'immutable'
 import _ from 'lodash'
 
 import AssetList from './AssetList.vue'
-// import TemplateNav from './TemplateNav.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
-import materialize_mixin from './mixins/materialize_mixin.js'
+import dialog_mixin from './mixins/dialog_mixin.js'
 
 export default {
+  
   data: function () {
     return {
       current_modality: this.initialModality,
@@ -90,21 +90,12 @@ export default {
       current_asset: null,
       input_asset_store: {},
       ongoing_upsert: false,
-      materialize_recursive: false,
-      materialize_classes: [ 'modal' ],
-      materialize_options: {
-        modal: {
-          onCloseEnd: () => {
-            this.$emit('close')
-          },
-          dismissible: true
-        }
-      }
+      asset_interface : null, // expected from derived classes
     }
   },
 
   /*
-    assetInterface: Object containing the following callbacks:
+    asset_interface: Object containing the following callbacks:
       get_title, get_body: take an asset reference as input and return
         the corresponding information
       sort_key: string
@@ -114,10 +105,8 @@ export default {
         to the ids of the upserted items
   */
   props: {
-    modal: Boolean,
     initialModality: Object,
     initialSpecialty: Object,
-    assetInterface: Object
   },
 
   computed: {
@@ -197,14 +186,6 @@ export default {
       }
     ),
 
-    show: function () {
-      if (this.modal) this.get_instances('modal')[0].open()
-    },
-
-    hide: function () {
-      if (this.modal) this.get_instances('modal')[0].open()
-    },
-
     asset_chosen: function (asset) {
       this.current_asset = asset
     },
@@ -279,7 +260,7 @@ export default {
       let upserts = this._pending_upserts
       if (upserts.size === 0) return
 
-      let me = this.ongoing_upsert = this.assetInterface.upsert_assets(Array.from(upserts.values()))
+      let me = this.ongoing_upsert = this.asset_interface.upsert_assets(Array.from(upserts.values()))
         .then(
           (ids) => {
 
@@ -353,7 +334,7 @@ export default {
     if (this._pending_upserts) this.submit_upserts(true)
   },
 
-  mixins: [ materialize_mixin ]
+  mixins: [ dialog_mixin ]
 }
 
 </script>

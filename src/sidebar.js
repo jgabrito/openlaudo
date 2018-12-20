@@ -8,7 +8,7 @@ import { submit_laudo } from './click_templates.js'
 
 import TemplateNav from './components/TemplateNav.vue'
 import AssetList from './components/AssetList.vue'
-import DescriptorDialog from './components/descriptor_dialog.js'
+import DescriptorDialog from './components/DescriptorDialog.js'
 import * as db from './db.js'
 import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
@@ -255,10 +255,11 @@ const template_nav = new Vue({
 
 var descriptor_dialog = null
 function descriptor_dialog_close () {
-/*  if (descriptor_dialog) {
-    descriptor_dialog.destroy(true)
+  if (descriptor_dialog) {
+    descriptor_dialog.$destroy()
+    descriptor_dialog.$el.parentElement.removeChild(descriptor_dialog.$el)
     descriptor_dialog = null
-  } */
+  }
 }
 
 const descriptor_search_input_changed = _.throttle(
@@ -279,14 +280,33 @@ $(document).ready(function () {
   $('.fixed-action-btn').floatingActionButton()
 
   $('#descriptor_edit_button').on('click', function () {
-    var el = document.createElement('div')
-    document.body.appendChild(el)
+    var el = null
     if (!descriptor_dialog) {
-      descriptor_dialog = new DescriptorDialog(el, v_descriptors_ul.modality, v_descriptors_ul.specialty, { close: descriptor_dialog_close })
+      el = document.createElement('div')
+      document.body.appendChild(el)
+      descriptor_dialog = new Vue({
+        el,
+        template: `
+          <DescriptorDialog v-bind:initial-modality="v_descriptors_ul.modality"
+            v-bind:initial-specialty="v_descriptors_ul.specialty"
+            v-on:close="descriptor_dialog_close" v-bind:modal="true" ref="dialog">
+          </DescriptorDialog>
+        `,
+        data: {
+          v_descriptors_ul
+        },
+        methods: {
+          descriptor_dialog_close
+        },
+        components: {
+          DescriptorDialog
+        }
+      })
     }
-    descriptor_dialog.set_modality(v_descriptors_ul.modality)
-    descriptor_dialog.set_specialty(v_descriptors_ul.specialty)
-    descriptor_dialog.show()
+    console.log(descriptor_dialog)
+    descriptor_dialog.$refs.dialog.set_modality(v_descriptors_ul.modality)
+    descriptor_dialog.$refs.dialog.set_specialty(v_descriptors_ul.specialty)
+    descriptor_dialog.$refs.dialog.show()
   })
 
   $('#descriptor_search_input').on('keyup', descriptor_search_input_changed)

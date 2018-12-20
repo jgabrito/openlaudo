@@ -41,9 +41,19 @@ export default {
           this.materialize_M.textareaAutoResize(elems[i])
         }
       }
+    },
+
+    get_mounted_promise : function() {
+      return this._mounted_promise
     }
   },
 
+  beforeCreate: function() {
+    this._mounted_promise = new Promise((resolve) => {
+      this._mounted_promise_resolve = resolve
+    })
+  },
+  
   mounted: function () {
     this.$nextTick(function () {
       const _do_initialize_tag = (ControlClass, name, options) => {
@@ -90,6 +100,8 @@ export default {
       }
 
       if (this.materialize_classes.includes('textarea')) this.resize_textareas()
+
+      this._mounted_promise_resolve()
     })
   },
 
