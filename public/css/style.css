@@ -80,6 +80,19 @@ html, body {
   padding-right: 10;
 }
 
+.ql-snow.ql-toolbar button.ql-SALVAR {
+  width: 90px;
+}
+
+.ql-SALVAR:after {
+  content: "SALVAR";
+  background-color: #f56565;
+  box-shadow: 2px 2px grey;
+  padding: 4;
+  padding-left: 10;
+  padding-right: 10;
+}
+
 .form_sg {
   width: 30%;
 }

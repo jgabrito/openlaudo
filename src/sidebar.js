@@ -4,11 +4,12 @@ import VueQuill from 'vue-quill'
 
 import _ from 'lodash'
 
-import { submit_laudo } from './click_templates.js'
+// import { submit_laudo } from './click_templates.js'
 
 import TemplateNav from './components/TemplateNav.vue'
 import AssetList from './components/AssetList.vue'
 import DescriptorDialog from './components/DescriptorDialog.js'
+import TemplateSaveDialog from './components/TemplateSaveDialog.vue'
 import * as db from './db.js'
 import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
@@ -38,18 +39,70 @@ const toolbarOptions = [
 
   [{ 'color': [] }, { 'background': [] }], // dropdown with defaults from theme
   [{ 'align': [] }],
-  ['COPIAR']
+  ['COPIAR', 'SALVAR']
 
   // ['clean']                                         // remove formatting button
 ]
 
 // define function to run when 'COPIAR' tool is pressed
-const myhandlers = { 'COPIAR': function () {
-  // htmlStr = quill.root.innerHTML
-  // textStr = quill.getText()
+const myhandlers = {
+  'COPIAR': function () {
+    // htmlStr = quill.root.innerHTML
+    // textStr = quill.getText()
 
-  copySelection()
-} }
+    copySelection()
+  },
+
+  'SALVAR': function () {
+    const template_body_editor = quill_comp.content.ops
+
+    var el = null
+    if (!template_save_dialog) {
+      el = document.createElement('div')
+      document.body.appendChild(el)
+      template_save_dialog = new Vue({
+        el,
+        template: `
+          <TemplateSaveDialog v-bind:initial-modality="v_descriptors_ul.modality"
+            v-bind:initial-specialty="v_descriptors_ul.specialty"
+            v-bind:modal="true" 
+            v-bind:template-body="template_body"
+            v-bind:initial-template="null"
+            v-on:close="template_save_dialog_close" ref="dialog">
+          </TemplateSaveDialog>
+        `,
+        data: {
+          v_descriptors_ul,
+          template_body_editor
+        },
+        computed: {
+          template_body: function () {
+            return this.template_body_editor.map((x) => {
+              x = Object.assign({}, x)
+              if (x.attributes !== undefined) {
+                x.attributes = JSON.stringify(x.attributes)
+              }
+              return x
+            })
+          }
+        },
+        methods: {
+          template_save_dialog_close
+        },
+        components: {
+          TemplateSaveDialog
+        }
+      })
+    }
+    console.log(template_save_dialog)
+    template_save_dialog.template_body_editor = template_body_editor
+    template_save_dialog.$refs.dialog.set_modality(v_descriptors_ul.modality)
+    template_save_dialog.$refs.dialog.set_specialty(v_descriptors_ul.specialty)
+    template_save_dialog.$refs.dialog.new_template = true
+    template_save_dialog.$refs.dialog.current_template = null
+    template_save_dialog.$refs.dialog.show()
+  }
+}
 
 const quill_config = {
   modules: {
@@ -269,6 +322,15 @@ const descriptor_search_input_changed = _.throttle(
     trailing: true
   }
 )
+
+var template_save_dialog = null
+function template_save_dialog_close () {
+  if (template_save_dialog) {
+    template_save_dialog.$destroy()
+    template_save_dialog.$el.parentElement.removeChild(template_save_dialog.$el)
+    template_save_dialog = null
+  }
+}
 
 $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })

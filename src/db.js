@@ -237,6 +237,12 @@ function upsert_descriptors (docs) {
   return _db_handle.get_collection('descriptors').upsert(docs)
 }
 
+function upsert_templates (docs) {
+  if (!_ready) return null
+  docs = _transform_docs(docs, template_schema, template_search_fields)
+  return _db_handle.get_collection('templates').upsert(docs)
+}
+
 function split_and_collate_text (text, full_info = false) {
   const retval = []
   const myRegExp = /[^\s,.!?;:()[\]{}<>/\\'"-+*!@%&]{2,}/g
@@ -287,6 +293,6 @@ function transform_selector (selector, options, search_expression) {
 
 export {
   db_ready_promise, is_db_ready, get_system_uid,
-  find_templates,
+  find_templates, upsert_templates,
   find_descriptors, upsert_descriptors
 }
