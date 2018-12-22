@@ -65,6 +65,27 @@ const descriptor_search_fields = [
   'body'
 ]
 
+const _attribute_custom_validator = function () {
+  // Will force the attribute field to be a JSON representation of an Object instance
+  if (this.value === undefined) return
+
+  const value = JSON.parse(this.value)
+  if (!(value instanceof Object)) {
+    return 'Delta.item.attribute field must be a valid JSON string representing an Object'
+  }
+}
+
+const delta_schema = new SimpleSchema({
+  insert: {
+    type: String
+  },
+  attributes: {
+    type: String,
+    optional: true,
+    custom: _attribute_custom_validator
+  }
+})
+
 const template_schema = new SimpleSchema({
   _id: {
     type: String,
@@ -72,12 +93,9 @@ const template_schema = new SimpleSchema({
   },
   specialty: String,
   modality: String,
-  name: String,
   nickname: String,
-  title: String,
-  technique: String,
-  body: String,
-  conc: String,
+  body: Array,
+  'body.$': delta_schema,
   owner_id: String,
   public: Boolean,
   [ aux_fieldname ]: {
@@ -87,8 +105,7 @@ const template_schema = new SimpleSchema({
   [ aux_fieldname_items ]: String
 })
 const template_search_fields = [
-  'nickname',
-  'title'
+  'nickname'
 ]
 
 var _ready_promise = null
@@ -147,6 +164,7 @@ function bootstrap_collections () {
       return f
     } catch (error) {
       console.log('Error validating base descriptor: ')
+      console.log(error)
       console.log(f)
       return null
     }
@@ -163,6 +181,7 @@ function bootstrap_collections () {
       return t
     } catch (error) {
       console.log('Error validating base template: ')
+      console.log(error)
       console.log(t)
       return null
     }

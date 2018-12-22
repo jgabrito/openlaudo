@@ -67,13 +67,13 @@ const quill_comp = new Vue({
   el: '#editor',
 
   template: `
-    <quill class="h-100" v-model="content" output="html" ref="editor" 
+    <quill class="h-100" v-model="content" output="delta" ref="editor" 
        v-bind:config="config" > 
     </quill>
   `,
 
   data: {
-    content: '',
+    content: [],
     config: quill_config
   }
 })
@@ -87,31 +87,35 @@ function copySelection () {
   quill.setSelection(len, len)
 }
 
+function editor_insert_stuff (deltas) {
+  const quill = quill_comp.$refs.editor.editor
+  const selection = quill.getSelection(true)
+  const update = {
+    ops: []
+  }
+
+  if (selection.index > 0) {
+    update.ops.push({ retain: selection.index })
+  }
+  if (selection.length > 0) {
+    update.ops.push({ delete: selection.length })
+  }
+
+  update.ops = update.ops.concat(deltas.map((x) => {
+    x = Object.assign({}, x)
+    if (x.attributes !== undefined) x.attributes = JSON.parse(x.attributes)
+    return x
+  }))
+
+  quill.updateContents(update)
+}
+
 // inserts simple template to quill
 // also changes clickable template that shows on the right
 function format_template (exam) {
-  const quill = quill_comp.$refs.editor.editor
-  var techniqueTitle = ''
-  var analysisTitle = ''
-  if (exam.technique !== '') {
-    techniqueTitle = '\nTécnica\n'
-    analysisTitle = '\nAnálise\n'
-  }
-  var conclusaoTitle = ''
-  if (exam.conc !== '') {
-    conclusaoTitle = 'Conclusão\n'
-  }
+  editor_insert_stuff(exam.body)
 
-  quill.setContents([
-    { insert: exam.title + '\n', attributes: { bold: true, align: 'center' } },
-    { insert: techniqueTitle, attributes: { bold: true, align: 'justify' } },
-    { insert: exam.technique + '\n' },
-    { insert: analysisTitle, attributes: { bold: true, align: 'justify' } },
-    { insert: exam.body + '\n\n', attributes: { align: 'justify' } },
-    { insert: conclusaoTitle, attributes: { bold: true } },
-    { insert: exam.conc }
-  ])
-
+  /* FIX LATER
   // change click form
   if (exam.name) {
     if (form_templates[exam.name]) {
@@ -132,6 +136,7 @@ function format_template (exam) {
       collpasible_app.change_name('<p>-</p>', '<p>-</p>')
     }
   }
+  */
 }
 
 // CLICKS CLICKS CLICKS
@@ -164,17 +169,7 @@ const collpasible_app = new Vue({
 
 // insert descriptor in quill
 function format_descriptor (descriptor) {
-  const quill = quill_comp.$refs.editor.editor
-  var selection = null
-  try {
-    selection = quill.getSelection()
-  } catch (err) {
-    quill.focusEditor()
-    selection = quill.getSelection()
-    console.warn(err)
-  }
-
-  quill.insertText((selection) ? selection.index : 0, descriptor.body)
+  editor_insert_stuff([{ insert: descriptor.body }])
 }
 
 const descriptor_interface = {

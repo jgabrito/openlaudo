@@ -1,3 +1,25 @@
+
+function template_to_delta (exam) {
+  var output = []
+
+  output.push({ insert: exam.title + '\n', attributes: JSON.stringify({ bold: true, align: 'center' }) })
+
+  if (exam.tecnique.trim() !== '') {
+    output.push({ insert: '\nTécnica\n', attributes: JSON.stringify({ bold: true, align: 'justify' }) })
+    output.push({ insert: exam.tecnique + '\n' })
+  }
+
+  output.push({ insert: '\nAnálise\n', attributes: JSON.stringify({ bold: true, align: 'justify' }) }),
+  output.push({ insert: exam.body + '\n\n', attributes: JSON.stringify({ align: 'justify' })})
+
+  if (exam.conc.trim() !== '') {
+    output.push({ insert: 'Conclusão\n', attributes: JSON.stringify({ bold: true }) })
+    output.push({ insert: exam.conc })
+  }
+
+  return output
+}
+
 function normalize_templates (templates) {
   const output_templates = []
 
@@ -7,12 +29,8 @@ function normalize_templates (templates) {
         t_data = {
           specialty: s_data['metadata']['specialty_name'],
           modality: m_data['metadata']['modality_name'],
-          name: t_data['name'],
           nickname: t_data['nickname'],
-          title: t_data['title'],
-          technique: t_data['tecnique'],
-          body: t_data['body'],
-          conc: t_data['conc']
+          body: template_to_delta(t_data)
         }
         output_templates.push(t_data)
       }
