@@ -18,7 +18,8 @@
                  v-bind:search-expression="search_expression"
                  v-bind:asset-interface="asset_interface"
                  v-on:asset-chosen="asset_chosen"
-                 v-on:asset-changed="asset_changed" >
+                 v-on:asset-changed="asset_changed"
+                 class="flex-grow-1">
       </AssetList>
 
       <div class="p-2">
@@ -63,12 +64,6 @@
 </template>
 
 <style scoped>
-  .zero-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-  }
 </style>
 
 <script>
@@ -81,7 +76,7 @@ import ModSpecSelector from './ModSpecSelector.vue'
 import dialog_mixin from './mixins/dialog_mixin.js'
 
 export default {
-  
+
   data: function () {
     return {
       current_modality: this.initialModality,
@@ -90,7 +85,7 @@ export default {
       current_asset: null,
       input_asset_store: {},
       ongoing_upsert: false,
-      asset_interface : null, // expected from derived classes
+      asset_interface: null // expected from derived classes
     }
   },
 
@@ -106,7 +101,7 @@ export default {
   */
   props: {
     initialModality: Object,
-    initialSpecialty: Object,
+    initialSpecialty: Object
   },
 
   computed: {

@@ -198,7 +198,8 @@ const v_descriptors_ul = new Vue({
   },
 
   template: `
-    <AssetList expanded v-bind:modality="modality" v-bind:specialty="specialty"
+    <AssetList expanded class="flex-grow-1"
+      v-bind:modality="modality" v-bind:specialty="specialty"
       v-bind:searchExpression="search_expression"
       v-bind:asset-interface="descriptor_interface" v-on:asset-chosen="format_descriptor" > 
     </AssetList>
@@ -254,6 +255,7 @@ const template_nav = new Vue({
 })
 
 var descriptor_dialog = null
+
 function descriptor_dialog_close () {
   if (descriptor_dialog) {
     descriptor_dialog.$destroy()

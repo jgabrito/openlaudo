@@ -1,5 +1,5 @@
 <template>
-<div class="flex-grow-1 d-flex flex-column">
+<div class="d-flex flex-column">
   <ul v-if="(! searching) && expanded" id="assets_ul" class="flex-grow-1">
     <li v-for="asset in assets" v-bind:key="asset._id">
       <a href="#!" v-on:click="asset_clicked(asset)">
