@@ -40,8 +40,10 @@ export default {
 
     set_modality: function (new_modality_name) {
       this.current_modality = this.metadata.modalities[new_modality_name]
-      if (!valid_modality_for_specialty(this.current_modality, this.current_specialty)) { this.set_specialty(this.get_valid_specialties()[0].name) }
       this.$emit('modality-changed', this.current_modality)
+      if (!valid_modality_for_specialty(this.current_modality, this.current_specialty)) {
+        this.set_specialty(this.get_valid_specialties()[0].name)
+      }
     },
 
     set_specialty: function (new_specialty_name) {

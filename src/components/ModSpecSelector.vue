@@ -32,6 +32,16 @@ export default {
     }
   },
 
+  watch: {
+    specialties: function () {
+      this.schedule_reinit()
+    },
+
+    modalities: function () {
+      this.schedule_reinit()
+    }
+  },
+
   methods: {
     get_value_for_control: function (name) {
       if (name === 'modality') {
@@ -42,7 +52,7 @@ export default {
     },
 
     control_value_changed: function (name, value) {
-      if (name === 'modalities') {
+      if (name === 'modality') {
         this.set_modality(value)
       } else if (name === 'specialty') {
         this.set_specialty(value)

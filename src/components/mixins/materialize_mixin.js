@@ -43,19 +43,19 @@ export default {
       }
     },
 
-    get_mounted_promise : function() {
+    get_mounted_promise: function () {
       return this._mounted_promise
-    }
-  },
+    },
 
-  beforeCreate: function() {
-    this._mounted_promise = new Promise((resolve) => {
-      this._mounted_promise_resolve = resolve
-    })
-  },
-  
-  mounted: function () {
-    this.$nextTick(function () {
+    schedule_reinit: function () {
+      this.get_mounted_promise().then(() => {
+        this.$nextTick(() => {
+          this.init_components()
+        })
+      })
+    },
+
+    init_components: function () {
       const _do_initialize_tag = (ControlClass, name, options) => {
         if (this.$el.tagName === name) { this._materialize_controls.push(new ControlClass(this.$el, options)) }
         if (this.materialize_recursive) {
@@ -100,15 +100,27 @@ export default {
       }
 
       if (this.materialize_classes.includes('textarea')) this.resize_textareas()
+    }
+  },
 
+  beforeCreate: function () {
+    this._mounted_promise = new Promise((resolve) => {
+      this._mounted_promise_resolve = resolve
+    })
+  },
+
+  mounted: function () {
+    this.$nextTick(function () {
+      this.init_components()
       this._mounted_promise_resolve()
     })
   },
 
   beforeDestroy: function () {
-    if (this._materialize_controls) {
+    // Check for possible memory leaks
+    /* if (this._materialize_controls) {
       for (let i = 0; i < this._materialize_controls.length; i++) { this._materialize_controls[i].destroy() }
       delete this._materialize_controls
-    }
+    } */
   }
 }
