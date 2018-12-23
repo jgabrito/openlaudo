@@ -72,7 +72,6 @@ const myhandlers = {
         }
       })
     }
-    console.log(template_save_dialog)
     template_save_dialog.template_body_editor = template_body_editor
     template_save_dialog.$refs.dialog.set_modality(v_descriptors_ul.modality)
     template_save_dialog.$refs.dialog.set_specialty(v_descriptors_ul.specialty)
@@ -264,13 +263,9 @@ const v_descriptors_ul = new Vue({
   methods: {
     format_descriptor,
     set_specialty: function (new_specialty) {
-      console.log('set_specialty:')
-      console.log(new_specialty)
       this.specialty = new_specialty
     },
     set_modality: function (new_modality) {
-      console.log('set_modality:')
-      console.log(new_modality)
       this.modality = new_modality
     }
   },

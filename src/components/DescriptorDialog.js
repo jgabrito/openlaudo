@@ -16,15 +16,15 @@ const descriptor_interface = {
 }
 
 export default {
-  data : function() {
+  data: function () {
     return {
-      asset_interface : descriptor_interface,
+      asset_interface: descriptor_interface
     }
   },
 
-  components : {
-    AssetEditor : DescriptorEditor,
+  components: {
+    AssetEditor: DescriptorEditor
   },
-  
-  mixins : [ AssetDialog ],
+
+  mixins: [ AssetDialog ]
 }

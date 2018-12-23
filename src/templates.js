@@ -9,8 +9,8 @@ function template_to_delta (exam) {
     output.push({ insert: exam.tecnique + '\n' })
   }
 
-  output.push({ insert: '\nAnálise\n', attributes: JSON.stringify({ bold: true, align: 'justify' }) }),
-  output.push({ insert: exam.body + '\n\n', attributes: JSON.stringify({ align: 'justify' })})
+  output.push({ insert: '\nAnálise\n', attributes: JSON.stringify({ bold: true, align: 'justify' }) })
+  output.push({ insert: exam.body + '\n\n', attributes: JSON.stringify({ align: 'justify' }) })
 
   if (exam.conc.trim() !== '') {
     output.push({ insert: 'Conclusão\n', attributes: JSON.stringify({ bold: true }) })
