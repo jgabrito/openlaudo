@@ -32,7 +32,7 @@ const myhandlers = {
   },
 
   'SALVAR': function () {
-    const template_body_editor = quill_comp.content.ops
+    const template_body_editor = quill_comp.content.ops || []
 
     var el = null
     if (!template_save_dialog) {
@@ -79,6 +79,35 @@ const myhandlers = {
     template_save_dialog.$refs.dialog.new_template = true
     template_save_dialog.$refs.dialog.current_template = null
     template_save_dialog.$refs.dialog.show()
+  },
+
+  'ACHADOS': function () {
+    var el = null
+    if (!descriptor_dialog) {
+      el = document.createElement('div')
+      document.body.appendChild(el)
+      descriptor_dialog = new Vue({
+        el,
+        template: `
+          <DescriptorDialog v-bind:initial-modality="v_descriptors_ul.modality"
+            v-bind:initial-specialty="v_descriptors_ul.specialty"
+            v-on:close="descriptor_dialog_close" v-bind:modal="true" ref="dialog">
+          </DescriptorDialog>
+        `,
+        data: {
+          v_descriptors_ul
+        },
+        methods: {
+          descriptor_dialog_close
+        },
+        components: {
+          DescriptorDialog
+        }
+      })
+    }
+    descriptor_dialog.$refs.dialog.set_modality(v_descriptors_ul.modality)
+    descriptor_dialog.$refs.dialog.set_specialty(v_descriptors_ul.specialty)
+    descriptor_dialog.$refs.dialog.show()
   }
 }
 
@@ -282,7 +311,6 @@ const template_nav = new Vue({
 })
 
 var descriptor_dialog = null
-
 function descriptor_dialog_close () {
   if (descriptor_dialog) {
     descriptor_dialog.$destroy()
@@ -315,37 +343,6 @@ $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })
   // $('.tabs').tabs()
   $('.form_select_init').formSelect()
-  $('.fixed-action-btn').floatingActionButton()
-
-  $('#descriptor_edit_button').on('click', function () {
-    var el = null
-    if (!descriptor_dialog) {
-      el = document.createElement('div')
-      document.body.appendChild(el)
-      descriptor_dialog = new Vue({
-        el,
-        template: `
-          <DescriptorDialog v-bind:initial-modality="v_descriptors_ul.modality"
-            v-bind:initial-specialty="v_descriptors_ul.specialty"
-            v-on:close="descriptor_dialog_close" v-bind:modal="true" ref="dialog">
-          </DescriptorDialog>
-        `,
-        data: {
-          v_descriptors_ul
-        },
-        methods: {
-          descriptor_dialog_close
-        },
-        components: {
-          DescriptorDialog
-        }
-      })
-    }
-    console.log(descriptor_dialog)
-    descriptor_dialog.$refs.dialog.set_modality(v_descriptors_ul.modality)
-    descriptor_dialog.$refs.dialog.set_specialty(v_descriptors_ul.specialty)
-    descriptor_dialog.$refs.dialog.show()
-  })
 
   $('#descriptor_search_input').on('keyup', descriptor_search_input_changed)
 })

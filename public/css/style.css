@@ -104,6 +104,19 @@ html, body {
   padding-right: 10;
 }
 
+.ql-snow.ql-toolbar button.ql-ACHADOS {
+  width: 90px;
+}
+
+.ql-ACHADOS:after {
+  content: "ACHADOS";
+  background-color: #f56565;
+  box-shadow: 2px 2px grey;
+  padding: 4;
+  padding-left: 10;
+  padding-right: 10;
+}
+
 .form_sg {
   width: 30%;
 }
