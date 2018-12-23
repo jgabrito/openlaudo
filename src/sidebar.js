@@ -22,28 +22,6 @@ const initial_specialty = base_metadata.specialties['cep']
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 //  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL  QUILL
 
-// this list determinates the tools that are displayed in the top tool bar of the editor
-const toolbarOptions = [
-  [{ 'font': [] }],
-  ['bold', 'italic', 'underline', 'strike'], // toggled buttons
-  [{ 'size': ['small', false, 'large', 'huge'] }], // custom dropdown
-  // ['blockquote', 'code-block'],
-
-  // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-  [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-  [{ 'script': 'sub' }, { 'script': 'super' }], // superscript/subscript
-  [{ 'indent': '-1' }, { 'indent': '+1' }], // outdent/indent
-  // [{ 'direction': 'rtl' }],                         // text direction
-
-  // [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-
-  [{ 'color': [] }, { 'background': [] }], // dropdown with defaults from theme
-  [{ 'align': [] }],
-  ['COPIAR', 'SALVAR']
-
-  // ['clean']                                         // remove formatting button
-]
-
 // define function to run when 'COPIAR' tool is pressed
 const myhandlers = {
   'COPIAR': function () {
@@ -107,11 +85,12 @@ const myhandlers = {
 const quill_config = {
   modules: {
     toolbar: {
-      container: toolbarOptions,
+      container: '#editor_toolbar',
       handlers: myhandlers
     }
   },
-  theme: 'snow'
+  theme: 'snow',
+  scrollingContainer: '#editor-container'
 }
 
 // code that inserts the editor on the page

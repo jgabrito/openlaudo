@@ -63,8 +63,19 @@ html, body {
 }
 
 #editor {
-/*  height: 93%;*/
   font-size: medium;
+  height: 100%;
+  min-height: 100%;
+}
+
+#editor .ql-editor {
+  overflow-y: visible; 
+}
+
+#editor_container {
+  overflow-y: auto;
+  flex-basis: 0;
+  -webkit-flex-basis: 0;
 }
 
 .ql-snow.ql-toolbar button.ql-COPIAR {

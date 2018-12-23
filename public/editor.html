@@ -77,8 +77,58 @@
 
       <!-- ROW WITH RTF_EDITOR AND FINDINGS DESCRIPTORS -->
       <!-- RTF_EDITOR -->
-      <div id="all_editor" style="width: 60%;">
-        <div id="editor" > </div>
+      <div id="all_editor" class="d-flex flex-column ml-1" style="width: 60%;">
+        <div id="editor_toolbar" class="d-flex flex-row flex-wrap">
+          <select class="ql-font"> </select> 
+
+          <div class="d-flex flex-row">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+          </div>
+          
+          <select class="ql-size">
+            <option value="small"></option>
+            <option selected></option>
+            <option value="large"></option>
+            <option value="huge"></option>
+          </select>
+
+          <div class="d-flex flex-row">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+          </div>
+
+          <div class="d-flex flex-row">
+            <button class="ql-script" value="sub"></button>
+            <button class="ql-script" value="super"></button>
+          </div>
+
+          <div class="d-flex flex-row">
+            <button class="ql-indent" value="-1"></button>
+            <button class="ql-indent" value="+1"></button>
+          </div>
+
+          <div class="d-flex flex-row">
+            <select class="ql-color"> </select>
+            <select class="ql-background"> </select>
+          </div>
+
+          <select class="ql-align"> </select>
+
+          <div class="d-flex flex-row">
+            <button class="ql-COPIAR"></button>
+            <button class="ql-SALVAR"></button>
+          </div>
+
+        </div>
+        
+        <div id="editor_container" class="flex-grow-1"> 
+          <div id="editor" > </div>
+        </div>
+        
+      
       </div>
         
       <!-- FORMS CLICKS -->
