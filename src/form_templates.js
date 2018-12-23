@@ -1,5 +1,5 @@
+/* eslint "no-unused-vars": "warn", "no-trailing-spaces" : "off", "comma-dangle" : "off" */
 
-/* eslint no-unused-vars: "warn" */
 import { calculate_history } from './click_templates.js'
 
 const form_templates = {

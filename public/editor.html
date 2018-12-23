@@ -123,13 +123,13 @@
       </div>
         
       <!-- FORMS CLICKS -->
-      <div class="d-flex flex-column pl-4 pr-2" style="width: 40%;">
+      <div class="d-flex flex-column pl-4 pr-2" style="width: 40%; overflow-y: auto; overflow-x: hidden">
       
         <ul id="app" class="collapsible popout">
           <li v-for="card in cards" :key="card.id">
-            <div class="collapsible-header ">
+            <div class="collapsible-header d-flex flex-row">
               <img :src="card.src" class="circle vignette ">
-              <span class="headline white--text" v-html="card.title" style="margin-top:20px;"> </span>
+              <span class="headline white--text flex-grow-1" v-html="card.title" style="margin-top:20px;"> </span>
             </div>
             <div class="collapsible-body white" id="form_div">
               <span class="headline white--text" v-html="card.description"></span>
@@ -141,7 +141,7 @@
 
         <!-- DESCRIPTORS DESCRIPTORS -->
         <div>
-          <input type="text" id="descriptor_search_input" placeholder="Busque descritores..." title="Type in a name">
+          <input type="text" id="descriptor_search_input" placeholder="Busque descritores...">
         </div>
         <div id="descriptor_list"> </div>
       </div>

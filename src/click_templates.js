@@ -1,4 +1,4 @@
-/* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn", "eqeqeq" : "warn", "no-redeclare" : "warn", "no-extra-semi" : "off" */
+/* eslint no-unused-vars: "warn", "no-undef" : "error", "no-new" : "warn", "eqeqeq" : "off", "no-redeclare" : "warn", "semi" : "off", "brace-style" : "off", "quotes" : "off", "space-before-function-paren" : "off", "no-multiple-empty-lines" : "off", "padded-blocks" : "off", "no-trailing-spaces" : "off", "spaced-comment" : "off", "no-floating-decimal" : "off", "indent" : "off", "space-infix-ops" : "off", "comma-spacing" : "off", "keyword-spacing" : "off", "comma-dangle" : "off", "space-before-blocks" : "off", "curly" : "off", "object-curly-spacing" : "off", "no-multi-spaces" : "off", "standard/object-curly-even-spacing" : "off", "space-in-parens" : "off" */
 
 const $ = window.$
 
@@ -31,7 +31,7 @@ const submit_laudo = {
 
 
 
-    calculated_age = calculate_efw_and_gestational(DBP, CC, CA, CF);
+    var calculated_age = calculate_efw_and_gestational(DBP, CC, CA, CF);
     var efw = calculated_age.efw;
     var weeks = calculated_age.weeks;
     var days = calculated_age.days;
@@ -130,6 +130,8 @@ const submit_laudo = {
       ccnStr = "***";
     }
 
+    var bcf_message;
+    var bcf_conc;
     if (bcf_ausente) {
       bcf_message = "Embrião único, com comprimento cabeça-nádega (CCN) de " + ccnStr + " mm.\nAusência de batimentos cardíacos embrionários detectáveis.";
       if (ccn >= 0.7) {
@@ -152,7 +154,7 @@ const submit_laudo = {
     }
 
 
-
+    var GAdays;
     if (embriao_ausente) {
       GAdays = ((sg_mean) + 30);
       GA = GAdays / 7;
@@ -274,7 +276,7 @@ const submit_laudo = {
 
   escrotal: function(quill){
 
-  }
+  },
 
 
 
@@ -313,7 +315,7 @@ function calculate_efw_and_gestational(BPD, HC, AC, FL) {
   AC = parseFloat(AC);
   FL = parseFloat(FL);
 
-  weight = Math.pow(10, 1.3596 + (0.0064 * HC) + (0.00061 * BPD * AC) + (0.0424 * AC) + (0.174 * FL) - (0.00386 * AC * FL));
+  var weight = Math.pow(10, 1.3596 + (0.0064 * HC) + (0.00061 * BPD * AC) + (0.0424 * AC) + (0.174 * FL) - (0.00386 * AC * FL));
   weight = Math.round(weight);
 
   var GA = 10.85 + (0.060 * HC * FL) + (0.6700 * BPD) + (0.1680 * AC);
@@ -409,7 +411,7 @@ function days_between(date1, date2) {
 
 function separate_weeks_days(weeks) {
   var GAint = Math.floor(weeks);
-  var GAfloat = GA % 1;
+  var GAfloat = GAint % 1;
 
   var days = GAfloat * 7;
 
@@ -426,9 +428,9 @@ function separate_weeks_days(weeks) {
   }
 }
 
-Idx3 = new Object();
+var Idx3 = {};
 
-Data3 = new Object();
+var Data3 = {};
 
 Idx3[1] = "-3.50"; Data3[1] = "0.0002";
 Idx3[2] = "-3.49"; Data3[2] = "0.0002";
@@ -1176,7 +1178,7 @@ function computeEFWPercentile(MAWeeks, MADays, Measured) {
   var Item = Zscore;
   
   Item = Item.replace(",", ".");
-  
+  var Count;
   for (Count = 1; Count <= Idx3[0]; Count++) {
 
     if (Item == Idx3[Count]) {

@@ -294,7 +294,9 @@ const template_nav = new Vue({
         // if there is a clickable form for this modality/specialty pair in the
         // form_templates.js file, render it on the cover of the expansible box
         // with button to generate report
-        for (let [name, content] of _.entries(templates)) {
+        let names = _.sortBy(_.keys(templates))
+        for (let name of names) {
+          let content = templates[name]
           if (submit_laudo[name] === undefined) {
             console.log(`Form for template ${name} defined, but dispatcher not found.`)
             continue
@@ -303,17 +305,15 @@ const template_nav = new Vue({
           let card = {
             id: id,
             title: `
-              <div class="fb-button form-group field-button-${id} row">
-                <div class="col-8">
+              <div class="fb-button form-group field-button-${id} d-flex flex-row flex-nowrap justify-content-between">
+                <div class='flex-grow'>
                   ${content.nickname}
                 </div>
-                <div class=col">
-                  <button type="button" class="btn btn-success" name="button-${id}" 
-                    style="success; float:right" id="button-${id}" 
-                    onclick="click_template_dispatcher('${name}');">
-                    Laudo
-                  </button>
-                </div>
+                <button type="button" class="btn btn-success" name="button-${id}" 
+                  id="button-${id}" 
+                  onclick="click_template_dispatcher('${name}');">
+                  Laudo
+                </button>
               </div>
             `,
             description: content.template,
