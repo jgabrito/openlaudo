@@ -124,10 +124,15 @@
         
       <!-- FORMS CLICKS -->
       <div class="d-flex flex-column pl-4 pr-2" style="width: 40%;">
+      
         <ul id="app" class="collapsible popout">
-          <li v-for="card in cards" :key="card.title">
-            <div class="collapsible-header "><img :src="card.src" class="circle vignette "><span class="headline white--text" v-html="card.title" style="margin-top:20px;"></span></div>
-            <div class="collapsible-body white" id="form_div"><span class="headline white--text" v-html="card.description"></span>
+          <li v-for="card in cards" :key="card.id">
+            <div class="collapsible-header ">
+              <img :src="card.src" class="circle vignette ">
+              <span class="headline white--text" v-html="card.title" style="margin-top:20px;"> </span>
+            </div>
+            <div class="collapsible-body white" id="form_div">
+              <span class="headline white--text" v-html="card.description"></span>
               <!-- HERE ENTERS THE CLICK FORM -->
               <!-- HERE ENTERS THE CLICK FORM -->
               <!-- HERE ENTERS THE CLICK FORM -->

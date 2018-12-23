@@ -4,8 +4,6 @@ import VueQuill from 'vue-quill'
 
 import _ from 'lodash'
 
-// import { submit_laudo } from './click_templates.js'
-
 import TemplateNav from './components/TemplateNav.vue'
 import AssetList from './components/AssetList.vue'
 import DescriptorDialog from './components/DescriptorDialog.js'
@@ -13,8 +11,12 @@ import TemplateSaveDialog from './components/TemplateSaveDialog.vue'
 import * as db from './db.js'
 import base_metadata from './base_metadata.js'
 import ultrasound_icon from './assets/images/ultrasound_icon.png'
+import { submit_laudo } from './click_templates.js'
+import form_templates from './form_templates.js'
 
 Vue.use(VueQuill)
+
+const $ = window.$
 
 const initial_modality = base_metadata.modalities['tc']
 const initial_specialty = base_metadata.specialties['cep']
@@ -170,35 +172,6 @@ function editor_insert_stuff (deltas) {
   quill.updateContents(update)
 }
 
-// inserts simple template to quill
-// also changes clickable template that shows on the right
-function format_template (exam) {
-  editor_insert_stuff(exam.body)
-
-  /* FIX LATER
-  // change click form
-  if (exam.name) {
-    if (form_templates[exam.name]) {
-      // if there is a clickable form with this exam.name in the form_templates.js file, render it
-
-      // cover of the expansible box. has button to generate report
-      div_tags =
-          `<div class="fb-button form-group field-button-1540577184864 row"><div class="col-8">` + exam.nickname +
-          `</div><div class=col"><button type="button" class="btn btn-success" name="button-1540577184864" style="success; float:right" id="button-1540577184864" onclick="submit_laudo.` + exam.name + `();event.stopPropagation();">Laudo</button></div>
-          </div>`
-
-      // calls func tha changes vue object
-      collpasible_app.change_name(div_tags, form_templates[exam.name])
-      setTimeout(function () { $('.form_select_init').formSelect() }, 500)
-      // $("#form_div").html(form_templates[exam.name]);
-      setTimeout(function () { $('.collapsible').collapsible() }, 500)
-    } else {
-      collpasible_app.change_name('<p>-</p>', '<p>-</p>')
-    }
-  }
-  */
-}
-
 // CLICKS CLICKS CLICKS
 // CLICKS CLICKS CLICKS
 // CLICKS CLICKS CLICKS
@@ -207,19 +180,11 @@ function format_template (exam) {
 
 $('#form_div').html()
 
-const collpasible_app = new Vue({
+const collapsible_app = new Vue({
   el: '#app',
   mounted: function () { $('.collapsible').collapsible() },
   data: {
-    cards: [
-      { title: '', src: ultrasound_icon, description: '' }
-    ]
-  },
-  methods: {
-    change_name: function (newTitle, newDescription) {
-      this.cards[0].title = newTitle
-      this.cards[0].description = newDescription
-    }
+    cards: [ ]
   }
 })
 
@@ -284,24 +249,95 @@ const v_descriptors_ul = new Vue({
 
 const template_nav = new Vue({
   el: '#template_nav',
-  data: {
-    initial_modality,
-    initial_specialty
-  },
-  methods: {
-    format_template,
-    set_specialty: v_descriptors_ul.set_specialty,
-    set_modality: v_descriptors_ul.set_modality
-  },
   template: `
     <TemplateNav template-dropdowns tabs
       v-bind:initial-modality="initial_modality" 
       v-bind:initial-specialty="initial_specialty"
-      v-on:template-chosen="format_template" 
+      v-on:template-chosen="template_chosen" 
       v-on:specialty-changed="set_specialty"
       v-on:modality-changed="set_modality">
     </TemplateNav>
   `,
+  data: {
+    initial_modality,
+    initial_specialty,
+    current_modality: initial_modality,
+    current_specialty: initial_specialty
+  },
+
+  watch: {
+    current_specialty: function () {
+      this.update_click_templates()
+    },
+    current_modality: function () {
+      this.update_click_templates()
+    }
+  },
+
+  methods: {
+    set_specialty: function (new_specialty) {
+      this.current_specialty = new_specialty
+      v_descriptors_ul.set_specialty(new_specialty)
+    },
+
+    set_modality: function (new_modality) {
+      this.current_modality = new_modality
+      v_descriptors_ul.set_modality(new_modality)
+    },
+
+    update_click_templates: function () {
+      // change click form
+      let new_cards = []
+      let templates = form_templates[this.current_modality.name]
+      if (templates) templates = templates[this.current_specialty.name]
+      if (templates) {
+        // if there is a clickable form for this modality/specialty pair in the
+        // form_templates.js file, render it on the cover of the expansible box
+        // with button to generate report
+        for (let [name, content] of _.entries(templates)) {
+          if (submit_laudo[name] === undefined) {
+            console.log(`Form for template ${name} defined, but dispatcher not found.`)
+            continue
+          }
+          let id = Math.round(1e10 * Math.random()).toString()
+          let card = {
+            id: id,
+            title: `
+              <div class="fb-button form-group field-button-${id} row">
+                <div class="col-8">
+                  ${content.nickname}
+                </div>
+                <div class=col">
+                  <button type="button" class="btn btn-success" name="button-${id}" 
+                    style="success; float:right" id="button-${id}" 
+                    onclick="click_template_dispatcher('${name}');">
+                    Laudo
+                  </button>
+                </div>
+              </div>
+            `,
+            description: content.template,
+            src: ultrasound_icon
+          }
+          new_cards.push(card)
+        }
+      }
+
+      if (new_cards.length > 0) {
+        // calls func tha changes vue object
+        collapsible_app.cards = new_cards
+        setTimeout(function () { $('.form_select_init').formSelect() }, 500)
+        setTimeout(function () { $('.collapsible').collapsible() }, 500)
+      } else {
+        collapsible_app.cards = []
+      }
+    },
+
+    template_chosen: function (exam) {
+      editor_insert_stuff(exam.body)
+    }
+  },
+
   components: { TemplateNav }
 })
 
@@ -342,4 +378,8 @@ $(document).ready(function () {
   $('#descriptor_search_input').on('keyup', descriptor_search_input_changed)
 })
 
-export { v_descriptors_ul }
+function click_template_dispatcher (name) {
+  submit_laudo[name](quill_comp.$refs.editor.editor)
+}
+
+export { v_descriptors_ul, click_template_dispatcher }

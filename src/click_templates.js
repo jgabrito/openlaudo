@@ -1,7 +1,9 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn", "eqeqeq" : "warn", "no-redeclare" : "warn", "no-extra-semi" : "off" */
 
-submit_laudo = {
-  ob_tardio: function () {
+const $ = window.$
+
+const submit_laudo = {
+  ob_tardio: function (quill) {
     try {
       var DBP = ($('#form_dbp')[0].value / 10) || "***";
       var CC = ($('#form_cc')[0].value / 10) || "***";
@@ -104,7 +106,7 @@ submit_laudo = {
 
   },
 
-  ob_inicial: function () {
+  ob_inicial: function (quill) {
 
     var sg1 = parseFloat($("#form_sg1")[0].value );
     var sg2 = parseFloat($("#form_sg2")[0].value);
@@ -212,7 +214,7 @@ submit_laudo = {
 
   },
 
-  transvaginal: function (){
+  transvaginal: function (quill){
     var utero1 = $('#form_utero1').val();
     var utero2 = $('#form_utero2').val();
     var utero3 = $('#form_utero3').val();
@@ -266,11 +268,11 @@ submit_laudo = {
 
   },
 
-  aparelho: function () {
+  aparelho: function (quill) {
 
   },
 
-  escrotal: function(){
+  escrotal: function(quill){
 
   }
 

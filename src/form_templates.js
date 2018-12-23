@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: "warn" */
 import { calculate_history } from './click_templates.js'
 
-form_templates = {
+const form_templates = {
     ob_tardio : `<form id="rendered-form"><div class="rendered-form">
     <div class="">
       <h3 id="control-4928516">2º/3º trimestre</h3>
@@ -445,4 +445,36 @@ form_templates = {
 
 }
 
-export default form_templates
+
+export default {
+  'usg' : {
+    'obstetrico' : {
+      'ob_tardio' : {
+        nickname : 'Obstétrico 2o/3o TRI',
+        template : form_templates['ob_tardio']
+      },
+      'ob_inicial' : {
+        nickname : 'Obstétrico 1o TRI',
+        template : form_templates['ob_inicial']
+      },
+      'transvaginal' : {
+        nickname : 'Transvaginal',
+        template : form_templates['transvaginal']
+      },
+    },
+
+    'superficial' : {
+      'escrotal' : {
+        nickname : 'Escrotal',
+        template : form_templates['escrotal']
+      },
+    },
+
+    'abdome' : {
+      'abdome_total' : {
+        nickname : 'Abdome Total',
+        template : form_templates['abdome_total']
+      },
+    }
+  }
+}
