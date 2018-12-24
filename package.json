@@ -1,30 +1,51 @@
 {
   "name": "openlaudo",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "start": "meteor run",
+    "test": "meteor test --once --driver-package meteortesting:mocha",
+    "test-app": "TEST_WATCH=1 meteor test --full-app --driver-package meteortesting:mocha",
+    "visualize": "meteor --production --extra-packages bundle-visualizer",
+    "lint": "eslint .",
+    "pretest": "npm run lint --silent"
+  },
+  "eslintConfig": {
+    "extends": "@meteorjs/eslint-config-meteor"
+  },
+  "staticAssets": {
+    "extensions": [
+      "jpg",
+      "png",
+      "svg"
+    ],
+    "pathPrefix": "static/",
+    "exportAbsolutePaths": true
   },
   "dependencies": {
+    "@babel/runtime": "^7.1.5",
     "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.11",
-    "minimongo": "^5.0.1",
+    "meteor-node-stubs": "^0.4.1",
+    "minimongo": "^5.1.1",
+    "quill": "^1.3.6",
+    "quill-render": "^1.0.5",
     "simpl-schema": "^1.5.3",
-    "vue": "^2.5.17",
-    "vue-quill": "^1.5.0-0"
+    "vue": "^2.5.21"
+  },
+  "meteor": {
+    "mainModule": {
+      "client": "client/main.js",
+      "server": "server/main.js"
+    },
+    "testModule": "tests/main.js"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.1.1",
-    "@vue/cli-plugin-eslint": "^3.1.5",
-    "@vue/cli-service": "^3.1.4",
-    "@vue/eslint-config-standard": "^4.0.0",
+    "@meteorjs/eslint-config-meteor": "^1.0.5",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.8.0",
-    "eslint-plugin-vue": "^5.0.0-0",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.0.1",
-    "vue-template-compiler": "^2.5.17"
+    "eslint": "^5.11.0",
+    "eslint-import-resolver-meteor": "^0.4.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-meteor": "^5.1.0",
+    "eslint-plugin-vue": "^5.0.0"
   }
 }
