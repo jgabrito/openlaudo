@@ -1,9 +1,13 @@
 <template>
-  <a href='#!' class="dropdown-trigger" v-bind:data-target="target"
+  <a v-if="textContent !== null" href='#!' class="dropdown-trigger" v-bind:data-target="target"
     v-on:click="$emit('click')">
     {{textContent}}
     <slot></slot>
   </a>
+  <div v-else href='#!' class="dropdown-trigger" v-bind:data-target="target">
+    <slot name="content"></slot>
+    <slot name="items"> </slot>
+  </div>
 </template>
 
 <script>

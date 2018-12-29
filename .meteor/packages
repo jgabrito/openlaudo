@@ -20,3 +20,7 @@ akryum:vue-component
 dynamic-import
 static-html
 nathantreid:static-assets
+accounts-base
+accounts-google
+service-configuration
+accounts-facebook

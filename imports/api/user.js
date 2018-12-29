@@ -1,6 +1,4 @@
-import { get_system_uid } from './db.js'
 
-const get_current_uid = get_system_uid
+import { get_current_uid, userid_mixin } from './user_meteor.js'
 
-// Dummy
-export { get_current_uid }
+export { get_current_uid, userid_mixin }

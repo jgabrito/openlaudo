@@ -2,7 +2,9 @@ import { Meteor } from 'meteor/meteor'
 import Vue from 'vue/dist/vue.min.js'
 
 import VueQuill from '../imports/startup/client/vue-quill/vue-quill.js'
+import VueMeteorTracker from 'vue-meteor-tracker'
 
+Vue.use(VueMeteorTracker)
 Vue.use(VueQuill)
 
 Meteor.startup(() => {

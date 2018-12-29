@@ -3,7 +3,9 @@
   <nav class="nav-extended">
     <div class="nav-wrapper">
       <a v-if="tabs" href="#!" class="brand-logo right">Open Laudo</a>
+
       <ul class="left hide-on-med-and-down">
+        <li v-if="tabs"> <LoginMenu></LoginMenu> </li>
         <li v-for="specialty in specialties"
           v-bind:key="get_specialty_id(specialty)"
           v-bind:class="{ active : (specialty === current_specialty) }" >
@@ -43,6 +45,7 @@
 
 import * as db from '../../api/db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
+import LoginMenu from './LoginMenu.vue'
 import metadata_mixin from './mixins/metadata_mixin.js'
 import materialize_mixin from './mixins/materialize_mixin.js'
 import db_mixin from './mixins/db_mixin.js'
@@ -61,7 +64,7 @@ export default {
     tabs: Boolean
   },
 
-  components: { DropdownTrigger },
+  components: { DropdownTrigger, LoginMenu },
 
   computed: {
 
