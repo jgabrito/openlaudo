@@ -18,7 +18,7 @@ const configServices =  function() {
     { service: 'facebook' },
     {
       $set: {
-        clientId: Meteor.settings.facebook.clientId,
+        appId: Meteor.settings.facebook.clientId,
         secret: Meteor.settings.facebook.secret,
         loginStyle: 'popup',
       }
