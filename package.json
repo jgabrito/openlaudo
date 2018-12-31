@@ -10,7 +10,66 @@
     "pretest": "npm run lint --silent"
   },
   "eslintConfig": {
-    "extends": "@meteorjs/eslint-config-meteor"
+    "extends": "@meteorjs/eslint-config-meteor",
+    "rules": {
+      "camelcase": [
+        "off"
+      ],
+      "semi": [
+        "off"
+      ],
+      "quote-props": [
+        "off"
+      ],
+      "comma-dangle": [
+        "off"
+      ],
+      "space-in-parens": [
+        "off"
+      ],
+      "array-bracket-spacing": [
+        "off"
+      ],
+      "key-spacing": [
+        "off"
+      ],
+      "no-underscore-dangle": [
+        "off"
+      ],
+      "object-curly-newline": [
+        "off"
+      ],
+      "computed-property-spacing": [
+        "off"
+      ],
+      "object-shorthand": [
+        "off"
+      ],
+      "no-multi-assign": [
+        "off"
+      ],
+      "dot-notation": [
+        "off"
+      ],
+      "no-param-reassign": [
+        "off"
+      ],
+      "consistent-return": [
+        "off"
+      ],
+      "no-constant-condition": [
+        "off"
+      ],
+      "no-bitwise": [
+        "off"
+      ],
+      "no-unused-vars": [
+        "warn"
+      ],
+      "class-methods-use-this": [
+        "off"
+      ]
+    }
   },
   "staticAssets": {
     "extensions": [
@@ -43,10 +102,12 @@
   "devDependencies": {
     "@meteorjs/eslint-config-meteor": "^1.0.5",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.11.0",
+    "eslint": "^5.11.1",
+    "eslint-config-airbnb": "^17.1.0",
     "eslint-import-resolver-meteor": "^0.4.0",
     "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-meteor": "^5.1.0",
-    "eslint-plugin-vue": "^5.0.0"
+    "eslint-plugin-react": "^7.12.0"
   }
 }
