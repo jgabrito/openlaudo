@@ -28,7 +28,7 @@ export default {
         'modal': this.materialize_M.Modal,
         'dropdown': this.materialize_M.Dropdown
       }
-      return this._materialize_controls.filter((c) => (c instanceof name_to_class[classname]))
+      return this._materialize_controls.filter(c => (c instanceof name_to_class[classname]))
     },
 
     resize_textareas: function () {
@@ -36,8 +36,8 @@ export default {
 
       if (this.$el.tagName === 'textarea') { this.materialize_M.textareaAutoResize(this.$el) }
       if (this.materialize_recursive) {
-        let elems = this.$el.getElementsByTagName('textarea')
-        for (let i = 0; i < elems.length; i++) {
+        const elems = this.$el.getElementsByTagName('textarea')
+        for (let i = 0; i < elems.length; i += 1) {
           this.materialize_M.textareaAutoResize(elems[i])
         }
       }
@@ -57,22 +57,26 @@ export default {
 
     init_components: function () {
       const _do_initialize_tag = (ControlClass, name, options) => {
-        if (this.$el.tagName === name) { this._materialize_controls.push(new ControlClass(this.$el, options)) }
+        if (this.$el.tagName === name) {
+          this._materialize_controls.push(new ControlClass(this.$el, options))
+        }
         if (this.materialize_recursive) {
-          let elems = this.$el.getElementsByTagName(name)
-          for (let i = 0; i < elems.length; i++) {
-            let instance = new ControlClass(elems[i], options)
+          const elems = this.$el.getElementsByTagName(name)
+          for (let i = 0; i < elems.length; i += 1) {
+            const instance = new ControlClass(elems[i], options)
             if (instance) this._materialize_controls.push(instance)
           }
         }
       }
 
       const _do_initialize_class = (ControlClass, name, options) => {
-        if (this.$el.classList.contains(name)) { this._materialize_controls.push(new ControlClass(this.$el, options)) }
+        if (this.$el.classList.contains(name)) {
+          this._materialize_controls.push(new ControlClass(this.$el, options))
+        }
         if (this.materialize_recursive) {
-          let elems = this.$el.getElementsByClassName(name)
-          for (let i = 0; i < elems.length; i++) {
-            let instance = new ControlClass(elems[i], options)
+          const elems = this.$el.getElementsByClassName(name)
+          for (let i = 0; i < elems.length; i += 1) {
+            const instance = new ControlClass(elems[i], options)
             if (instance) this._materialize_controls.push(instance)
           }
         }
@@ -81,7 +85,8 @@ export default {
       if (!this._materialize_controls) this._materialize_controls = []
 
       if (this.materialize_classes.includes('select')) {
-        _do_initialize_tag(this.materialize_M.FormSelect, 'select', this.materialize_options['select'])
+        _do_initialize_tag(this.materialize_M.FormSelect, 'select',
+          this.materialize_options['select'])
       }
 
       if (this.materialize_classes.includes('dropdown')) {
@@ -117,10 +122,6 @@ export default {
   },
 
   beforeDestroy: function () {
-    // Check for possible memory leaks
-    /* if (this._materialize_controls) {
-      for (let i = 0; i < this._materialize_controls.length; i++) { this._materialize_controls[i].destroy() }
-      delete this._materialize_controls
-    } */
+    // TODO: check for possible memory leaks
   }
 }

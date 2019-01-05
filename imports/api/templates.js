@@ -1,6 +1,8 @@
 
+import _ from 'lodash'
+
 function template_to_delta (exam) {
-  var output = []
+  const output = []
 
   output.push({ insert: exam.title + '\n', attributes: JSON.stringify({ bold: true, align: 'center' }) })
 
@@ -23,9 +25,9 @@ function template_to_delta (exam) {
 function normalize_templates (templates) {
   const output_templates = []
 
-  for (let m_data of Object.values(templates)) {
-    for (let s_data of Object.values(m_data['specialties'])) {
-      for (let t_data of Object.values(s_data['mascaras'])) {
+  _.values(templates).forEach((m_data) => {
+    _.values(m_data['specialties']).forEach((s_data) => {
+      _.values(s_data['mascaras']).forEach((t_data) => {
         t_data = {
           specialty: s_data['metadata']['specialty_name'],
           modality: m_data['metadata']['modality_name'],
@@ -33,14 +35,14 @@ function normalize_templates (templates) {
           body: template_to_delta(t_data)
         }
         output_templates.push(t_data)
-      }
-    }
-  }
+      })
+    })
+  })
 
   return output_templates
 }
 
-var base_templates = {
+const base_templates = {
   'usg': {
     'metadata': {
       'modality_name': 'usg'

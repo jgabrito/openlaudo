@@ -7,14 +7,14 @@ const get_current_uid = function() {
 
 const providers = {
   google : {
-    text : "Login com Google",
+    text : 'Login com Google',
     _provider : Meteor.loginWithGoogle,
     _provider_data : { }
   },
   facebook : {
-    text : "Login com Facebook",
+    text : 'Login com Facebook',
     _provider : Meteor.loginWithFacebook,
-    _provider_data : { 
+    _provider_data : {
       requestPermissions: ['public_profile', 'email']
     }
   }
@@ -32,9 +32,9 @@ const userid_mixin = {
 
   methods : {
     login : function(provider_name) {
-      let provider = providers[provider_name]
+      const provider = providers[provider_name]
       if (provider === undefined) {
-        throw Exception (`Unknown login provider: ${provider_name}`);
+        throw new Error(`Unknown login provider: ${provider_name}`);
       }
 
       provider._provider(provider._provider_data, (err) => {

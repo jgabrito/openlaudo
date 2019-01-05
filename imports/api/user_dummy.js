@@ -2,7 +2,7 @@
 
 import { get_system_uid } from './db.js'
 
-const get_current_uid = get_system_uid
+const get_current_uid = () => 'USER'
 
 const userid_mixin = {
   data : function() {
@@ -14,7 +14,7 @@ const userid_mixin = {
   },
 
   methods : {
-    login : function(provider_name) {
+    login : function() {
       console.log('Login called')
     },
     logout : function() {

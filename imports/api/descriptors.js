@@ -1,24 +1,27 @@
+import _ from 'lodash'
+
 function normalize_descriptors (descriptors) {
   const output_descriptors = []
 
-  for (let s_data of Object.values(descriptors)) {
-    for (let m_data of Object.values(s_data['modalities'])) {
-      for (let f_data of Object.values(m_data['findings'])) {
+  _.values(descriptors).forEach((s_data) => {
+    _.values(s_data['modalities']).forEach((m_data) => {
+      _.values(m_data['findings']).forEach((f_data) => {
         f_data = {
           specialty: s_data['metadata']['specialty_name'],
           modality: m_data['metadata']['modality_name'],
           title: f_data['title'],
-          body: f_data['body']
+          body: f_data['body'],
+          hotkey: "",
         }
         output_descriptors.push(f_data)
-      }
-    }
-  }
+      })
+    })
+  })
 
   return output_descriptors
 }
 
-var base_descriptors = {
+const base_descriptors = {
   'neuro': {
     'metadata': {
       'specialty_name': 'neuro'

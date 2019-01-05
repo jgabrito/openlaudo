@@ -54,7 +54,7 @@ const myhandlers = {
         computed: {
           template_body: function () {
             return this.template_body_editor.map((x) => {
-              x = Object.assign({}, x)
+              x = _.assign({}, x)
               if (x.attributes !== undefined) {
                 x.attributes = JSON.stringify(x.attributes)
               }
@@ -160,7 +160,7 @@ function editor_insert_stuff (deltas) {
   }
 
   update.ops = update.ops.concat(deltas.map((x) => {
-    x = Object.assign({}, x)
+    x = _.assign({}, x)
     if (x.attributes !== undefined) x.attributes = JSON.parse(x.attributes)
     return x
   }))
@@ -291,11 +291,11 @@ const template_nav = new Vue({
         // form_templates.js file, render it on the cover of the expansible box
         // with button to generate report
         let names = _.sortBy(_.keys(templates))
-        for (let name of names) {
+        names.forEach((name) => {
           let content = templates[name]
           if (submit_laudo[name] === undefined) {
             console.log(`Form for template ${name} defined, but dispatcher not found.`)
-            continue
+            return
           }
           let id = Math.round(1e10 * Math.random()).toString()
           let card = {
@@ -316,7 +316,7 @@ const template_nav = new Vue({
             src: ultrasound_icon
           }
           new_cards.push(card)
-        }
+        })
       }
 
       if (new_cards.length > 0) {

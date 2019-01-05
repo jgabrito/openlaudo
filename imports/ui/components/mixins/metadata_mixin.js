@@ -3,7 +3,7 @@ import base_metadata from '../../../api/base_metadata.js'
 
 function valid_modality_for_specialty (modality, specialty) {
   if (specialty.modalities === 'all') return true
-  else return specialty.modalities.includes(modality.name)
+  return specialty.modalities.includes(modality.name)
 }
 
 export default {
@@ -33,7 +33,8 @@ export default {
   methods: {
     get_valid_specialties: function () {
       let specialties = Object.values(this.metadata.specialties)
-      specialties = _.filter(specialties, (s) => (valid_modality_for_specialty(this.current_modality, s)))
+      specialties = _.filter(specialties,
+        s => (valid_modality_for_specialty(this.current_modality, s)))
       specialties = _.sortBy(specialties, _.property('nickname'))
       return specialties
     },

@@ -2,7 +2,7 @@
 import { Meteor } from 'meteor/meteor'
 import { ServiceConfiguration } from 'meteor/service-configuration'
 
-const configServices =  function() {
+const configServices = function() {
   ServiceConfiguration.configurations.upsert(
     { service: 'google' },
     {
