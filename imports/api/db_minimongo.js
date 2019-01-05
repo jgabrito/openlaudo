@@ -1,16 +1,10 @@
 import minimongo from 'minimongo'
-import { OrderedMap, fromJS } from 'immutable'
+import { List as ImList, fromJS } from 'immutable'
 import _ from 'lodash'
 
 const localDb = new minimongo.MemoryDb()
 
 const _network_delay = 2000
-
-const db_interface = {
-  get_collection
-}
-
-const db_promise = Promise.resolve(db_interface)
 
 // Thin layer on top of the minimongo APi
 class _DumbCursor {
@@ -18,27 +12,27 @@ class _DumbCursor {
     this._find_result = find_result
   }
 
-  get_capabilities () {
-    return {
-      events: false
-    }
-  }
-
+  // Promise result: immutable order-preserving map of _id -> records
   fetch () {
     return new Promise((resolve, reject) => {
-      let delay = Math.random() * _network_delay
+      const delay = Math.random() * _network_delay
 
       setTimeout(() => {
         this._find_result.fetch(
           (data) => {
-            let output = new OrderedMap()
-            for (let d of data) output = output.set(d._id, fromJS(d))
+            let output = new ImList()
+            data.forEach((d) => {
+              output = output.push(fromJS(d))
+            })
             resolve(output)
           },
           reject
         )
       }, delay)
     })
+  }
+
+  clear() {
   }
 }
 
@@ -49,11 +43,12 @@ class _Collection {
     this._coll = localDb[name]
     this.find = this.find.bind(this)
     this.findOne = this.findOne.bind(this)
-    this.upsert = this.upsert.bind(this)
+    this.insert = this.insert.bind(this)
+    this.update = this.update.bind(this)
+    this.bulkInsert = this.bulkInsert.bind(this)
   }
 
   // Arguments: Mongo-style selector and options
-  // Promise result: immutable order-preserving map of _id -> records
   find (selector, options) {
     return new _DumbCursor(this._coll.find(selector, options))
   }
@@ -63,7 +58,7 @@ class _Collection {
   findOne (selector, options) {
     return new Promise((resolve, reject) => {
       // Random delay to simulate network
-      let delay = Math.random() * _network_delay
+      const delay = Math.random() * _network_delay
 
       setTimeout(() => {
         this._coll.findOne(selector, options, resolve, reject)
@@ -71,21 +66,45 @@ class _Collection {
     })
   }
 
-  // Arguments: array of records to be upserted
-  upsert (docs) {
+  // Arguments: record to be upserted
+  update (doc, upsert) {
     return new Promise((resolve, reject) => {
       // Random delay to simulate network
-      let delay = Math.random() * _network_delay
+      const delay = Math.random() * _network_delay
+
+      setTimeout(() => {
+        this._coll.upsert([doc], upsert ? null : undefined,
+          (data) => {
+            resolve(data[0]._id)
+          },
+          reject)
+      }, delay)
+    })
+  }
+
+  insert (doc) {
+    doc = _.assign({}, doc)
+    delete doc._id
+    return this.update(doc, true)
+  }
+
+  bulkInsert(docs) {
+    return new Promise((resolve, reject) => {
+      const delay = Math.random() * _network_delay
 
       setTimeout(() => {
         this._coll.upsert(docs, null,
           (data) => {
             resolve(_.map(data, _.property('_id')))
           },
-          reject
-        )
+          reject)
       }, delay)
     })
+  }
+
+  // Dummy; minimongo does not support indices
+  createIndex() {
+    return Promise.resolve()
   }
 }
 
@@ -94,6 +113,19 @@ class _Collection {
 function get_collection (name) {
   return new _Collection(name)
 }
+
+const db_interface = {
+  get_collection,
+
+  get_capabilities : function () {
+    return {
+      regexp_query : false,
+      events : false,
+    }
+  }
+}
+
+const db_promise = Promise.resolve(db_interface)
 
 function generate_uid () {
   return minimongo.utils.createUid()
@@ -105,4 +137,18 @@ function get_db_promise () {
   return db_promise
 }
 
-export { get_db_promise, generate_uid }
+// This backend runs completely an the client, when the server just serves static content,
+// thus there is no difference between client and server.
+function is_server() {
+  return true
+}
+function is_client() {
+  return true
+}
+
+// This is a test-only backend
+function is_production() {
+  return false
+}
+
+export { get_db_promise, generate_uid, is_server, is_client, is_production }

@@ -1,7 +1,8 @@
 /*
     Mixin to add DB backend following capabilities to a component.
 */
-
+import { List as ImList } from 'immutable'
+import _ from 'lodash'
 import * as db from '../../../api/db.js'
 
 export default {
@@ -26,16 +27,18 @@ export default {
       this.searching = false
       if (this._cursor === undefined) return
 
-      if (!this._cursor.get_capabilities()['events']) {
+      if (!db.get_capabilities()['events']) {
         if (this._db_promise !== undefined) delete this._db_promise
-      } else {
-        // TODO
+        if (this._refresh_timeout) {
+          clearTimeout(this._refresh_timeout)
+          this._refresh_timeout = null
+        }
+      } else if (this._observer) {
+        this._observer.stop()
+        delete this._observer
       }
-      if (this._refresh_timeout) {
-        clearTimeout(this._refresh_timeout)
-        this._refresh_timeout = null
-      }
-
+      this._throttled_update.cancel()
+      this._cursor.clear()
       delete this._cursor
     },
 
@@ -47,12 +50,17 @@ export default {
       this._cursor = this.find_function()
       if (!this._cursor) return
 
-      if (this._cursor.get_capabilities()['events']) {
-        // TODO
+      if (db.get_capabilities()['events']) {
+        this.dataset = new ImList()
+        this._observer = this._cursor.observe((dataset) => {
+          this._throttled_update(dataset)
+        })
       } else {
-        if (active) this.searching = true
+        if (active) {
+          this.searching = true
+        }
 
-        let my_promise = this._db_promise = this._cursor.fetch()
+        const my_promise = this._db_promise = this._cursor.fetch()
           .then(
             (data) => {
               if (this._db_promise !== my_promise) {
@@ -83,6 +91,17 @@ export default {
       this.db_ready = true
       this.refresh_dataset(true)
     })
+
+    this._throttled_update = _.throttle(
+      (dataset) => {
+        this.dataset = dataset
+      },
+      1000,
+      {
+        leading : true,
+        trailing : true,
+      }
+    )
   },
 
   beforeDestroy: function () {

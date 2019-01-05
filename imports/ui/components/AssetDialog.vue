@@ -33,6 +33,7 @@
       <AssetEditor v-if="current_asset !== null"
                    v-bind:asset="current_asset" v-bind:input-asset="current_input_asset"
                    v-bind:key="current_asset._id"
+                   v-bind:disable-controls="(! can_edit_current_asset)"
                    v-on:content-changed="input_asset_changed" >
 
         <a slot="remove_button" v-bind:class="button_classes.remove"
@@ -53,6 +54,11 @@
             </div>
           </div>
         </div>
+        <a v-else-if="(! can_edit_current_asset)"
+          slot="submit_button" v-bind:class="button_classes.copy"
+          v-on:click="button_clicked('copy')">
+          Duplicar
+        </a>
         <a v-else slot="submit_button" v-bind:class="button_classes.submit"
            v-on:click="button_clicked('submit')">
           Enviar
@@ -74,6 +80,7 @@ import _ from 'lodash'
 import AssetList from './AssetList.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
 import dialog_mixin from './mixins/dialog_mixin.js'
+import { userid_mixin } from '../../api/user.js'
 
 export default {
 
@@ -84,21 +91,11 @@ export default {
       search_expression: '',
       current_asset: null,
       input_asset_store: {},
-      ongoing_upsert: false,
+      ongoing_upsert: null,
       asset_interface: null // expected from derived classes
     }
   },
 
-  /*
-    asset_interface: Object containing the following callbacks:
-      get_title, get_body: take an asset reference as input and return
-        the corresponding information
-      sort_key: string
-      find_assets(selector, options, search_expression) : reroutes the call to the
-        appropriate entry in the DB backend and returns a promise for the data
-      upsert_assets(docs): upserts the given assets, returning a promise that resolves
-        to the ids of the upserted items
-  */
   props: {
     initialModality: Object,
     initialSpecialty: Object
@@ -117,6 +114,14 @@ export default {
           'waves-light': true,
           'w-100': true,
           disabled: clean
+        },
+        'copy': {
+          btn: true,
+          red: true,
+          'lighten-2': true,
+          'waves-effect': true,
+          'waves-light': true,
+          'w-100': true,
         },
         'add': {
           btn: true,
@@ -158,6 +163,20 @@ export default {
       let asset = this.current_asset
       if (!asset) return {}
       else return store[asset._id] || {}
+    },
+
+    can_edit_current_asset: function() {
+      const current_asset = this.current_asset
+      const user_id = this.user_id
+      
+      if (! current_asset) return false
+      
+      if ((current_asset._id.startsWith('local://')) ||
+        (user_id !== current_asset.owner_id)) {
+        return false
+      }
+
+      return true
     }
   },
 
@@ -209,9 +228,16 @@ export default {
     button_clicked: function (name) {
       if (name === 'submit') {
         this.submit_upserts()
-      } else if (name === 'remove') {
+      } 
+      else if (name === 'copy') {
+        console.log('Copy local asset clicked')
+      }
+      else if (name === 'remove') {
         // TODO
         console.log('Remove button clicked')
+      }
+      else {
+        throw new Error(`Unknown button: ${name}`)
       }
     },
 
@@ -251,48 +277,57 @@ export default {
       // making a last ditch effort to save input data.
       if (this.ongoing_upsert && (!last_effort)) return
 
-      // Submit all pending upserts to the database backend
-      let upserts = this._pending_upserts
+      // Submit pending upserts to the database backend
+      let upserts = this._pending_upserts // ownership taken
+      const upsert_array = Array.from(upserts.values())
       if (upserts.size === 0) return
 
-      let me = this.ongoing_upsert = this.asset_interface.upsert_assets(Array.from(upserts.values()))
-        .then(
-          (ids) => {
-
-          },
-          (error) => {
-            console.log(error)
-            if (last_effort) return
-
-            // Return failed upserts to pending upsert list where appropriate, to avoid
-            // losing sacred user input data
-            for (let [id, asset] of upserts.entries()) {
-              let input_asset = this.input_asset_store[id]
-              if (input_asset && input_asset._submitted === me) {
-                // Unchanged since last submit by myself
-                // Return upsert to pending list to try again next round
-                this._pending_upserts.set(id, asset)
-
-                // Clear submission indicator on input store
-                input_asset = _.assign({}, input_asset, { _submitted: null })
-                this.$set(this.input_asset_store, id, input_asset)
+      let me = this.ongoing_upsert = this.asset_interface.upsert_assets(upsert_array)
+        .then((results) => {
+          results.forEach(({_id, requested_id, error}) => {
+            if (! error) {
+              if (_id === requested_id) {
+                // Success
+                upserts.delete(_id)  
               }
+              else {
+                // This id was not in the originally submitted list, thus the backend
+                // created a new entry behind our backs
+                upserts.delete(requested_id)
+              }
+              
             }
-          }
-        )
-        .then(() => {
-          if (last_effort) return
+            else {
+              const will_retry = last_effort ? "ignoring because last effort" : "will retry"
+              console.log(`Failed upsert for ${_id}: ${error}; ${will_retry}`)
+            }
+          })
+
+          // Return failed upserts to pending upsert list where appropriate, to avoid
+          // losing sacred user input data
+          Array.from(upserts.entries()).forEach(([_id, asset]) => {
+            let input_asset = this.input_asset_store[_id]
+            if (input_asset && input_asset._submitted === me) {
+              // Unchanged since last submit by myself
+              // Return upsert to pending list to try again next round
+              this._pending_upserts.set(_id, asset)
+
+              // Clear submission indicator on input store
+              input_asset = _.assign({}, input_asset, { _submitted: null })
+              this.$set(this.input_asset_store, _id, input_asset)
+            }
+          })
 
           // Finally: clear the ongoing upsert
           if (this.ongoing_upsert === me) this.ongoing_upsert = null
         })
-
+        
       // Set submission indicator on input store
-      for (let id of upserts.keys()) {
-        let temp = _.assign({}, this.input_asset_store[id], { _submitted: me })
-        this.$set(this.input_asset_store, id, temp)
-      }
-
+      Array.from(upserts.keys()).forEach((_id) => { 
+        let temp = _.assign({}, this.input_asset_store[_id], { _submitted: me })
+        this.$set(this.input_asset_store, _id, temp)
+      })
+      
       // Clear pending upserts to start input accumulation over
       this._pending_upserts = new Map()
     }
@@ -329,7 +364,7 @@ export default {
     if (this._pending_upserts) this.submit_upserts(true)
   },
 
-  mixins: [ dialog_mixin ]
+  mixins: [ dialog_mixin, userid_mixin ]
 }
 
 </script>

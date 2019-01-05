@@ -79,6 +79,8 @@
 <script>
 
 import { fromJS } from 'immutable'
+import _ from 'lodash'
+
 import db_mixin from './mixins/db_mixin.js'
 
 export default {
@@ -101,6 +103,10 @@ export default {
     modality: Object,
     specialty: Object,
     searchExpression: String,
+    extraFilters: {
+      type : Object,
+      default : {}
+    },
     expanded: Boolean,
     assetInterface: Object
   },
@@ -113,10 +119,7 @@ export default {
 
     assets: function () {
       if (!this.dataset) return []
-
-      return this.dataset.toList().sort((a, b) => (
-        a.get(this.assetInterface.sort_key).localeCompare(b.get(this.assetInterface.sort_key))
-      )).toJS()
+      return this.dataset.toJS()
     }
   },
 
@@ -133,6 +136,10 @@ export default {
       this.refresh_dataset(false)
     },
 
+    extraFilters : function() {
+      this.refresh_dataset(false)
+    },
+
     dataset: function () {
       let dataset = this.dataset
       let current_asset = this.current_asset
@@ -145,7 +152,7 @@ export default {
       }
 
       for (let i = selected_asset_id_stack.length - 1; i >= 0; i--) {
-        let imm_asset = dataset.get(selected_asset_id_stack[i])
+        let imm_asset = dataset.find((d) => ( d.get('_id') === selected_asset_id_stack[i]))
         if (imm_asset) {
           if (!imm_asset.equals(fromJS(current_asset))) {
             new_current_asset = imm_asset.toJS()
@@ -182,13 +189,18 @@ export default {
     },
 
     find_function: function () {
-      return this.assetInterface.find_assets(
-        {
+      const selector = _.assign(
+        {  
           modality: this.modality.name,
-          specialty: this.specialty.name
+          specialty: this.specialty.name 
         },
+        this.extraFilters
+      )
+      return this.assetInterface.find_assets(
+        selector,
         {},
-        this.searchExpression
+        this.searchExpression,
+        this.assetInterface.sort_key
       )
     }
   },

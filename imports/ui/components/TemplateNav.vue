@@ -72,9 +72,6 @@ export default {
       let entries = this.dataset
       if (entries === null) return new Map()
 
-      entries = entries.sort((a, b) => (
-        a.get('nickname').localeCompare(b.get('nickname'))
-      ))
       entries = entries.groupBy((t) => (t.get('specialty')))
       entries = entries.sortBy(
         (v, k) => (k),
@@ -94,7 +91,7 @@ export default {
     },
 
     find_function: function () {
-      return db.find_templates({ modality: this.current_modality.name })
+      return db.find_templates({ modality: this.current_modality.name }, {}, "", 'nickname' )
     }
   },
 

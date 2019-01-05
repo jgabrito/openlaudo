@@ -5,6 +5,7 @@
       <label>
         Público
         <input type="checkbox"
+          v-bind:disabled="disableControls"
           v-bind:checked="(! get_value_for_control('public'))"
           v-on:change="control_value_changed('public', !($event.target.checked))" >
         <span class="lever"></span>
@@ -14,6 +15,7 @@
 
     <div class="input-field">
       <select v-bind:value="get_value_for_control('modality')"
+        v-bind:disabled="disableControls"
         v-on:change="control_value_changed('modality', $event.target.value)">
         <option v-for="modality in modalities" v-bind:key="modality.name"
           v-bind:value="modality.name">
@@ -22,6 +24,7 @@
         <label> Modalidade </label>
       </select>
       <select v-bind:value="get_value_for_control('specialty')"
+        v-bind:disabled="disableControls"
         v-on:change="control_value_changed('specialty', $event.target.value)">
         <option v-for="specialty in specialties" v-bind:key="specialty.name"
           v-bind:value="specialty.name">
@@ -33,6 +36,7 @@
 
     <div class="input-field col-12">
       <input id="title" type="text"
+        v-bind:disabled="disableControls"
         v-bind:value="get_value_for_control('title')"
         v-on:input="control_value_changed('title', $event.target.value)" >
       <label for="title" class="active"> Título </label>
@@ -40,6 +44,7 @@
 
     <div class="input-field">
       <textarea id="body" type="text" style="height:10rem;"
+        v-bind:disabled="disableControls"
         v-bind:value="get_value_for_control('body')"
         v-on:input="control_value_changed('body', $event.target.value)">
       </textarea>
@@ -79,7 +84,8 @@ export default {
 
   props: {
     asset: Object,
-    inputAsset: Object
+    inputAsset: Object,
+    disableControls : Boolean
   },
 
   watch: {

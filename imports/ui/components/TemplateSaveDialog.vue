@@ -30,11 +30,12 @@
       </label>
     </div>
 
-    <div class="flex-grow-1 mt-3 mb-3">
-      <AssetList v-if="overwrite_template"
+    <div class="flex-grow-1 mt-3 mb-3" style="overflow-y : auto;">
+      <AssetList v-if="(overwrite_template) && (user_id)"
         v-bind:modality="current_modality" v-bind:specialty="current_specialty"
         search-expression=""
         v-bind:asset-interface="template_interface"
+        v-bind:extra-filters="{ owner_id : user_id }"
         v-on:asset-chosen="asset_chosen"
         v-on:asset-changed="asset_changed" >
       </AssetList>
@@ -64,25 +65,18 @@
 
 <script>
 
+import _ from 'lodash'
+
 import * as db from '../../api/db.js'
 import AssetList from './AssetList.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
 import dialog_mixin from './mixins/dialog_mixin.js'
-
-const template_interface = {
-  get_title: (a) => (a.nickname),
-  get_body: (a) => (a.body),
-  sort_key: 'nickname',
-  find_assets: function (selector, options, search_expression) {
-    return db.find_templates(selector, options, search_expression)
-  },
-  upsert_assets: function (docs) {
-    return db.upsert_templates(docs)
-  }
-}
+import { template_interface } from './asset_interfaces.js'
+import { userid_mixin } from '../../api/user.js'
 
 export default {
   data: function () {
+
     return {
       overwrite_template: false,
       nickname: '',
@@ -107,7 +101,9 @@ export default {
       let overwrite_template = this.overwrite_template
       let current_template = this.current_template
       let nickname = this.nickname
-      let can_submit = (nickname !== '') && ((!overwrite_template) || current_template)
+      let can_submit = (this.user_id) && 
+        (nickname !== '') && 
+        ((!overwrite_template) || current_template)
       return {
         'submit': {
           btn: true,
@@ -184,9 +180,9 @@ export default {
         this.submitting = true
         let upsert = {}
         if (this.overwrite_template) {
-          upsert = Object.assign(upsert, this.current_template)
+          upsert = _.assign(upsert, this.current_template)
         }
-        console.log(upsert)
+        upsert.owner_id = this.user_id
         upsert.nickname = this.nickname
         upsert.body = this.templateBody
         upsert.specialty = this.current_specialty.name
@@ -202,7 +198,7 @@ export default {
     ModSpecSelector
   },
 
-  mixins: [ dialog_mixin ]
+  mixins: [ dialog_mixin, userid_mixin ]
 }
 
 </script>
