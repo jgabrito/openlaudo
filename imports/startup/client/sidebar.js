@@ -15,7 +15,8 @@ import base_metadata from '../../api/base_metadata.js'
 import ultrasound_icon from '../../ui/assets/images/ultrasound_icon.png'
 import { submit_laudo } from './click_templates.js'
 import form_templates from './form_templates.js'
-import vueQuill from './vue-quill/vue-quill';
+import vueQuill from './vue-quill/vue-quill'
+import 'quill/dist/quill.snow.css'
 
 const $ = window.$
 
