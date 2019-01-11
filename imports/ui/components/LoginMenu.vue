@@ -12,7 +12,7 @@
         <a href="#!" v-on:click="logout"> Logout </a>
     </ul>
     <a class="btn-flat" slot="content" > 
-      <i class="material-icons md-18">menu</i> 
+      <span class="material-icons md-18">menu</span> 
     </a>
   </DropdownTrigger>
 </template>
