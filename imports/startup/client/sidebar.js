@@ -17,6 +17,8 @@ import { submit_laudo } from './click_templates.js'
 import form_templates from './form_templates.js'
 import vueQuill from './vue-quill/vue-quill'
 import 'quill/dist/quill.snow.css'
+import 'materialize-css/dist/css/materialize.min.css'
+import 'materialize-css/dist/js/materialize.min.js'
 
 const $ = window.$
 
