@@ -20,7 +20,6 @@ import 'quill/dist/quill.snow.css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
 
-const $ = window.$
 
 const initial_modality = base_metadata.modalities['tc']
 const initial_specialty = base_metadata.specialties['cep']
@@ -186,11 +185,13 @@ function editor_insert_stuff (deltas) {
 
 // inserts the collapsible menu where the clickable forms lie
 
-$('#form_div').html()
+// $('#form_div').html()
 
 const collapsible_app = new Vue({
   el: '#app',
-  mounted: function () { $('.collapsible').collapsible() },
+  mounted: function () { 
+    window.M.Collapsible.init(this.$el)
+  },
   data: {
     cards: [ ]
   }
@@ -334,8 +335,19 @@ const template_nav = new Vue({
       if (new_cards.length > 0) {
         // calls func tha changes vue object
         collapsible_app.cards = new_cards
-        setTimeout(function () { $('.form_select_init').formSelect() }, 500)
-        setTimeout(function () { $('.collapsible').collapsible() }, 500)
+        setTimeout(
+          function () { 
+            let elems = document.querySelectorAll('.form_select_init')
+            window.M.FormSelect.init(elems)
+          }, 
+        500)
+        setTimeout(
+          function () { 
+            let elems = document.querySelectorAll('.collapsible')
+            window.M.Collapsible.init(elems)
+          },
+          500
+        )
       } else {
         collapsible_app.cards = []
       }
@@ -378,6 +390,9 @@ function template_save_dialog_close () {
   }
 }
 
+document.getElementById('descriptor_search_input').onkeyup = descriptor_search_input_changed
+
+/*
 $(document).ready(function () {
   // $('.dropdown-trigger').dropdown({ constrainWidth: false })
   // $('.tabs').tabs()
@@ -385,6 +400,7 @@ $(document).ready(function () {
 
   $('#descriptor_search_input').on('keyup', descriptor_search_input_changed)
 })
+*/
 
 function click_template_dispatcher (name) {
   submit_laudo[name](quill_comp.$refs.editor.editor)
