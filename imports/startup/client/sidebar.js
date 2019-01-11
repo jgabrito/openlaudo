@@ -15,6 +15,7 @@ import base_metadata from '../../api/base_metadata.js'
 import ultrasound_icon from '../../ui/assets/images/ultrasound_icon.png'
 import { submit_laudo } from './click_templates.js'
 import form_templates from './form_templates.js'
+import vueQuill from './vue-quill/vue-quill';
 
 const $ = window.$
 
@@ -125,19 +126,23 @@ const quill_config = {
 
 // code that inserts the editor on the page
 // TODO: move the editor to a Vue component to solve sizing issues.
-const quill_comp = new Vue({
-  el: '#editor',
-
-  template: `
-    <quill class="h-100" v-model="content" output="delta" ref="editor" 
-       v-bind:config="config" > 
-    </quill>
-  `,
-
-  data: {
-    content: [],
-    config: quill_config
-  }
+let quill_comp
+import('./vue-quill/vue-quill.js').then((vueQuill) => {
+  Vue.use(vueQuill.default)
+  quill_comp = new Vue({
+    el: '#editor',
+  
+    template: `
+      <quill class="h-100" v-model="content" output="delta" ref="editor" 
+         v-bind:config="config" > 
+      </quill>
+    `,
+  
+    data: {
+      content: [],
+      config: quill_config
+    }
+  })
 })
 
 // function to copy content
