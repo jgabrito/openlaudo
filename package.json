@@ -82,6 +82,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.1.5",
+    "bootstrap": "^4.2.1",
     "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.11",
     "materialize-css": "^1.0.0",

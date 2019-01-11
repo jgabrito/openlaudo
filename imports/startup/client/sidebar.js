@@ -19,7 +19,7 @@ import vueQuill from './vue-quill/vue-quill'
 import 'quill/dist/quill.snow.css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
-
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 const initial_modality = base_metadata.modalities['tc']
 const initial_specialty = base_metadata.specialties['cep']
