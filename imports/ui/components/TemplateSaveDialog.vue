@@ -65,7 +65,7 @@
 
 <script>
 
-import _ from 'lodash'
+import _assign from 'lodash/assign'
 
 import * as db from '../../api/db.js'
 import AssetList from './AssetList.vue'
@@ -180,7 +180,7 @@ export default {
         this.submitting = true
         let upsert = {}
         if (this.overwrite_template) {
-          upsert = _.assign(upsert, this.current_template)
+          upsert = _assign(upsert, this.current_template)
         }
         upsert.owner_id = this.user_id
         upsert.nickname = this.nickname

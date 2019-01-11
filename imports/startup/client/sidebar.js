@@ -1,6 +1,10 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "warn", "no-new" : "warn" */
 import Vue from 'vue/dist/vue.min.js'
-import _ from 'lodash'
+
+import _assign from 'lodash/assign'
+import _keys from 'lodash/keys'
+import _sortBy from 'lodash/sortBy'
+import _throttle from 'lodash/throttle'
 
 import TemplateNav from '../../ui/components/TemplateNav.vue'
 import AssetList from '../../ui/components/AssetList.vue'
@@ -54,7 +58,7 @@ const myhandlers = {
         computed: {
           template_body: function () {
             return this.template_body_editor.map((x) => {
-              x = _.assign({}, x)
+              x = _assign({}, x)
               if (x.attributes !== undefined) {
                 x.attributes = JSON.stringify(x.attributes)
               }
@@ -160,7 +164,7 @@ function editor_insert_stuff (deltas) {
   }
 
   update.ops = update.ops.concat(deltas.map((x) => {
-    x = _.assign({}, x)
+    x = _assign({}, x)
     if (x.attributes !== undefined) x.attributes = JSON.parse(x.attributes)
     return x
   }))
@@ -290,7 +294,7 @@ const template_nav = new Vue({
         // if there is a clickable form for this modality/specialty pair in the
         // form_templates.js file, render it on the cover of the expansible box
         // with button to generate report
-        let names = _.sortBy(_.keys(templates))
+        let names = _sortBy(_keys(templates))
         names.forEach((name) => {
           let content = templates[name]
           if (submit_laudo[name] === undefined) {
@@ -346,7 +350,7 @@ function descriptor_dialog_close () {
   }
 }
 
-const descriptor_search_input_changed = _.throttle(
+const descriptor_search_input_changed = _throttle(
   (event) => {
     v_descriptors_ul.search_expression = event.target.value
   },

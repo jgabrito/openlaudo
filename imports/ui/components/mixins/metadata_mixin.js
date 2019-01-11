@@ -1,4 +1,7 @@
-import _ from 'lodash'
+import _sortBy from 'lodash/sortBy'
+import _property from 'lodash/property'
+import _filter from 'lodash/filter'
+
 import base_metadata from '../../../api/base_metadata.js'
 
 function valid_modality_for_specialty (modality, specialty) {
@@ -22,7 +25,7 @@ export default {
 
   computed: {
     modalities: function () {
-      return _.sortBy(Object.values(this.metadata.modalities), _.property('nickname'))
+      return _sortBy(Object.values(this.metadata.modalities), _property('nickname'))
     },
 
     specialties: function () {
@@ -33,9 +36,9 @@ export default {
   methods: {
     get_valid_specialties: function () {
       let specialties = Object.values(this.metadata.specialties)
-      specialties = _.filter(specialties,
+      specialties = _filter(specialties,
         s => (valid_modality_for_specialty(this.current_modality, s)))
-      specialties = _.sortBy(specialties, _.property('nickname'))
+      specialties = _sortBy(specialties, _property('nickname'))
       return specialties
     },
 

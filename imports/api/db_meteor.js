@@ -3,7 +3,11 @@ import { Mongo } from 'meteor/mongo'
 import { DDPRateLimiter } from 'meteor/ddp-rate-limiter'
 import { check, Match } from 'meteor/check'
 import { List as ImList, fromJS } from 'immutable'
-import _ from 'lodash'
+import _assign from 'lodash/assign'
+import _values from 'lodash/values'
+import _entries from 'lodash/entries'
+import _keys from 'lodash/keys'
+import _pick from 'lodash/pick'
 
 import { validate_template, validate_descriptor } from './db.js'
 
@@ -15,7 +19,7 @@ const collections = {
   'metadata' : new Mongo.Collection('metadata')
 }
 
-_.values(collections).forEach((c) => {
+_values(collections).forEach((c) => {
   c.deny(
     {
       insert() { return true },
@@ -30,7 +34,7 @@ function _sanitize_options(options) {
   if (options.limit !== undefined) output.limit = Number(options.limit)
   if (options.sort instanceof Object) {
     output.sort = {}
-    _.entries(options.sort).forEach(([k, v]) => {
+    _entries(options.sort).forEach(([k, v]) => {
       output.sort[k] = Number(v)
     })
   }
@@ -175,7 +179,7 @@ if (Meteor.isServer) {
   DDPRateLimiter.addRule(
     {
       type : 'method',
-      name : name => (_.values(_method_names).includes(name)),
+      name : name => (_values(_method_names).includes(name)),
       connectionId : () => true,
     },
     10, 1000
@@ -238,7 +242,7 @@ class _Cursor {
       changed : this.doc_changed,
       removed : this.doc_removed,
     }
-    return _.pick(callback_map, _.keys(callbacks))
+    return _pick(callback_map, _keys(callbacks))
   }
 
   observe(callbacks) {
@@ -292,7 +296,7 @@ class _Collection {
       throw new Meteor.Error('Server-side only')
     }
 
-    if (_.keys(selector).length === 0) {
+    if (_keys(selector).length === 0) {
       const cursor = this._coll.find(selector, options)
       if (cursor.count() > 0) return Promise.resolve(cursor.fetch()[0])
       return Promise.resolve(undefined)
@@ -306,7 +310,7 @@ class _Collection {
       throw new Error('Server side only')
     }
     docs = docs.map(d => {
-      d = _.assign({}, d)
+      d = _assign({}, d)
       delete d._id
       return d
     })
@@ -323,7 +327,7 @@ class _Collection {
   }
 
   insert (doc) {
-    doc = _.assign({}, doc)
+    doc = _assign({}, doc)
     delete doc._id
     return this.update(doc, true)
   }

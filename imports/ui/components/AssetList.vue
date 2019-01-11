@@ -79,8 +79,7 @@
 <script>
 
 import { fromJS } from 'immutable'
-import _ from 'lodash'
-
+import _assign from 'lodash/assign'
 import db_mixin from './mixins/db_mixin.js'
 
 export default {
@@ -189,7 +188,7 @@ export default {
     },
 
     find_function: function () {
-      const selector = _.assign(
+      const selector = _assign(
         {  
           modality: this.modality.name,
           specialty: this.specialty.name 

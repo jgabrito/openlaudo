@@ -64,7 +64,7 @@
 
 <script>
 
-import _ from 'lodash'
+import _assign from 'lodash/assign'
 
 import metadata_mixin from './mixins/metadata_mixin.js'
 import materialize_mixin from './mixins/materialize_mixin.js'
@@ -106,7 +106,7 @@ export default {
     },
 
     control_value_changed: function (name, value) {
-      let inputAsset = _.assign({}, this.inputAsset, { [name]: value })
+      let inputAsset = _assign({}, this.inputAsset, { [name]: value })
       this.$emit('content-changed', inputAsset)
     }
   },

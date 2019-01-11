@@ -1,6 +1,8 @@
 import SimpleSchema from 'simpl-schema'
-import _ from 'lodash'
 import { List as ImList, Map as ImMap, Set as ImSet, fromJS } from 'immutable'
+import _assign from 'lodash/assign'
+import _entries from 'lodash/entries'
+import _filter from 'lodash/filter'
 
 import { collate } from './intl_util.js'
 import { get_db_promise, generate_uid, is_client, is_server, is_production } from './db_meteor.js'
@@ -184,7 +186,7 @@ function transform_record (record, search_fields) {
 }
 
 function transform_selector (selector, options, search_expression) {
-  const new_selector = _.assign({}, selector)
+  const new_selector = _assign({}, selector)
 
   const search_array = split_and_collate_text(search_expression, false)
   if (search_array.length > 0) new_selector[aux_fieldname] = { '$all': search_array }
@@ -204,7 +206,7 @@ function is_db_ready () {
 function _transform_hardcoded_stuff(items, schema, search_fields, sort_key) {
   let output = new ImList()
   items.forEach((i) => {
-    i = _.assign({}, i, {
+    i = _assign({}, i, {
       _id : `local://${generate_uid()}`,
       owner_id: get_system_uid(),
       public: true
@@ -383,7 +385,7 @@ function _filter_items (items, items_wordmap, selector) {
     }
   }
 
-  selector = _.entries(selector)
+  selector = _entries(selector)
   return items.filter((i) => {
     let retval = true
 
@@ -530,7 +532,7 @@ class ExpandedCursor {
       _id,
       callback,
       stop : () => {
-        this._observers = _.filter(this._observers, o => (o._id !== _id))
+        this._observers = _filter(this._observers, o => (o._id !== _id))
       }
     })
     callback(this._dataset)
@@ -558,7 +560,7 @@ function _do_find(collection, hardcoded_collection, selector, options, sort_key)
   }
   if (!_ready) return null
 
-  options = _.assign({}, options, { sort : { [ sort_key ] : 1, _id : 1 } } )
+  options = _assign({}, options, { sort : { [ sort_key ] : 1, _id : 1 } } )
   const fixed_items = _filter_items(hardcoded_collection.items,
     hardcoded_collection.wordmap, selector)
   return new ExpandedCursor(collection.find(selector, options), fixed_items, selector,
@@ -582,7 +584,7 @@ function _transform_docs (docs, schema, search_fields) {
   if (!user_id) throw new Error('Could not get current user id.')
 
   return docs.map((d) => {
-    d = _.assign({}, d, {
+    d = _assign({}, d, {
       owner_id: user_id
     })
     d = transform_record(d, search_fields)

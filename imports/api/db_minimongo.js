@@ -1,6 +1,8 @@
 import minimongo from 'minimongo'
 import { List as ImList, fromJS } from 'immutable'
-import _ from 'lodash'
+import _assign from 'lodash/assign'
+import _map from 'lodash/map'
+import _property from 'lodash/property'
 
 const localDb = new minimongo.MemoryDb()
 
@@ -83,7 +85,7 @@ class _Collection {
   }
 
   insert (doc) {
-    doc = _.assign({}, doc)
+    doc = _assign({}, doc)
     delete doc._id
     return this.update(doc, true)
   }
@@ -95,7 +97,7 @@ class _Collection {
       setTimeout(() => {
         this._coll.upsert(docs, null,
           (data) => {
-            resolve(_.map(data, _.property('_id')))
+            resolve(_map(data, _property('_id')))
           },
           reject)
       }, delay)

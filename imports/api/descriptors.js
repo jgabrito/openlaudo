@@ -1,11 +1,11 @@
-import _ from 'lodash'
+import _values from 'lodash/values'
 
 function normalize_descriptors (descriptors) {
   const output_descriptors = []
 
-  _.values(descriptors).forEach((s_data) => {
-    _.values(s_data['modalities']).forEach((m_data) => {
-      _.values(m_data['findings']).forEach((f_data) => {
+  _values(descriptors).forEach((s_data) => {
+    _values(s_data['modalities']).forEach((m_data) => {
+      _values(m_data['findings']).forEach((f_data) => {
         f_data = {
           specialty: s_data['metadata']['specialty_name'],
           modality: m_data['metadata']['modality_name'],

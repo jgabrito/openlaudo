@@ -75,7 +75,9 @@
 <script>
 
 import { fromJS } from 'immutable'
-import _ from 'lodash'
+import _assign from 'lodash/assign'
+import _keys from 'lodash/keys'
+import _throttle from 'lodash/throttle'
 
 import AssetList from './AssetList.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
@@ -104,7 +106,7 @@ export default {
   computed: {
     button_classes: function () {
       let current_input_asset = this.current_input_asset
-      let clean = ((_.keys(current_input_asset).length === 0) || (current_input_asset._submitted !== null))
+      let clean = ((_keys(current_input_asset).length === 0) || (current_input_asset._submitted !== null))
       return {
         'submit': {
           btn: true,
@@ -189,7 +191,7 @@ export default {
       this.current_specialty = specialty
     },
 
-    search_input_changed: _.throttle(
+    search_input_changed: _throttle(
       function (event) {
         this.search_expression = event.target.value
       },
@@ -212,7 +214,7 @@ export default {
       let input_asset = this.input_asset_store[id]
       if ((!input_asset) || (!input_asset._submitted)) return
 
-      asset = _.assign({}, asset)
+      asset = _assign({}, asset)
       let my_asset = this.assemble_asset(input_asset)
 
       if (fromJS(asset).equals(fromJS(my_asset))) {
@@ -256,7 +258,7 @@ export default {
 
       let id = this.current_asset._id
       let asset = this.assemble_asset(input_asset)
-      input_asset = _.assign({}, input_asset, { _submitted: null })
+      input_asset = _assign({}, input_asset, { _submitted: null })
 
       this.$set(this.input_asset_store, id, input_asset)
       this._pending_upserts.set(id, asset)
@@ -265,8 +267,8 @@ export default {
     // Assemble an upsert-ready asset based on the current asset and input data
     assemble_asset: function (input_asset) {
       if (!this.current_asset) return null
-      let asset = _.assign({}, this.current_asset, input_asset)
-      for (let k of _.keys(asset)) {
+      let asset = _assign({}, this.current_asset, input_asset)
+      for (let k of _keys(asset)) {
         if ((k[0] === '_') && (k !== '_id')) delete asset[k]
       }
       return asset
@@ -313,7 +315,7 @@ export default {
               this._pending_upserts.set(_id, asset)
 
               // Clear submission indicator on input store
-              input_asset = _.assign({}, input_asset, { _submitted: null })
+              input_asset = _assign({}, input_asset, { _submitted: null })
               this.$set(this.input_asset_store, _id, input_asset)
             }
           })
@@ -324,7 +326,7 @@ export default {
         
       // Set submission indicator on input store
       Array.from(upserts.keys()).forEach((_id) => { 
-        let temp = _.assign({}, this.input_asset_store[_id], { _submitted: me })
+        let temp = _assign({}, this.input_asset_store[_id], { _submitted: me })
         this.$set(this.input_asset_store, _id, temp)
       })
       

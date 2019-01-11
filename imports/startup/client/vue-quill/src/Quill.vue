@@ -5,11 +5,11 @@
 </template>
 
 <script>
-    import lodash from 'lodash'
+    import defaultsDeep from 'lodash/defaultsDeep'
     import Quill from 'quill'
     import GrammarlyInline from './formats/GrammarlyInline'
 
-    const defaultsDeep = lodash.defaultsDeep
+    //const defaultsDeep = lodash.defaultsDeep
 
     export default {
         model: {

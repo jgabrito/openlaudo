@@ -2,7 +2,7 @@
     Mixin to add DB backend following capabilities to a component.
 */
 import { List as ImList } from 'immutable'
-import _ from 'lodash'
+import _throttle from 'lodash/throttle'
 import * as db from '../../../api/db.js'
 
 export default {
@@ -92,7 +92,7 @@ export default {
       this.refresh_dataset(true)
     })
 
-    this._throttled_update = _.throttle(
+    this._throttled_update = _throttle(
       (dataset) => {
         this.dataset = dataset
       },

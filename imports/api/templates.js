@@ -1,5 +1,5 @@
 
-import _ from 'lodash'
+import _values from 'lodash/values'
 
 function template_to_delta (exam) {
   const output = []
@@ -25,9 +25,9 @@ function template_to_delta (exam) {
 function normalize_templates (templates) {
   const output_templates = []
 
-  _.values(templates).forEach((m_data) => {
-    _.values(m_data['specialties']).forEach((s_data) => {
-      _.values(s_data['mascaras']).forEach((t_data) => {
+  _values(templates).forEach((m_data) => {
+    _values(m_data['specialties']).forEach((s_data) => {
+      _values(s_data['mascaras']).forEach((t_data) => {
         t_data = {
           specialty: s_data['metadata']['specialty_name'],
           modality: m_data['metadata']['modality_name'],
