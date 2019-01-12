@@ -1,6 +1,11 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "error", "no-new" : "warn", "eqeqeq" : "off", "no-redeclare" : "warn", "semi" : "off", "brace-style" : "off", "quotes" : "off", "space-before-function-paren" : "off", "no-multiple-empty-lines" : "off", "padded-blocks" : "off", "no-trailing-spaces" : "off", "spaced-comment" : "off", "no-floating-decimal" : "off", "indent" : "off", "space-infix-ops" : "off", "comma-spacing" : "off", "keyword-spacing" : "off", "comma-dangle" : "off", "space-before-blocks" : "off", "curly" : "off", "object-curly-spacing" : "off", "no-multi-spaces" : "off", "standard/object-curly-even-spacing" : "off", "space-in-parens" : "off" */
 
 import $ from 'jquery'
+import _entries from 'lodash/entries'
+import _filter from 'lodash/filter'
+import _isString from 'lodash/isString'
+
+import { editor_insert_stuff } from './quill_utils.js'
 
 const submit_laudo = {
   ob_tardio: function (quill) {
@@ -279,32 +284,175 @@ const submit_laudo = {
   },
 
 
+  nodulo_tireoide : function(quill) {
+    const sizes = [
+      parseFloat($('#thyroid_nodule_size_1')[0].value ),
+      parseFloat($('#thyroid_nodule_size_2')[0].value ),
+      parseFloat($('#thyroid_nodule_size_3')[0].value ),
+    ].sort().reverse()
+    const lobe = $('#thyroid_nodule_lobe_select')[0].value
+    const cc_location = $('#thyroid_nodule_cc_location_select')[0].value
+    const composition = $('#thyroid_nodule_composition_select')[0].value
+    const echo = $('#thyroid_nodule_echo_select')[0].value
+    const shape = $('#thyroid_nodule_shape_select')[0].value
+    const margin = $('#thyroid_nodule_margin_select')[0].value
+    const halo = $('#thyroid_nodule_halo_select')[0].value
+    const foci = {
+      comet : $('#thyroid_nodule_comet')[0].checked,
+      macro : $('#thyroid_nodule_macro')[0].checked,
+      rim : $('#thyroid_nodule_rim')[0].checked,
+      micro : $('#thyroid_nodule_micro')[0].checked,
+    }
 
+    const translations = {
+      right : 'lobo tireoideano direito',
+      left : 'lobo tireoideano esquedo',
+      isthmus : 'istmo tireoideano',
+      superior : 'superior',
+      inferior : 'inferior',
+      middle : 'médio',
 
+      cystic : 'cístico',
+      almost_cystic : 'quase completamente cístico',
+      spongyform : 'espongiforme',
+      mpc : 'misto, predominantemente cístico',
+      mps : 'misto, predominantemente sólido',
+      almost_solid : 'quase completamente sólido',
+      solid : 'sólido',
 
+      anechoic : 'com conteúdo anecóico',
+      hyperechoic : 'com conteúdo sólido hiperecogênico',
+      isoechoic : 'com conteúdo sólido isoecogênico',
+      hypoechoic : 'com conteúdo sólido hipoecogênico',
+      very_hypoechoic : 'com conteúdo sólido marcadamente hipoecogênico',
 
+      well_defined : 'com margens bem definidas',
+      ill_defined : 'com margens mal definidas',
+      lobulated : 'com margens lobuladas',
+      extra : 'com extensão extratiredoideana',
 
+      complete : 'com fino halo hipoecogênico',
+      incomplete : 'com fino halo hipoecogênico incompleto',
+      absent : 'sem halo hipoecogênico',
 
+      comet : 'com focos hiperecogênicos apresentando artefatos em cauda de cometa',
+      macro : 'com calcificações grosseiras',
+      rim : 'com calcificações periféricas',
+      micro : {
+        positive : 'com microcalcificações',
+        negative : 'sem microcalcificações'
+      },
+
+      wider : null, 
+      taller : 'mais alto que largo',
+    }
+
+    const TIRADS = {
+      cystic : 0,
+      almost_cystic : 0,
+      spongyform : 0,
+      mpc : 1,
+      mps : 1,
+      almost_solid : 3,
+      solid : 3,
+
+      anechoic : 0,
+      hyperechoic : 1,
+      isoechoic : 1,
+      hypoechoic : 2,
+      very_hypoechoic : 3,
+
+      well_defined : 0,
+      ill_defined : 0,
+      lobulated : 2,
+      extra : 3,
+
+      comet : 0,
+      macro : 1,
+      rim : 2,
+      micro : 3,
+
+      wider : 0,
+      taller : 3,
+    }
+
+    function TIRADS_class(score) {
+      if (score === 0) {
+        return 1
+      }
+      if (score <= 2) {
+        return 2
+      }
+      if (score <= 3) {
+        return 3
+      }
+      if (score <= 6) {
+        return 4
+      }
+      return 5
+    }
+
+    const text = []
+    let TIRADS_score = 0
+
+    if (lobe !== 'isthmus') {
+      text.push(`Nódulo no terço ${translations[cc_location]} do ${translations[lobe]}`)
+    }
+    else {
+      text.push(`Nódulo no ${translations[lobe]}`)
+    }
+    
+    text.push(translations[composition])
+    TIRADS_score += TIRADS[composition]
+    if (! ['cystic', 'almost_cystic', 'spongyform'].includes(composition)) {
+      text.push(translations[echo])
+      TIRADS_score += TIRADS[echo]
+    }
+
+    text.push(translations[margin])
+    TIRADS_score += TIRADS[margin]
+
+    text.push(translations[shape])
+    TIRADS_score += TIRADS[shape]
+
+    text.push(translations[halo])
+
+    let foci_TIRADS = 0
+    _entries(foci).forEach(([k,v]) => {
+      let t = translations[k]
+      if (_isString(t)) {
+        t = {
+          positive : t,
+          negative : null
+        }
+      }
+      if (v) {
+        text.push(t.positive)
+        foci_TIRADS = Math.max(foci_TIRADS, TIRADS[k])
+      }
+      else {
+        text.push(t.negative)
+      }
+    })
+    TIRADS_score += foci_TIRADS
+
+    const volume = 0.52*sizes[0]*sizes[1]*sizes[2]
+    text.push(`medindo ${sizes[0].toFixed(1)} x ${sizes[1].toFixed(1)} x ${sizes[2].toFixed(1)} cm (volume de ${volume.toFixed(1)} cc)`)
+
+    const deltas = [
+      { insert : `${_filter(text, (t) => (t !== null)).join(', ')}.` },
+      { insert : ` ACR-TIRADS ${TIRADS_class(TIRADS_score)}`, attributes : { bold : true } },
+      { insert : '\n' }
+    ]
+
+    editor_insert_stuff(quill, deltas)
+  }
 }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 // HELPER FUNCTIONS   HELPER FUNCTIONS   HELPER FUNCTIONS   HELPER FUNCTIONS   
 // HELPER FUNCTIONS   HELPER FUNCTIONS   HELPER FUNCTIONS   HELPER FUNCTIONS   
-
-
 
 
 

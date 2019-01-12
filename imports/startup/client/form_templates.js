@@ -441,7 +441,128 @@ const form_templates = {
      </div>
  </form>`,
 
+    nodulo_tireoide : `<form>
+    <div class="rendered-form">
+      <h3>Nódulo Tireoideano</h3>
+      <div class="row">
+        <div class="fb-number form-group col-4">
+          <label for="thyroid_nodule_size_1" class="fb-number-label">Tamanho 1 (cm)</label>
+          <input type="number" placeholder="" step="0.1" class="form-control" name="thyroid_nodule_size_1" id="thyroid_nodule_size_1">
+        </div>
+        <div class="fb-number form-group col-4">
+          <label for="thyroid_nodule_size_2" class="fb-number-label">Tamanho 2 (cm)</label>
+          <input type="number" placeholder="" step="0.1" class="form-control" name="thyroid_nodule_size_2" id="thyroid_nodule_size_2">
+        </div>
+        <div class="fb-number form-group col-4">
+          <label for="thyroid_nodule_size_3" class="fb-number-label">Tamanho 3 (cm)</label>
+          <input type="number" placeholder="" step="0.1" class="form-control" name="thyroid_nodule_size_3" id="thyroid_nodule_size_3">
+        </div>
+      </div>
 
+      <div class="row">
+        <label for="thyroid_nodule_lobe_select" class="fb-number-label">Lobo</label>
+        <select class="form-control" id="thyroid_nodule_lobe_select">
+           <option value="right" selected>Direito</option>
+           <option value="left">Esquerdo</option>
+           <option value="isthmus">Istmo</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="thyroid_nodule_cc_location_select" class="fb-number-label">Terço</label>
+        <select class="form-control" id="thyroid_nodule_cc_location_select">
+           <option value="superior"> Superior </option>
+           <option value="middle" selected> Médio </option>
+           <option value="inferior" selected> Inferior </option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="thyroid_nodule_composition_select" class="fb-number-label">Composição</label>
+        <select class="form-control" id="thyroid_nodule_composition_select">
+           <option value="cystic" selected>Cístico</option>
+           <option value="almost_cystic">Quase completamente cístico</option>
+           <option value="spongyform">Espongiforme</option>
+           <option value="mpc">Misto predominantemente cístico</option>
+           <option value="mps">Misto predominantemente sólido</option>
+           <option value="almost_solid">Quase completamente sólido</option>
+           <option value="solid">Sólido</option>
+        </select>
+      </div>
+ 
+      <div class="row">
+        <label for="thyroid_nodule_echo_select" class="fb-number-label">Ecogenicidade</label>
+        <select class="form-control" id="thyroid_nodule_echo_select">
+           <option value="anechoic" selected>Anecóico</option>
+           <option value="hyperechoic">Hiperecóico</option>
+           <option value="isoechoic">Isoecóico</option>
+           <option value="hypoechoic">Hipocóico</option>
+           <option value="very_hypoechoic">Marcadamente hipoecóico</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="thyroid_nodule_shape_select" class="fb-number-label">Forma</label>
+        <select class="form-control" id="thyroid_nodule_shape_select">
+           <option value="wider" selected>Mais largo que alto</option>
+           <option value="taller">Mais alto que largo</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="thyroid_nodule_margin_select" class="fb-number-label">Margens</label>
+        <select class="form-control" id="thyroid_nodule_margin_select">
+           <option value="well_defined" selected>Bem definidas</option>
+           <option value="ill_defined">Mal definidas</option>
+           <option value="lobulated">Lobuladas</option>
+           <option value="extra">Extensão extra-tireoideana</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="thyroid_nodule_halo_select" class="fb-number-label">Halo hipoecogênico</label>
+        <select class="form-control" id="thyroid_nodule_halo_select">
+           <option value="complete" selected> Completo </option>
+           <option value="incomplete"> Incompleto </option>
+           <option value="ausente"> Ausente </option>
+        </select>
+      </div>
+  
+      <fieldset class="form-group">
+        <div class="row">
+          <legend class="col-form-label pt-0"> Focos hiperecogênicos </legend>
+
+          <div class="col inputGroup">
+            <label>
+              <input type="checkbox" id="thyroid_nodule_comet" class="filled-in" />
+                <span> Grandes, com artefatos em cauda de cometa </span>
+            </label>
+          </div>
+
+          <div class="col inputGroup">
+            <label>
+              <input type="checkbox" id="thyroid_nodule_macro" class="filled-in" />
+              <span> Calcificações grosseiras </span>
+            </label>
+          </div>
+
+          <div class="col inputGroup">
+            <label>
+              <input type="checkbox" id="thyroid_nodule_rim" class="filled-in" />
+              <span> Calcificações periféricas </span>
+            </label>
+          </div>
+
+          <div class="col inputGroup">
+            <label>
+              <input type="checkbox" id="thyroid_nodule_micro" class="filled-in" />
+              <span> Microcalcificações </span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </form>`,
 
 }
 
@@ -475,6 +596,13 @@ export default {
         nickname : 'Abdome Total',
         template : form_templates['abdome_total']
       },
+    },
+
+    'cep' : {
+      'nodulo_tireoide' : {
+        nickname : 'Nódulo Tireoideano',
+        template : form_templates['nodulo_tireoide']
+      }
     }
   }
 }
