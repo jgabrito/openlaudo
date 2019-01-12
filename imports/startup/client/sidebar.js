@@ -5,6 +5,11 @@ import _assign from 'lodash/assign'
 import _keys from 'lodash/keys'
 import _sortBy from 'lodash/sortBy'
 import _throttle from 'lodash/throttle'
+import 'quill/dist/quill.snow.css'
+import 'materialize-css/dist/css/materialize.min.css'
+import 'materialize-css/dist/js/materialize.min.js'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'pretty-checkbox/dist/pretty-checkbox.min.css'
 
 import TemplateNav from '../../ui/components/TemplateNav.vue'
 import AssetList from '../../ui/components/AssetList.vue'
@@ -16,11 +21,7 @@ import ultrasound_icon from '../../ui/assets/images/ultrasound_icon.png'
 import { submit_laudo } from './click_templates.js'
 import form_templates from './form_templates.js'
 import vueQuill from './vue-quill/vue-quill'
-import 'quill/dist/quill.snow.css'
-import 'materialize-css/dist/css/materialize.min.css'
-import 'materialize-css/dist/js/materialize.min.js'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'pretty-checkbox/dist/pretty-checkbox.min.css'
+import { editor_insert_stuff } from './quill_utils.js'
 
 const initial_modality = base_metadata.modalities['tc']
 const initial_specialty = base_metadata.specialties['cep']
@@ -157,29 +158,6 @@ function copySelection () {
   quill.setSelection(len, len)
 }
 
-function editor_insert_stuff (deltas) {
-  const quill = quill_comp.$refs.editor.editor
-  const selection = quill.getSelection(true)
-  const update = {
-    ops: []
-  }
-
-  if (selection.index > 0) {
-    update.ops.push({ retain: selection.index })
-  }
-  if (selection.length > 0) {
-    update.ops.push({ delete: selection.length })
-  }
-
-  update.ops = update.ops.concat(deltas.map((x) => {
-    x = _assign({}, x)
-    if (x.attributes !== undefined) x.attributes = JSON.parse(x.attributes)
-    return x
-  }))
-
-  quill.updateContents(update)
-}
-
 // CLICKS CLICKS CLICKS
 // CLICKS CLICKS CLICKS
 // CLICKS CLICKS CLICKS
@@ -204,7 +182,8 @@ const collapsible_app = new Vue({
 
 // insert descriptor in quill
 function format_descriptor (descriptor) {
-  editor_insert_stuff([{ insert: descriptor.body }])
+  const quill = quill_comp.$refs.editor.editor
+  editor_insert_stuff(quill, [{ insert: descriptor.body }])
 }
 
 const descriptor_interface = {
@@ -355,7 +334,8 @@ const template_nav = new Vue({
     },
 
     template_chosen: function (exam) {
-      editor_insert_stuff(exam.body)
+      const quill = quill_comp.$refs.editor.editor
+      editor_insert_stuff(quill, exam.body)
     }
   },
 
