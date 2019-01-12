@@ -1,6 +1,6 @@
 /* eslint no-unused-vars: "warn", "no-undef" : "error", "no-new" : "warn", "eqeqeq" : "off", "no-redeclare" : "warn", "semi" : "off", "brace-style" : "off", "quotes" : "off", "space-before-function-paren" : "off", "no-multiple-empty-lines" : "off", "padded-blocks" : "off", "no-trailing-spaces" : "off", "spaced-comment" : "off", "no-floating-decimal" : "off", "indent" : "off", "space-infix-ops" : "off", "comma-spacing" : "off", "keyword-spacing" : "off", "comma-dangle" : "off", "space-before-blocks" : "off", "curly" : "off", "object-curly-spacing" : "off", "no-multi-spaces" : "off", "standard/object-curly-even-spacing" : "off", "space-in-parens" : "off" */
 
-const $ = window.$
+import $ from 'jquery'
 
 const submit_laudo = {
   ob_tardio: function (quill) {
