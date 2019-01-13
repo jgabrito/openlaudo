@@ -183,7 +183,7 @@ const collapsible_app = new Vue({
 // insert descriptor in quill
 function format_descriptor (descriptor) {
   const quill = quill_comp.$refs.editor.editor
-  editor_insert_stuff(quill, [{ insert: descriptor.body }])
+  editor_insert_stuff(quill, [{ insert: descriptor.body }], false)
 }
 
 const descriptor_interface = {
@@ -335,7 +335,7 @@ const template_nav = new Vue({
 
     template_chosen: function (exam) {
       const quill = quill_comp.$refs.editor.editor
-      editor_insert_stuff(quill, exam.body)
+      editor_insert_stuff(quill, exam.body, true)
     }
   },
 
