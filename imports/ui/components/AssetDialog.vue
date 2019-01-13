@@ -33,6 +33,7 @@
           :specialty="current_specialty"
           :search-expression="search_expression"
           :asset-interface="asset_interface"
+          :disabled="ongoing_addition"
           class="flex-grow-1"
           @asset-chosen="asset_chosen"
           @asset-changed="asset_changed"
@@ -143,6 +144,7 @@ export default {
       search_expression: '',
       current_asset: null,
       input_asset_store: {},
+      ongoing_addition: false,
       ongoing_upsert: null,
       asset_interface: null // expected from derived classes
     }
@@ -288,31 +290,26 @@ export default {
 
     asset_changed: function (asset) {
       this.current_asset = asset
-      if (!asset) return
-
-      const id = asset._id
-      const input_asset = this.input_asset_store[id]
-      if ((!input_asset) || (!input_asset._submitted)) return
-
-      asset = _assign({}, asset)
-      const my_asset = this.assemble_asset(input_asset)
-
-      if (fromJS(asset).equals(fromJS(my_asset))) {
-        // The changed asset has been submitted and equals my view of it.
-        // Clear input store and go on.
-        this.$delete(this.input_asset_store, id)
-      } else {
-        // The changed asset is different from my view of it. It is probably
-        // a flicker, thus ignore.
-      }
     },
 
     button_clicked: function (name) {
       const current_asset = this.current_asset || {}
-      const _id = current_asset._id
+      let _id = current_asset._id
       let input_asset = _id ? this.input_asset_store[_id] : {}
 
-      if (name === 'submit') {
+      if (name === 'add') {
+        _id = 'NEW'
+        this.current_asset = _assign(
+          this.asset_interface.empty_asset(), 
+          {
+            modality: this.current_modality.name,
+            specialty: this.current_specialty.name,
+            _id
+          }
+        )
+        this.ongoing_addition = true
+        this.$set(this.input_asset_store, _id, { _copy : true })
+      } else if (name === 'submit') {
         if (input_asset._copy) {
           // This is the copy gatekeeper. From now on, this input asset will be treated
           // as a normal one, with online updates from UI and synchronous updates to the
@@ -329,6 +326,10 @@ export default {
         console.log('Remove button clicked')
       } else if (name === 'cancel' ) {
         this.$delete(this.input_asset_store, _id)
+        if (this.ongoing_addition) {
+          this.ongoing_addition = false
+          this.current_asset = this.$refs.asset_list.get_current_asset()
+        }
       } else {
         throw new Error(`Unknown button: ${name}`)
       }
@@ -340,7 +341,12 @@ export default {
       const upsert = _find(upserts, u => (_id === u.requested_id))
 
       if (upsert && (upsert._id !== upsert.requested_id)) {
-        // The current asset was copied to another _id. Navigate to it if possible.
+        if (this.ongoing_addition) {
+          this.ongoing_addition = false
+          this.current_asset = null
+        }
+        // The current asset was copied to another _id or is a new one. Have asset list
+        // navigate us to it if possible.
         this.$refs.asset_list.push_selected_asset_id(upsert._id)
       }
     },

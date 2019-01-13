@@ -67,3 +67,12 @@ export default {
     }
   }
 }
+
+function get_default_specialty_modality_pair() {
+  return {
+    specialty: 'abdome',
+    modality: 'tc'
+  }
+}
+
+export { get_default_specialty_modality_pair }

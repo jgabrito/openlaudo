@@ -130,7 +130,8 @@ export default {
       }
     },
     expanded: Boolean,
-    assetInterface: Object
+    assetInterface: Object,
+    disabled: Boolean,
   },
 
   data: function () {
@@ -179,7 +180,9 @@ export default {
     },
 
     current_asset: function () {
-      this.$emit('asset-changed', this.current_asset)
+      if (! this.disabled) {
+        this.$emit('asset-changed', this.current_asset)
+      }
     }
   },
 
@@ -194,6 +197,10 @@ export default {
       }
 
       this.selected_asset_id_stack = stack
+    },
+
+    get_current_asset: function() {
+      return this.current_asset
     },
 
     dataset_watcher : function () {
@@ -227,6 +234,7 @@ export default {
     },
 
     asset_clicked: function (asset) {
+      if (this.disabled) return
       this.push_selected_asset_id(asset._id)
       this.current_asset = asset
       this.$emit('asset-chosen', asset)

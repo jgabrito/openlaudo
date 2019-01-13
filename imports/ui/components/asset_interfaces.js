@@ -15,6 +15,8 @@
           _id : id of upserted item
           error : error message, if appropriate, otherwise null
         }
+    
+    empty_asset(): returns a new empty asset
 */
 
 // TODO: create abstract AssetInterface class and derived descriptor and template
@@ -48,6 +50,9 @@ const descriptor_interface = {
   upsert_assets: function (docs) {
     const promises = docs.map(d => _promise_factory(db.upsert_descriptor, d))
     return Promise.all(promises)
+  },
+  empty_asset: function() {
+    return db.empty_descriptor()
   }
 }
 
@@ -61,6 +66,9 @@ const template_interface = {
   upsert_assets: function (docs) {
     const promises = docs.map(d => _promise_factory(db.upsert_template, d))
     return Promise.all(promises)
+  },
+  empty_asset: function() {
+    return db.empty_template()
   }
 }
 

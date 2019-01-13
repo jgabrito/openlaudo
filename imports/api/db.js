@@ -7,6 +7,7 @@ import _filter from 'lodash/filter'
 import { collate } from './intl_util.js'
 import { get_db_promise, generate_uid, is_client, is_server, is_production } from './db_meteor.js'
 import { get_current_uid } from './user.js'
+import {get_default_specialty_modality_pair} from './base_metadata.js'
 
 /*
   DB backend interface specification:
@@ -93,6 +94,19 @@ const descriptor_search_fields = [
   'body'
 ]
 
+function empty_descriptor() {
+  const { specialty, modality } = get_default_specialty_modality_pair()
+  return {
+    specialty,
+    modality,
+    title: '',
+    body: '',
+    owner_id: '',
+    public: true,
+    hotkey: '',
+  }
+}
+
 const _attribute_custom_validator = function () {
   // Will force the attribute field to be a JSON representation of an Object instance
   if (this.value === undefined) return
@@ -134,6 +148,17 @@ const template_schema = new SimpleSchema({
 const template_search_fields = [
   'nickname'
 ]
+
+function empty_template() {
+  const { specialty, modality } = get_default_specialty_modality_pair()
+  return {
+    specialty,
+    modality,
+    nickname: '',
+    body: [],
+    public: true
+  }
+}
 
 // Module-global variables
 let _ready_promise = null
@@ -646,7 +671,7 @@ function validate_descriptor(d) {
 
 export {
   db_ready_promise, is_db_ready, get_system_uid,
-  find_templates, upsert_template, validate_template,
-  find_descriptors, upsert_descriptor, validate_descriptor,
+  find_templates, upsert_template, validate_template, empty_template,
+  find_descriptors, upsert_descriptor, validate_descriptor, empty_descriptor,
   get_capabilities
 }
