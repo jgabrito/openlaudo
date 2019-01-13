@@ -1,35 +1,60 @@
 <template>
-<div class="d-flex flex-column">
-  <ul v-if="(! searching) && expanded" id="assets_ul" class="flex-grow-1">
-    <li v-for="asset in assets" v-bind:key="asset._id">
-      <a href="#!" v-on:click="asset_clicked(asset)">
-        <b>{{assetInterface.get_title(asset)}}</b>
-      </a>
-      <p href="#!"> {{assetInterface.get_body(asset)}}</p>
-    </li>
-  </ul>
-  <ul v-else-if="(! searching)" id="assets_ul" class="flex-grow-1">
-    <li v-for="asset in assets" v-bind:key="asset._id">
-      <a href="#!" v-on:click="asset_clicked(asset)"
-         v-bind:class="{ selected : (current_asset_id === asset._id)}">
-        {{assetInterface.get_title(asset)}}
-      </a>
-    </li>
-  </ul>
-  <div v-else class="flex-grow-1 d-flex flex-column align-items-center justify-content-center">
-    <div  class="preloader-wrapper big active">
-      <div class="spinner-layer spinner-red">
-        <div class="circle-clipper left">
-          <div class="circle"></div>
-        </div><div class="gap-patch">
-          <div class="circle"></div>
-        </div><div class="circle-clipper right">
-          <div class="circle"></div>
+  <div class="d-flex flex-column">
+    <ul
+      v-if="(! searching) && expanded"
+      id="assets_ul"
+      class="flex-grow-1"
+    >
+      <li
+        v-for="asset in assets"
+        :key="asset._id"
+      >
+        <a
+          href="#!"
+          @click="asset_clicked(asset)"
+        >
+          <b>{{ assetInterface.get_title(asset) }}</b>
+        </a>
+        <p href="#!">
+          {{ assetInterface.get_body(asset) }}
+        </p>
+      </li>
+    </ul>
+    <ul
+      v-else-if="(! searching)"
+      id="assets_ul"
+      class="flex-grow-1"
+    >
+      <li
+        v-for="asset in assets"
+        :key="asset._id"
+      >
+        <a
+          href="#!"
+          :class="{ selected : (current_asset_id === asset._id)}"
+          @click="asset_clicked(asset)"
+        >
+          {{ assetInterface.get_title(asset) }}
+        </a>
+      </li>
+    </ul>
+    <div
+      v-else
+      class="flex-grow-1 d-flex flex-column align-items-center justify-content-center"
+    >
+      <div class="preloader-wrapper big active">
+        <div class="spinner-layer spinner-red">
+          <div class="circle-clipper left">
+            <div class="circle" />
+          </div><div class="gap-patch">
+            <div class="circle" />
+          </div><div class="circle-clipper right">
+            <div class="circle" />
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped>
@@ -83,12 +108,8 @@ import _assign from 'lodash/assign'
 import db_mixin from './mixins/db_mixin.js'
 
 export default {
-  data: function () {
-    return {
-      selected_asset_id_stack: [],
-      current_asset: null
-    }
-  },
+
+  mixins: [ db_mixin ],
 
   /*
     assetInterface: Object containing the following callbacks:
@@ -104,16 +125,26 @@ export default {
     searchExpression: String,
     extraFilters: {
       type : Object,
-      default : {}
+      default : function() {
+        return {}
+      }
     },
     expanded: Boolean,
     assetInterface: Object
   },
 
+  data: function () {
+    return {
+      selected_asset_id_stack: [],
+      current_asset: null
+    }
+  },
+
   computed: {
     current_asset_id: function () {
-      if (this.current_asset) return this.current_asset._id
-      else return null
+      const current_asset = this.current_asset
+      if (current_asset) return current_asset._id
+      return null
     },
 
     assets: function () {
@@ -139,10 +170,36 @@ export default {
       this.refresh_dataset(false)
     },
 
+    selected_asset_id_stack : function() {
+      this.dataset_watcher()
+    },
+
     dataset: function () {
-      let dataset = this.dataset
-      let current_asset = this.current_asset
-      let selected_asset_id_stack = this.selected_asset_id_stack
+      this.dataset_watcher()
+    },
+
+    current_asset: function () {
+      this.$emit('asset-changed', this.current_asset)
+    }
+  },
+
+  methods: {
+    push_selected_asset_id: function (id) {
+      const stack = Array.from(this.selected_asset_id_stack)
+      if ((stack.length > 0) && (stack[stack.length - 1] === id)) return
+
+      stack.push(id)
+      if (stack.length > 10) {
+        stack.splice(0, this.selected_asset_id_stack.length - 10)
+      }
+
+      this.selected_asset_id_stack = stack
+    },
+
+    dataset_watcher : function () {
+      const dataset = this.dataset
+      const current_asset = this.current_asset
+      const selected_asset_id_stack = this.selected_asset_id_stack
       let new_current_asset = null
 
       if (!this.dataset) {
@@ -150,8 +207,8 @@ export default {
         return
       }
 
-      for (let i = selected_asset_id_stack.length - 1; i >= 0; i--) {
-        let imm_asset = dataset.find((d) => ( d.get('_id') === selected_asset_id_stack[i]))
+      for (let i = selected_asset_id_stack.length - 1; i >= 0; i -= 1) {
+        const imm_asset = dataset.find(d => ( d.get('_id') === selected_asset_id_stack[i]))
         if (imm_asset) {
           if (!imm_asset.equals(fromJS(current_asset))) {
             new_current_asset = imm_asset.toJS()
@@ -162,23 +219,11 @@ export default {
         }
       }
 
-      if (new_current_asset !== current_asset) this.current_asset = new_current_asset
-    },
-
-    current_asset: function () {
-      this.$emit('asset-changed', this.current_asset)
-    }
-  },
-
-  methods: {
-    push_selected_asset_id: function (id) {
-      let stack = this.selected_asset_id_stack
-      if ((stack.length > 0) && (stack[stack.length - 1] === id)) return
-
-      stack.push(id)
-      if (stack.length > 10) {
-        stack.splice(0, this.selected_asset_id_stack.length - 10)
+      if (new_current_asset !== current_asset) {
+        this.current_asset = new_current_asset
       }
+
+      // TODO: scroll list into view
     },
 
     asset_clicked: function (asset) {
@@ -189,9 +234,9 @@ export default {
 
     find_function: function () {
       const selector = _assign(
-        {  
+        {
           modality: this.modality.name,
-          specialty: this.specialty.name 
+          specialty: this.specialty.name
         },
         this.extraFilters
       )
@@ -202,9 +247,7 @@ export default {
         this.assetInterface.sort_key
       )
     }
-  },
-
-  mixins: [ db_mixin ]
+  }
 }
 
 </script>

@@ -135,11 +135,10 @@ function _do_update (collection, doc, upsert, op_id, validator) {
     // Document is OK. Perform actual update.
     if (doc._id) {
       if (collection.update({ '_id' : doc._id }, doc, { upsert })) {
-        results = doc._id
+        result = doc._id
       }
     } else {
-      collection.insert(doc)
-      result = doc._id
+      result = collection.insert(doc)
     }
   } catch (err) {
     error = err
@@ -309,7 +308,7 @@ class _Collection {
     if (!Meteor.isServer) {
       throw new Error('Server side only')
     }
-    docs = docs.map(d => {
+    docs = docs.map((d) => {
       d = _assign({}, d)
       delete d._id
       return d

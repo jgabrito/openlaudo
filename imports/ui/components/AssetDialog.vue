@@ -1,72 +1,116 @@
 <template>
-<div id="dialog_main_container" v-bind:class="container_classes['dialog_main_container']">
-  <div v-bind:class="container_classes['client_area']">
-    <div class="d-flex flex-column" style="width:40%;">
-      <ModSpecSelector v-bind:initial-modality="initialModality"
-                       v-bind:initial-specialty="initialSpecialty"
-                       v-on:specialty-changed="set_specialty"
-                       v-on:modality-changed="set_modality">
-      </ModSpecSelector>
+  <div
+    id="dialog_main_container"
+    :class="container_classes['dialog_main_container']"
+  >
+    <div :class="container_classes['client_area']">
+      <div
+        class="d-flex flex-column"
+        style="width:40%;"
+      >
+        <ModSpecSelector
+          :initial-modality="initialModality"
+          :initial-specialty="initialSpecialty"
+          @specialty-changed="set_specialty"
+          @modality-changed="set_modality"
+        />
 
-      <div class="input-field">
-        <i class="material-icons prefix"> search </i>
-        <input type="text" id="search_input" v-on:keyup="search_input_changed"
-               placeholder="Buscar..." />
+        <div class="input-field">
+          <i class="material-icons prefix">
+            search
+          </i>
+          <input
+            id="search_input"
+            type="text"
+            placeholder="Buscar..."
+            @keyup="search_input_changed"
+          >
+        </div>
+
+        <AssetList
+          ref="asset_list"
+          :modality="current_modality"
+          :specialty="current_specialty"
+          :search-expression="search_expression"
+          :asset-interface="asset_interface"
+          class="flex-grow-1"
+          @asset-chosen="asset_chosen"
+          @asset-changed="asset_changed"
+        />
+
+        <div class="p-2">
+          <a
+            :class="button_classes['add']"
+            @click="button_clicked('add')"
+          >
+            Adicionar...
+          </a>
+        </div>
       </div>
 
-      <AssetList v-bind:modality="current_modality" v-bind:specialty="current_specialty"
-                 v-bind:search-expression="search_expression"
-                 v-bind:asset-interface="asset_interface"
-                 v-on:asset-chosen="asset_chosen"
-                 v-on:asset-changed="asset_changed"
-                 class="flex-grow-1">
-      </AssetList>
+      <div class="flex-grow-1 d-flex flex-column p-3 m-3 border">
+        <AssetEditor
+          v-if="current_asset !== null"
+          :key="current_asset._id"
+          :asset="current_asset"
+          :input-asset="current_input_asset"
+          :disable-controls="! can_edit_current_asset"
+          @content-changed="input_asset_changed"
+        >
+          <a
+            v-if="! current_asset_is_copy"
+            slot="remove_button"
+            :class="button_classes.remove"
+            @click="button_clicked('remove')"
+          >
+            Remover
+          </a>
+          <a
+            v-else
+            slot="remove_button"
+            :class="button_classes.cancel"
+            @click="button_clicked('cancel')"
+          >
+            Cancelar
+          </a>
 
-      <div class="p-2">
-        <a v-bind:class="button_classes['add']" v-on:click="button_clicked('add')">
-          Adicionar...
-        </a>
-      </div>
-    </div>
-
-    <div class="flex-grow-1 d-flex flex-column p-3 m-3 border">
-      <AssetEditor v-if="current_asset !== null"
-                   v-bind:asset="current_asset" v-bind:input-asset="current_input_asset"
-                   v-bind:key="current_asset._id"
-                   v-bind:disable-controls="(! can_edit_current_asset)"
-                   v-on:content-changed="input_asset_changed" >
-
-        <a slot="remove_button" v-bind:class="button_classes.remove"
-           v-on:click="button_clicked('remove')">
-          Remover
-        </a>
-
-        <div v-if="ongoing_upsert" slot="submit_button" style="text-align:center;">
-          <div class="preloader-wrapper small active">
-            <div class="spinner-layer spinner-red-only">
-              <div class="circle-clipper left">
-                <div class="circle"></div>
-              </div><div class="gap-patch">
-                <div class="circle"></div>
-              </div><div class="circle-clipper right">
-                <div class="circle"></div>
+          <div
+            v-if="ongoing_upsert"
+            slot="submit_button"
+            style="text-align:center;"
+          >
+            <div class="preloader-wrapper small active">
+              <div class="spinner-layer spinner-red-only">
+                <div class="circle-clipper left">
+                  <div class="circle" />
+                </div><div class="gap-patch">
+                  <div class="circle" />
+                </div><div class="circle-clipper right">
+                  <div class="circle" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <a v-else-if="(! can_edit_current_asset)"
-          slot="submit_button" v-bind:class="button_classes.copy"
-          v-on:click="button_clicked('copy')">
-          Duplicar
-        </a>
-        <a v-else slot="submit_button" v-bind:class="button_classes.submit"
-           v-on:click="button_clicked('submit')">
-          Enviar
-        </a>
-      </AssetEditor>
+          <a
+            v-else-if="((! current_asset_is_mine) && (! current_asset_is_copy))"
+            slot="submit_button"
+            :class="button_classes.copy"
+            @click="button_clicked('copy')"
+          >
+            Duplicar
+          </a>
+          <a
+            v-else
+            slot="submit_button"
+            :class="button_classes.submit"
+            @click="button_clicked('submit')"
+          >
+            Enviar
+          </a>
+        </AssetEditor>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <style scoped>
@@ -78,6 +122,7 @@ import { fromJS } from 'immutable'
 import _assign from 'lodash/assign'
 import _keys from 'lodash/keys'
 import _throttle from 'lodash/throttle'
+import _find from 'lodash/find'
 
 import AssetList from './AssetList.vue'
 import ModSpecSelector from './ModSpecSelector.vue'
@@ -85,6 +130,11 @@ import dialog_mixin from './mixins/dialog_mixin.js'
 import { userid_mixin } from '../../api/user.js'
 
 export default {
+
+  props: {
+    initialModality: Object,
+    initialSpecialty: Object
+  },
 
   data: function () {
     return {
@@ -98,15 +148,12 @@ export default {
     }
   },
 
-  props: {
-    initialModality: Object,
-    initialSpecialty: Object
-  },
-
   computed: {
     button_classes: function () {
-      let current_input_asset = this.current_input_asset
-      let clean = ((_keys(current_input_asset).length === 0) || (current_input_asset._submitted !== null))
+      const current_input_asset = this.current_input_asset
+      const clean = ((_keys(current_input_asset).length === 0)
+                     || (current_input_asset._submitted !== null))
+      const current_asset_is_mine = this.current_asset_is_mine
       return {
         'submit': {
           btn: true,
@@ -115,7 +162,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
-          disabled: clean
+          disabled: (! this.user_id) || (current_asset_is_mine && clean)
         },
         'copy': {
           btn: true,
@@ -124,6 +171,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
+          disabled : (! this.user_id) 
         },
         'add': {
           btn: true,
@@ -131,7 +179,8 @@ export default {
           'lighten-2': true,
           'waves-effect': true,
           'waves-light': true,
-          'w-100': true
+          'w-100': true,
+          disabled : (! this.user_id) 
         },
         'remove': {
           btn: true,
@@ -139,8 +188,17 @@ export default {
           'lighten-2': true,
           'waves-effect': true,
           'waves-light': true,
-          'w-100': true
-        }
+          'w-100': true,
+          disabled : (! this.user_id) || (!current_asset_is_mine)
+        },
+        'cancel': {
+          btn: true,
+          red: true,
+          'lighten-2': true,
+          'waves-effect': true,
+          'waves-light': true,
+          'w-100': true,
+        },
       }
     },
 
@@ -161,25 +219,47 @@ export default {
     },
 
     current_input_asset: function () {
-      let store = this.input_asset_store
-      let asset = this.current_asset
+      const store = this.input_asset_store
+      const asset = this.current_asset
       if (!asset) return {}
-      else return store[asset._id] || {}
+      return store[asset._id] || {}
     },
 
-    can_edit_current_asset: function() {
+    current_asset_is_mine: function() {
       const current_asset = this.current_asset
       const user_id = this.user_id
-      
-      if (! current_asset) return false
-      
-      if ((current_asset._id.startsWith('local://')) ||
-        (user_id !== current_asset.owner_id)) {
+
+      if (!current_asset) return false
+
+      if ((current_asset._id.startsWith('local://'))
+        || (user_id !== current_asset.owner_id)) {
         return false
       }
 
       return true
+    },
+
+    current_asset_is_copy : function() {
+      const current_asset = this.current_asset
+      const current_asset_is_mine = this.current_asset_is_mine
+      const store = this.input_asset_store
+
+      if (!current_asset) return false
+      if (current_asset_is_mine) return false
+
+      const input_asset = store[current_asset._id] || {}
+      if (input_asset._copy) return true
+      return false
+    },
+
+    can_edit_current_asset : function() {
+      const current_asset_is_mine = this.current_asset_is_mine
+      const current_asset_is_copy = this.current_asset_is_copy
+      const ongoing_upsert = this.ongoing_upsert
+      const user_id = this.user_id
+      return user_id && (current_asset_is_mine || (current_asset_is_copy && (! ongoing_upsert)))
     }
+
   },
 
   methods: {
@@ -210,12 +290,12 @@ export default {
       this.current_asset = asset
       if (!asset) return
 
-      let id = asset._id
-      let input_asset = this.input_asset_store[id]
+      const id = asset._id
+      const input_asset = this.input_asset_store[id]
       if ((!input_asset) || (!input_asset._submitted)) return
 
       asset = _assign({}, asset)
-      let my_asset = this.assemble_asset(input_asset)
+      const my_asset = this.assemble_asset(input_asset)
 
       if (fromJS(asset).equals(fromJS(my_asset))) {
         // The changed asset has been submitted and equals my view of it.
@@ -228,20 +308,47 @@ export default {
     },
 
     button_clicked: function (name) {
+      const current_asset = this.current_asset || {}
+      const _id = current_asset._id
+      let input_asset = _id ? this.input_asset_store[_id] : {}
+
       if (name === 'submit') {
+        if (input_asset._copy) {
+          // This is the copy gatekeeper. From now on, this input asset will be treated
+          // as a normal one, with online updates from UI and synchronous updates to the
+          // pending upsert map
+          const asset = this.assemble_asset(input_asset)
+          this._pending_upserts.set(_id, asset)
+        }
         this.submit_upserts()
-      } 
-      else if (name === 'copy') {
-        console.log('Copy local asset clicked')
-      }
-      else if (name === 'remove') {
+      } else if (name === 'copy') {
+        input_asset = { _copy : true }
+        this.$set(this.input_asset_store, _id, input_asset)
+      } else if (name === 'remove') {
         // TODO
         console.log('Remove button clicked')
-      }
-      else {
+      } else if (name === 'cancel' ) {
+        this.$delete(this.input_asset_store, _id)
+      } else {
         throw new Error(`Unknown button: ${name}`)
       }
     },
+
+    on_successful_upsert : function(upserts) {
+      const current_asset = this.current_asset || {}
+      const _id = current_asset._id
+      const upsert = _find(upserts, u => (_id === u.requested_id))
+
+      if (upsert && (upsert._id !== upsert.requested_id)) {
+        // The current asset was copied to another _id. Navigate to it if possible.
+        this.$refs.asset_list.push_selected_asset_id(upsert._id)
+      }
+    },
+
+    on_failed_upsert : function(upserts) {
+      console.log(upserts)
+    },
+
 
     input_asset_changed: function (input_asset) {
       /*
@@ -256,21 +363,25 @@ export default {
       */
       if (!this.current_asset) return
 
-      let id = this.current_asset._id
-      let asset = this.assemble_asset(input_asset)
+      const id = this.current_asset._id
+      const asset = this.assemble_asset(input_asset)
       input_asset = _assign({}, input_asset, { _submitted: null })
 
       this.$set(this.input_asset_store, id, input_asset)
-      this._pending_upserts.set(id, asset)
+      if ((!input_asset._copy) || (this._pending_upserts.has(id))) {
+        // In case this is a copy, only update the pending upserts map if it has
+        // already been submitted at least once by the user
+        this._pending_upserts.set(id, asset)
+      }
     },
 
     // Assemble an upsert-ready asset based on the current asset and input data
     assemble_asset: function (input_asset) {
       if (!this.current_asset) return null
-      let asset = _assign({}, this.current_asset, input_asset)
-      for (let k of _keys(asset)) {
-        if ((k[0] === '_') && (k !== '_id')) delete asset[k]
-      }
+      const asset = _assign({}, this.current_asset, input_asset)
+      _keys(asset).forEach((k) => {
+        if ((k[0] === '_') && (!['_id', '_copy'].includes(k))) delete asset[k]
+      })
       return asset
     },
 
@@ -280,58 +391,87 @@ export default {
       if (this.ongoing_upsert && (!last_effort)) return
 
       // Submit pending upserts to the database backend
-      let upserts = this._pending_upserts // ownership taken
-      const upsert_array = Array.from(upserts.values())
-      if (upserts.size === 0) return
+      const upserts = this._pending_upserts // ownership taken
+      const actual_upserts = new Map()
 
-      let me = this.ongoing_upsert = this.asset_interface.upsert_assets(upsert_array)
+      // Mangle ids of to-be-copied entries
+      Array.from(upserts.entries()).forEach(([k, v]) => {
+        if (v._copy) {
+          v = _assign({}, v)
+          delete v._copy
+          k = v._id = `copy://${v._id}`
+        }
+        actual_upserts.set(k, v)
+      })
+
+      const upsert_array = Array.from(actual_upserts.values())
+
+      // submit upserts
+      const me = this.ongoing_upsert = this.asset_interface.upsert_assets(upsert_array)
         .then((results) => {
-          results.forEach(({_id, requested_id, error}) => {
-            if (! error) {
-              if (_id === requested_id) {
-                // Success
-                upserts.delete(_id)  
-              }
-              else {
-                // This id was not in the originally submitted list, thus the backend
-                // created a new entry behind our backs
-                upserts.delete(requested_id)
-              }
-              
+          const successful_upserts = []
+          const failed_upserts = []
+
+          results.forEach(({ _id, requested_id, error }) => { 
+            if (requested_id.startsWith('copy://')) {
+              // Unmangle the ids corresponding to the copy operations
+              requested_id = requested_id.slice(7)
             }
-            else {
-              const will_retry = last_effort ? "ignoring because last effort" : "will retry"
-              console.log(`Failed upsert for ${_id}: ${error}; ${will_retry}`)
+
+            if (!error) {
+              successful_upserts.push({ _id, requested_id, asset : upserts.get(requested_id) })
+            } else {
+              const will_retry = last_effort ? 'ignoring because last effort' : 'will retry'
+              console.log(`Failed upsert for ${requested_id}: ${error}; ${will_retry}`)
+              failed_upserts.push({ requested_id, asset : upserts.get(requested_id) } )
+            }
+          })
+
+          // Remove input store entry for successful upsets where appropriate
+          successful_upserts.forEach(({ _id, requested_id }) => {
+            let input_asset = this.input_asset_store[requested_id]
+            if (input_asset && input_asset._submitted === me) {
+              // Unchanged since last submit by myself
+              this.$delete(this.input_asset_store, requested_id)
             }
           })
 
           // Return failed upserts to pending upsert list where appropriate, to avoid
           // losing sacred user input data
-          Array.from(upserts.entries()).forEach(([_id, asset]) => {
-            let input_asset = this.input_asset_store[_id]
+          failed_upserts.forEach(({requested_id, asset}) => {
+            let input_asset = this.input_asset_store[requested_id]
             if (input_asset && input_asset._submitted === me) {
               // Unchanged since last submit by myself
               // Return upsert to pending list to try again next round
-              this._pending_upserts.set(_id, asset)
-
+              this._pending_upserts.set(requested_id, asset)
               // Clear submission indicator on input store
               input_asset = _assign({}, input_asset, { _submitted: null })
-              this.$set(this.input_asset_store, _id, input_asset)
+              this.$set(this.input_asset_store, requested_id, input_asset)
             }
           })
 
           // Finally: clear the ongoing upsert
-          if (this.ongoing_upsert === me) this.ongoing_upsert = null
+          if (this.ongoing_upsert === me) {
+            this.ongoing_upsert = null
+            if (successful_upserts.length > 0) {
+              this.on_successful_upsert(successful_upserts)
+            }
+            if (failed_upserts.length > 0) {
+              this.on_failed_upsert(failed_upserts)
+            }
+          }
         })
-        
+
       // Set submission indicator on input store
-      Array.from(upserts.keys()).forEach((_id) => { 
-        let temp = _assign({}, this.input_asset_store[_id], { _submitted: me })
+      Array.from(upserts.keys()).forEach((_id) => {
+        const temp = _assign({}, this.input_asset_store[_id], { _submitted: me })
         this.$set(this.input_asset_store, _id, temp)
       })
-      
+
       // Clear pending upserts to start input accumulation over
       this._pending_upserts = new Map()
+
+      return me
     }
   },
 

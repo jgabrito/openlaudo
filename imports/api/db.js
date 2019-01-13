@@ -276,10 +276,9 @@ function bootstrap_test_db_if_development() {
     t = t.set('_id', generate_uid() )
     return t
   })
+
   return descriptors_col.bulkInsert(test_descriptors.toJS())
-    .then( () => {
-      return templates_col.bulkInsert(test_templates.toJS())
-    })
+    .then( () => templates_col.bulkInsert(test_templates.toJS()) )
 }
 
 function upgrade_db_if_necessary () {
@@ -589,8 +588,8 @@ function _transform_docs (docs, schema, search_fields) {
     })
     d = transform_record(d, search_fields)
     schema.validate(d)
-    if ((d._id !== undefined) && d._id.startsWith('local://')) {
-      // Attempting to upsert a local, hardcoded doc; silently convert to an insert
+    if ((d._id !== undefined) && (d._id.startsWith('local://') || d._id.startsWith('copy://'))) {
+      // Attempting to create something new from something pre-existent; convert to an insert
       delete d._id
     }
     return d
