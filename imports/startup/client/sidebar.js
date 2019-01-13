@@ -300,7 +300,7 @@ const template_nav = new Vue({
                 </div>
                 <button type="button" class="btn btn-success" name="button-${id}" 
                   id="button-${id}" 
-                  onclick="click_template_dispatcher('${name}');">
+                    onclick="click_template_dispatcher('${name}'); event.stopPropagation();">
                   Laudo
                 </button>
               </div>
