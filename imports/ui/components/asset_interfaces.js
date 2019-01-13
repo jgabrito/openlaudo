@@ -25,12 +25,12 @@ import * as db from '../../api/db.js'
 
 function _promise_factory (dispatcher, doc) {
   return dispatcher(doc).then(
-    (id) => ({
+    id => ({
       _id : id,
       requested_id : doc._id,
       error : null
     }),
-    (error) => ({
+    error => ({
       _id : null,
       requested_id : doc._id,
       error
