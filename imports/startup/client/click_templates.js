@@ -320,11 +320,21 @@ const submit_laudo = {
       almost_solid : 'quase completamente sólido',
       solid : 'sólido',
 
-      anechoic : 'com conteúdo anecóico',
-      hyperechoic : 'com conteúdo sólido hiperecogênico',
-      isoechoic : 'com conteúdo sólido isoecogênico',
-      hypoechoic : 'com conteúdo sólido hipoecogênico',
-      very_hypoechoic : 'com conteúdo sólido marcadamente hipoecogênico',
+      echogenicity_mixed: {
+        anechoic : 'com conteúdo anecóico',
+        hyperechoic : 'com conteúdo sólido hiperecogênico',
+        isoechoic : 'com conteúdo sólido isoecogênico',
+        hypoechoic : 'com conteúdo sólido hipoecogênico',
+        very_hypoechoic : 'com conteúdo sólido marcadamente hipoecogênico',
+      },
+
+      echogenicity_solid: {
+        anechoic : null,
+        hyperechoic : 'hiperecogênico',
+        isoechoic : 'isoecogênico',
+        hypoechoic : 'hipoecogênico',
+        very_hypoechoic : 'marcadamente hipoecogênico',
+      },
 
       well_defined : 'com margens bem definidas',
       ill_defined : 'com margens mal definidas',
@@ -353,8 +363,8 @@ const submit_laudo = {
       spongyform : 0,
       mpc : 1,
       mps : 1,
-      almost_solid : 3,
-      solid : 3,
+      almost_solid : 2,
+      solid : 2,
 
       anechoic : 0,
       hyperechoic : 1,
@@ -404,8 +414,14 @@ const submit_laudo = {
     
     text.push(translations[composition])
     TIRADS_score += TIRADS[composition]
+
+    if (! ['almost_solid', 'solid'].includes(composition)) {
+      text.push(translations.echogenicity_mixed[echo])
+    }
+    else {
+      text.push(translations.echogenicity_solid[echo])
+    }
     if (! ['cystic', 'almost_cystic', 'spongyform'].includes(composition)) {
-      text.push(translations[echo])
       TIRADS_score += TIRADS[echo]
     }
 
@@ -436,8 +452,16 @@ const submit_laudo = {
     })
     TIRADS_score += foci_TIRADS
 
+    const format_number = (x, d) => (x.toLocaleString(
+      ['pt-BR'], 
+      { 
+        minimumFractionDigits : d,
+        maximumFractionDigits : d
+      }
+    ))
+
     const volume = 0.52*sizes[0]*sizes[1]*sizes[2]
-    text.push(`medindo ${sizes[0].toFixed(1)} x ${sizes[1].toFixed(1)} x ${sizes[2].toFixed(1)} cm (volume de ${volume.toFixed(1)} cc)`)
+    text.push(`medindo ${format_number(sizes[0],1)} x ${format_number(sizes[1],1)} x ${format_number(sizes[2],1)} cm (volume de ${format_number(volume,1)} cc)`)
 
     const deltas = [
       { insert : `${_filter(text, (t) => (t !== null)).join(', ')}.` },
