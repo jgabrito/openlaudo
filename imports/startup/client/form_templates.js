@@ -473,7 +473,7 @@ const form_templates = {
         <select class="form-control" id="thyroid_nodule_cc_location_select">
            <option value="superior"> Superior </option>
            <option value="middle" selected> Médio </option>
-           <option value="inferior" selected> Inferior </option>
+           <option value="inferior"> Inferior </option>
         </select>
       </div>
 
@@ -493,11 +493,11 @@ const form_templates = {
       <div class="row">
         <label for="thyroid_nodule_echo_select" class="fb-number-label">Ecogenicidade</label>
         <select class="form-control" id="thyroid_nodule_echo_select">
-           <option value="anechoic" selected>Anecóico</option>
-           <option value="hyperechoic">Hiperecóico</option>
-           <option value="isoechoic">Isoecóico</option>
-           <option value="hypoechoic">Hipocóico</option>
-           <option value="very_hypoechoic">Marcadamente hipoecóico</option>
+           <option value="anechoic" selected>Anecogênico</option>
+           <option value="hyperechoic">Hiperecogênico</option>
+           <option value="isoechoic">Isoecogênico</option>
+           <option value="hypoechoic">Hipocogênico</option>
+           <option value="very_hypoechoic">Marcadamente hipoecogênico</option>
         </select>
       </div>
 
@@ -524,7 +524,7 @@ const form_templates = {
         <select class="form-control" id="thyroid_nodule_halo_select">
            <option value="complete" selected> Completo </option>
            <option value="incomplete"> Incompleto </option>
-           <option value="ausente"> Ausente </option>
+           <option value="absent"> Ausente </option>
         </select>
       </div>
   

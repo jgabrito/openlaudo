@@ -306,7 +306,7 @@ const submit_laudo = {
 
     const translations = {
       right : 'lobo tireoideano direito',
-      left : 'lobo tireoideano esquedo',
+      left : 'lobo tireoideano esquerdo',
       isthmus : 'istmo tireoideano',
       superior : 'superior',
       inferior : 'inferior',
@@ -353,7 +353,7 @@ const submit_laudo = {
         negative : 'sem microcalcificações'
       },
 
-      wider : null, 
+      wider : 'mais largo que alto', 
       taller : 'mais alto que largo',
     }
 
