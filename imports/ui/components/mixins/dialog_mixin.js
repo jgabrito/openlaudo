@@ -18,7 +18,11 @@ export default {
   },
 
   props: {
-    modal: Boolean
+    modal: Boolean,
+    showOnCreate : {
+      type : Boolean,
+      default : function () { return false }
+    }
   },
 
   methods: {
@@ -37,7 +41,12 @@ export default {
         })
       }
     }
+  },
 
+  mounted : function() {
+    if (this.showOnCreate) {
+      this.show()
+    }
   },
 
   mixins: [ materialize_mixin ]

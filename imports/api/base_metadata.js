@@ -1,5 +1,5 @@
 
-export default {
+const base_metadata = {
   'modalities': {
     'tc': {
       'name': 'tc',
@@ -68,10 +68,20 @@ export default {
   }
 }
 
-function get_default_specialty_modality_pair() {
-  return {
+export default base_metadata
+
+function get_default_specialty_modality_pair(as_object = false) {
+  const default_pair = {
     specialty: 'abdome',
     modality: 'tc'
+  }
+  if (!as_object) {
+    return default_pair
+  }
+
+  return {
+    specialty: base_metadata.specialties[default_pair.specialty],
+    modality: base_metadata.modalities[default_pair.modality]
   }
 }
 

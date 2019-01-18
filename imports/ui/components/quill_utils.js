@@ -11,8 +11,7 @@ function fix_attributes(deltas) {
   })
 }
 
-function editor_insert_stuff (quill, deltas, clear=false) {
-
+function editor_insert_stuff (quill, deltas, clear = false) {
   if (clear) {
     // TODO: setup undo mechanism for destructive changes
     quill.setContents(fix_attributes(deltas))

@@ -93,7 +93,7 @@ export default {
     initialSpecialty: Object,
     initialModality: Object,
     initialTemplate: Object,
-    templateBody: Array
+    content: Array
   },
 
   computed: {
@@ -130,6 +130,16 @@ export default {
           'flex-column': true
         }
       }
+    },
+
+    template_body : function() {
+      return this.content.map((x) => {
+        x = _assign({}, x)
+        if (x.attributes !== undefined) {
+          x.attributes = JSON.stringify(x.attributes)
+        }
+        return x
+      })
     }
   },
 
@@ -162,6 +172,10 @@ export default {
       this.current_specialty = specialty
     },
 
+    clear_current_template : function() {
+      this.current_template = null
+    },
+
     button_clicked: function (name) {
       const _submit_upsert_and_close = (upsert) => {
         return template_interface.upsert_assets([upsert])
@@ -184,7 +198,7 @@ export default {
         }
         upsert.owner_id = this.user_id
         upsert.nickname = this.nickname
-        upsert.body = this.templateBody
+        upsert.body = this.template_body
         upsert.specialty = this.current_specialty.name
         upsert.modality = this.current_modality.name
         upsert.public = (!this.not_public)

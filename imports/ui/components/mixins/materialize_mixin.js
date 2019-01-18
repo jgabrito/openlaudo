@@ -57,28 +57,42 @@ export default {
 
     init_components: function () {
       const _do_initialize_tag = (ControlClass, name, options) => {
-        if (this.$el.tagName === name) {
-          this._materialize_controls.push(new ControlClass(this.$el, options))
-        }
-        if (this.materialize_recursive) {
-          const elems = this.$el.getElementsByTagName(name)
-          for (let i = 0; i < elems.length; i += 1) {
-            const instance = new ControlClass(elems[i], options)
-            if (instance) this._materialize_controls.push(instance)
+        try {
+          if (this.$el.tagName === name) {
+            this._materialize_controls.push(new ControlClass(this.$el, options))
           }
+          if (this.materialize_recursive) {
+            const elems = this.$el.getElementsByTagName(name)
+            for (let i = 0; i < elems.length; i += 1) {
+              const instance = new ControlClass(elems[i], options)
+              if (instance) this._materialize_controls.push(instance)
+            }
+          }
+        }
+        catch(err) {
+          console.log(`Error initializing Materialize tag ${name}`)
+          console.log(this)
+          throw err
         }
       }
 
       const _do_initialize_class = (ControlClass, name, options) => {
-        if (this.$el.classList.contains(name)) {
-          this._materialize_controls.push(new ControlClass(this.$el, options))
-        }
-        if (this.materialize_recursive) {
-          const elems = this.$el.getElementsByClassName(name)
-          for (let i = 0; i < elems.length; i += 1) {
-            const instance = new ControlClass(elems[i], options)
-            if (instance) this._materialize_controls.push(instance)
+        try {
+          if (this.$el.classList.contains(name)) {
+            this._materialize_controls.push(new ControlClass(this.$el, options))
           }
+          if (this.materialize_recursive) {
+            const elems = this.$el.getElementsByClassName(name)
+            for (let i = 0; i < elems.length; i += 1) {
+              const instance = new ControlClass(elems[i], options)
+              if (instance) this._materialize_controls.push(instance)
+            }
+          }
+        }
+        catch(err) {
+          console.log(`Error initializing Materialize class ${name}`)
+          console.log(this)
+          throw err
         }
       }
 
