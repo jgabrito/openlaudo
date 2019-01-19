@@ -55,6 +55,20 @@ export default {
       })
     },
 
+    element_is_mine: function(element) {
+      // Only touch elements that do not belong to any other child component, to avoid
+      // overlap issues.      
+      let retval = true
+      
+      this.$children.forEach((child) => {
+        if (child.$el.contains(element)) {
+          retval = false
+        }
+      })
+
+      return retval
+    },
+
     init_components: function () {
       const _do_initialize_tag = (ControlClass, name, options) => {
         try {
@@ -64,6 +78,7 @@ export default {
           if (this.materialize_recursive) {
             const elems = this.$el.getElementsByTagName(name)
             for (let i = 0; i < elems.length; i += 1) {
+              if (! this.element_is_mine(elems[i])) continue
               const instance = new ControlClass(elems[i], options)
               if (instance) this._materialize_controls.push(instance)
             }
@@ -84,6 +99,7 @@ export default {
           if (this.materialize_recursive) {
             const elems = this.$el.getElementsByClassName(name)
             for (let i = 0; i < elems.length; i += 1) {
+              if (! this.element_is_mine(elems[i])) continue
               const instance = new ControlClass(elems[i], options)
               if (instance) this._materialize_controls.push(instance)
             }

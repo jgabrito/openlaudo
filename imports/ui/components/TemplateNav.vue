@@ -9,7 +9,7 @@
         <li v-for="specialty in specialties"
           v-bind:key="get_specialty_id(specialty)"
           v-bind:class="{ active : (specialty === current_specialty) }" >
-          <DropdownTrigger v-if="templateDropdowns" v-bind:text-content="specialty.nickname"
+          <DropdownTrigger class="specialty_a" v-if="templateDropdowns" v-bind:text-content="specialty.nickname"
             v-bind:target="get_specialty_id(specialty)"
             v-on:click="set_specialty(specialty.name)" >
             <ul v-bind:id="get_specialty_id(specialty)" class="dropdown-content">
@@ -21,7 +21,7 @@
               </li>
             </ul>
           </DropdownTrigger>
-          <a v-else href="#!" v-on:click="set_specialty(specialty.name)">
+          <a v-else href="#!" class="specialty_a" v-on:click="set_specialty(specialty.name)">
             {{ specialty.nickname }}
           </a>
         </li>
@@ -31,7 +31,7 @@
       <ul v-bind:class="{tabs : tabs}">
         <li v-for="modality in modalities" v-bind:key="modality.name"
             v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
-          <a href="#" v-on:click="set_modality(modality.name)"
+          <a href="#" class="modality_a" v-on:click="set_modality(modality.name)"
              v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
             {{modality.nickname}}
           </a>
@@ -105,3 +105,23 @@ export default {
 }
 
 </script>
+
+<style scoped>
+  .specialty_a {
+    text-decoration: none !important;
+  }
+
+  .specialty_a:hover {
+    background-color: #80808080 !important;
+    color: #FFFFFF !important;
+  }
+
+  .modality_a {
+    text-decoration: none !important;
+  }
+
+  .modality_a:hover {
+    background-color: #80808040 !important;
+  }
+
+</style>

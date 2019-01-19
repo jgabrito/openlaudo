@@ -107,63 +107,87 @@
 
       <div
         class="d-flex flex-column pl-4 pr-2"
-        style="width: 40%; overflow-y: auto; overflow-x: hidden"
+        style="width: 40%; overflow: hidden;"
       >
-        <!-- FORMS CLICKS -->
-        <ul
-          id="clickable_template_cards"
-          ref="clickable_template_cards"
-          class="collapsible popout"
-        >
-          <li
-            v-for="card in cards"
-            :key="card.id"
-          >
-            <div class="collapsible-header d-flex flex-row">
-              <img
-                :src="card.src"
-                class="circle vignette "
-              >
-              <span
-                class="headline white--text flex-grow-1"
-                style="margin-top:20px;"
-                v-html="card.title"
-              />
-            </div>
-            <div
-              id="form_div"
-              class="collapsible-body white"
-            >
-              <span
-                class="headline white--text"
-                v-html="card.description"
-              />
-              <!-- HERE ENTERS THE CLICK FORM -->
-              <!-- HERE ENTERS THE CLICK FORM -->
-              <!-- HERE ENTERS THE CLICK FORM -->
-            </div>
-          </li>
-        </ul>
-
-        <!-- DESCRIPTORS DESCRIPTORS -->
-        <div>
-          <input
-            id="descriptor_search_input"
-            v-model="search_expression"
-            type="text"
-            placeholder="Busque descritores..."
-          >
+        <div class="d-flex flex-row">
+          <ul class="tabs">
+            <li class="tab">
+              <a class="sidebar_tab sidebar_tab_enabled active" 
+                href="#descriptor_list_container">
+                Achados
+              </a>
+            </li>
+            <li class="tab" v-bind:class="{ disabled : (cards.length === 0) }">
+              <a class="sidebar_tab" 
+                v-bind:class="{sidebar_tab_enabled : (cards.length > 0)}"
+                href="#clickable_template_container">
+                Forms clicáveis
+              </a>
+            </li>          
+          </ul>
         </div>
 
-        <AssetList
-          expanded
-          class="flex-grow-1"
-          :modality="current_modality"
-          :specialty="current_specialty"
-          :search-expression="search_expression"
-          :asset-interface="descriptor_interface"
-          @asset-chosen="format_descriptor"
-        />
+        <!-- FORMS CLICKS -->
+        <div id='clickable_template_container' class='flex-grow-1 mt-4 pt-4'>
+          <ul
+            id="clickable_template_cards"
+            ref="clickable_template_cards"
+            class="collapsible popout"
+          >
+            <li
+              v-for="card in cards"
+              :key="card.id"
+            >
+              <div class="collapsible-header d-flex flex-row">
+                <img
+                  :src="card.src"
+                  class="circle vignette "
+                >
+                <span
+                  class="headline white--text flex-grow-1"
+                  style="margin-top:20px;"
+                  v-html="card.title"
+                />
+              </div>
+              <div
+                id="form_div"
+                class="collapsible-body white"
+              >
+                <span
+                  class="headline white--text"
+                  v-html="card.description"
+                />
+                <!-- HERE ENTERS THE CLICK FORM -->
+                <!-- HERE ENTERS THE CLICK FORM -->
+                <!-- HERE ENTERS THE CLICK FORM -->
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- DESCRIPTORS DESCRIPTORS -->
+        <div id='descriptor_list_container' class='flex-grow-1 mt-4'>
+          <div id='descriptor_list_inner_container' class="d-flex flex-column h-100">
+            <div>
+              <input
+                id="descriptor_search_input"
+                v-model="search_expression"
+                type="text"
+                placeholder="Busque descritores..."
+              >
+            </div>
+
+            <AssetList
+              expanded
+              class="flex-grow-1"
+              :modality="current_modality"
+              :specialty="current_specialty"
+              :search-expression="search_expression"
+              :asset-interface="descriptor_interface"
+              @asset-chosen="format_descriptor"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -188,10 +212,14 @@ import { descriptor_interface } from './asset_interfaces.js'
 import form_templates from './form_templates.js'
 import { submit_laudo } from './click_templates.js'
 import { editor_insert_stuff } from './quill_utils.js'
+import materialize_mixin from './mixins/materialize_mixin';
 
 import ultrasound_icon from '../assets/images/ultrasound_icon.png'
 
 export default {
+  mixins : [
+    materialize_mixin
+  ],
 
   components : {
     TemplateNav,
@@ -203,6 +231,7 @@ export default {
     initialSpecialty : Object,
     localVue : Object
   },
+
   data : function() {
     return {
       current_modality : this.initialModality,
@@ -224,7 +253,9 @@ export default {
         },
         theme: 'snow',
         scrollingContainer: '#editor-container'
-      }
+      },
+      materialize_classes : [ 'tabs' ],
+      materialize_recursive : true
     }
   },
 
@@ -415,10 +446,6 @@ export default {
   margin-top: 0px
 }
 
-* {
-  box-sizing: border-box;
-}
-
 .collapsible-header {
   padding-top: 6px;
   padding-bottom: 6px;
@@ -429,13 +456,6 @@ export default {
 .collapsible-body {
   padding-top: 2px;
   padding-bottom: 2px;
-}
-
-
-html, body {
-  overflow: hidden;
-  max-height: 100%;
-  height: 100%;
 }
 
 .zero-margin {
@@ -481,6 +501,24 @@ html, body {
 }
 
 #editor_container {
+  overflow-y: auto;
+  flex-basis: 0;
+  -webkit-flex-basis: 0;
+}
+
+#descriptor_list_container {
+  overflow-y: hidden;
+  flex-basis: 0;
+  -webkit-flex-basis: 0;
+}
+
+#descriptor_list_inner_container {
+  overflow-y: hidden;
+  flex-basis: 0;
+  -webkit-flex-basis: 0;
+}
+
+#clickable_template_container {
   overflow-y: auto;
   flex-basis: 0;
   -webkit-flex-basis: 0;
@@ -545,5 +583,14 @@ html, body {
 label {
   margin-bottom: 0px;
 }
+
+.sidebar_tab {
+    text-decoration: none !important;
+  }
+
+.sidebar_tab_enabled:hover {
+  background-color: #80808040 !important;
+}
+
 
 </style>
