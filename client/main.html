@@ -5,9 +5,15 @@
   <title>openlaudo</title>
 
   <!-- FORM FORM FORM -->
-  <link rel="stylesheet" type="text/css" href="/roboto.css"> 
+  <link rel="stylesheet" type="text/css" href="/roboto.css" 
+    onload="document.roboto_css = { loaded : true, error : false };"
+    onerror="document.roboto_css = { loaded : false, error : true };"
+  > 
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css"> -->
-  <link rel="stylesheet" href="/material-icons/material-icons.css">
+  <link rel="stylesheet" href="/material-icons/material-icons.css"
+    onload="document.material_icons_css = { loaded : true, error : false };"
+    onerror="document.material_icons_css = { loaded : false, error : true };"
+  >
   <!-- Include stylesheet -->
   <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> -->
   <!-- <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"> -->
@@ -36,4 +42,3 @@
     </p>
   </div>
 </body>
-
