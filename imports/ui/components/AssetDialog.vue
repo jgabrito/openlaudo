@@ -9,10 +9,7 @@
         style="width:40%;"
       >
         <ModSpecSelector
-          :initial-modality="initialModality"
-          :initial-specialty="initialSpecialty"
-          @specialty-changed="set_specialty"
-          @modality-changed="set_modality"
+          v-model="current_modspec_pair"
         />
 
         <div class="input-field">
@@ -29,8 +26,8 @@
 
         <AssetList
           ref="asset_list"
-          :modality="current_modality"
-          :specialty="current_specialty"
+          :modality="current_modspec_pair.modality"
+          :specialty="current_modspec_pair.specialty"
           :search-expression="search_expression"
           :asset-interface="asset_interface"
           :disabled="ongoing_addition"
@@ -119,7 +116,6 @@
 
 <script>
 
-import { fromJS } from 'immutable'
 import _assign from 'lodash/assign'
 import _keys from 'lodash/keys'
 import _throttle from 'lodash/throttle'
@@ -139,8 +135,10 @@ export default {
 
   data: function () {
     return {
-      current_modality: this.initialModality,
-      current_specialty: this.initialSpecialty,
+      current_modspec_pair : {
+        modality : this.initialModality,
+        specialty : this.initialSpecialty,
+      },
       search_expression: '',
       current_asset: null,
       input_asset_store: {},
@@ -164,7 +162,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
-          disabled: (! this.user_id) || (current_asset_is_mine && clean)
+          disabled: (!this.user_id) || (current_asset_is_mine && clean)
         },
         'copy': {
           btn: true,
@@ -173,7 +171,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
-          disabled : (! this.user_id) 
+          disabled : (!this.user_id)
         },
         'add': {
           btn: true,
@@ -182,7 +180,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
-          disabled : (! this.user_id) 
+          disabled : (!this.user_id)
         },
         'remove': {
           btn: true,
@@ -191,7 +189,7 @@ export default {
           'waves-effect': true,
           'waves-light': true,
           'w-100': true,
-          disabled : (! this.user_id) || (!current_asset_is_mine)
+          disabled : (!this.user_id) || (!current_asset_is_mine)
         },
         'cancel': {
           btn: true,
@@ -259,18 +257,18 @@ export default {
       const current_asset_is_copy = this.current_asset_is_copy
       const ongoing_upsert = this.ongoing_upsert
       const user_id = this.user_id
-      return user_id && (current_asset_is_mine || (current_asset_is_copy && (! ongoing_upsert)))
+      return user_id && (current_asset_is_mine || (current_asset_is_copy && (!ongoing_upsert)))
     }
 
   },
 
   methods: {
     set_modality: function (modality) {
-      this.current_modality = modality
+      this.$set(this.current_modspec_pair, 'modality', modality)
     },
 
     set_specialty: function (specialty) {
-      this.current_specialty = specialty
+      this.$set(this.current_modspec_pair, 'specialty', specialty)
     },
 
     search_input_changed: _throttle(
@@ -300,10 +298,10 @@ export default {
       if (name === 'add') {
         _id = 'NEW'
         this.current_asset = _assign(
-          this.asset_interface.empty_asset(), 
+          this.asset_interface.empty_asset(),
           {
-            modality: this.current_modality.name,
-            specialty: this.current_specialty.name,
+            modality: this.current_modspec_pair.modality.name,
+            specialty: this.current_modspec_pair.specialty.name,
             _id
           }
         )
@@ -418,7 +416,7 @@ export default {
           const successful_upserts = []
           const failed_upserts = []
 
-          results.forEach(({ _id, requested_id, error }) => { 
+          results.forEach(({ _id, requested_id, error }) => {
             if (requested_id.startsWith('copy://')) {
               // Unmangle the ids corresponding to the copy operations
               requested_id = requested_id.slice(7)
@@ -434,8 +432,8 @@ export default {
           })
 
           // Remove input store entry for successful upsets where appropriate
-          successful_upserts.forEach(({ _id, requested_id }) => {
-            let input_asset = this.input_asset_store[requested_id]
+          successful_upserts.forEach(({ requested_id }) => {
+            const input_asset = this.input_asset_store[requested_id]
             if (input_asset && input_asset._submitted === me) {
               // Unchanged since last submit by myself
               this.$delete(this.input_asset_store, requested_id)
@@ -444,7 +442,7 @@ export default {
 
           // Return failed upserts to pending upsert list where appropriate, to avoid
           // losing sacred user input data
-          failed_upserts.forEach(({requested_id, asset}) => {
+          failed_upserts.forEach(({ requested_id, asset }) => {
             let input_asset = this.input_asset_store[requested_id]
             if (input_asset && input_asset._submitted === me) {
               // Unchanged since last submit by myself

@@ -1,66 +1,87 @@
 <template>
-<div v-bind:class="container_classes['dialog_main_container']">
-  <div v-bind:class="container_classes['client_area']">
-    <div class="switch mt-2 mb-2">
-      <label>
-        Público
-        <input type="checkbox" v-model="not_public">
-        <span class="lever"></span>
-        Privado
-      </label>
-    </div>
+  <div :class="container_classes['dialog_main_container']">
+    <div :class="container_classes['client_area']">
+      <div class="switch mt-2 mb-2">
+        <label>
+          Público
+          <input
+            v-model="not_public"
+            type="checkbox"
+          >
+          <span class="lever" />
+          Privado
+        </label>
+      </div>
 
-    <ModSpecSelector v-bind:initial-modality="initialModality"
-                      v-bind:initial-specialty="initialSpecialty"
-                      v-on:specialty-changed="set_specialty"
-                      v-on:modality-changed="set_modality">
-    </ModSpecSelector>
+      <ModSpecSelector v-model="current_modspec_pair" />
 
-    <div class="input-field">
-      <input id="nickname_input" type="text" v-model.trim="nickname">
-      <label for="nickname_input" class="active"> Título </label>
-    </div>
+      <div class="input-field">
+        <input
+          id="nickname_input"
+          v-model.trim="nickname"
+          type="text"
+        >
+        <label
+          for="nickname_input"
+          class="active"
+        >
+          Título
+        </label>
+      </div>
 
-    <div class="switch mt-2">
-      <label>
-        Criar novo
-        <input type="checkbox" v-model="overwrite_template" >
-        <span class="lever"></span>
-        Sobrescrever
-      </label>
-    </div>
+      <div class="switch mt-2">
+        <label>
+          Criar novo
+          <input
+            v-model="overwrite_template"
+            type="checkbox"
+          >
+          <span class="lever" />
+          Sobrescrever
+        </label>
+      </div>
 
-    <div class="flex-grow-1 mt-3 mb-3" style="overflow-y : auto;">
-      <AssetList v-if="(overwrite_template) && (user_id)"
-        v-bind:modality="current_modality" v-bind:specialty="current_specialty"
-        search-expression=""
-        v-bind:asset-interface="template_interface"
-        v-bind:extra-filters="{ owner_id : user_id }"
-        v-on:asset-chosen="asset_chosen"
-        v-on:asset-changed="asset_changed" >
-      </AssetList>
-    </div>
+      <div
+        class="flex-grow-1 mt-3 mb-3"
+        style="overflow-y : auto;"
+      >
+        <AssetList
+          v-if="(overwrite_template) && (user_id)"
+          :modality="current_modspec_pair.modality"
+          :specialty="current_modspec_pair.specialty"
+          search-expression=""
+          :asset-interface="template_interface"
+          :extra-filters="{ owner_id : user_id }"
+          @asset-chosen="asset_chosen"
+          @asset-changed="asset_changed"
+        />
+      </div>
 
-    <div v-if="submitting" style="text-align:center;">
-      <div class="preloader-wrapper small active">
-        <div class="spinner-layer spinner-red-only">
-          <div class="circle-clipper left">
-            <div class="circle"></div>
-          </div><div class="gap-patch">
-            <div class="circle"></div>
-          </div><div class="circle-clipper right">
-            <div class="circle"></div>
+      <div
+        v-if="submitting"
+        style="text-align:center;"
+      >
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-red-only">
+            <div class="circle-clipper left">
+              <div class="circle" />
+            </div><div class="gap-patch">
+              <div class="circle" />
+            </div><div class="circle-clipper right">
+              <div class="circle" />
+            </div>
           </div>
         </div>
       </div>
+      <a
+        v-else
+        :class="button_classes.submit"
+        @click="button_clicked('submit')"
+      >
+        Enviar
+      </a>
     </div>
-    <a v-else v-bind:class="button_classes.submit"
-        v-on:click="button_clicked('submit')">
-      Enviar
-    </a>
-
   </div>
-</div>
 </template>
 
 <script>
@@ -75,19 +96,13 @@ import { template_interface } from './asset_interfaces.js'
 import { userid_mixin } from '../../api/user.js'
 
 export default {
-  data: function () {
 
-    return {
-      overwrite_template: false,
-      nickname: '',
-      not_public: false,
-      current_modality: this.initialModality,
-      current_specialty: this.initialSpecialty,
-      current_template: this.initialTemplate,
-      submitting: false,
-      template_interface
-    }
+  components: {
+    AssetList,
+    ModSpecSelector
   },
+
+  mixins: [ dialog_mixin, userid_mixin ],
 
   props: {
     initialSpecialty: Object,
@@ -95,15 +110,29 @@ export default {
     initialTemplate: Object,
     content: Array
   },
+  data: function () {
+    return {
+      overwrite_template: false,
+      nickname: '',
+      not_public: false,
+      current_modspec_pair : {
+        modality : this.initialModality,
+        specialty : this.initialSpecialty,
+      },
+      current_template: this.initialTemplate,
+      submitting: false,
+      template_interface
+    }
+  },
 
   computed: {
     button_classes: function () {
-      let overwrite_template = this.overwrite_template
-      let current_template = this.current_template
-      let nickname = this.nickname
-      let can_submit = (this.user_id) && 
-        (nickname !== '') && 
-        ((!overwrite_template) || current_template)
+      const overwrite_template = this.overwrite_template
+      const current_template = this.current_template
+      const nickname = this.nickname
+      const can_submit = (this.user_id)
+        && (nickname !== '')
+        && ((!overwrite_template) || current_template)
       return {
         'submit': {
           btn: true,
@@ -145,8 +174,8 @@ export default {
 
   watch: {
     current_template: function (val, old_val) {
-      let old_id = old_val ? old_val._id : null
-      let new_id = val ? val._id : null
+      const old_id = old_val ? old_val._id : null
+      const new_id = val ? val._id : null
 
       if (old_id !== new_id) {
         this.nickname = val ? val.nickname : ''
@@ -165,11 +194,11 @@ export default {
     },
 
     set_modality: function (modality) {
-      this.current_modality = modality
+      this.$set(this.current_modspec_pair, 'modality', modality)
     },
 
     set_specialty: function (specialty) {
-      this.current_specialty = specialty
+      this.$set(this.current_modspec_pair, 'specialty', specialty)
     },
 
     clear_current_template : function() {
@@ -177,18 +206,16 @@ export default {
     },
 
     button_clicked: function (name) {
-      const _submit_upsert_and_close = (upsert) => {
-        return template_interface.upsert_assets([upsert])
-          .then(() => {
-            this.submitting = false
-            return this.hide()
-          }, (error) => {
-            console.log('Error sending template update to DB')
-            console.log(error)
-            console.log('Retrying...')
-            return _submit_upsert_and_close(upsert)
-          })
-      }
+      const _submit_upsert_and_close = upsert => template_interface.upsert_assets([upsert])
+        .then(() => {
+          this.submitting = false
+          return this.hide()
+        }, (error) => {
+          console.log('Error sending template update to DB')
+          console.log(error)
+          console.log('Retrying...')
+          return _submit_upsert_and_close(upsert)
+        })
 
       if (name === 'submit') {
         this.submitting = true
@@ -199,20 +226,13 @@ export default {
         upsert.owner_id = this.user_id
         upsert.nickname = this.nickname
         upsert.body = this.template_body
-        upsert.specialty = this.current_specialty.name
-        upsert.modality = this.current_modality.name
+        upsert.specialty = this.current_modspec_pair.specialty.name
+        upsert.modality = this.current_modspec_pair.modality.name
         upsert.public = (!this.not_public)
         _submit_upsert_and_close(upsert)
       }
     }
-  },
-
-  components: {
-    AssetList,
-    ModSpecSelector
-  },
-
-  mixins: [ dialog_mixin, userid_mixin ]
+  }
 }
 
 </script>

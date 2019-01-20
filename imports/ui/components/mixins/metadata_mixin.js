@@ -4,19 +4,19 @@ import _property from 'lodash/property'
 import _filter from 'lodash/filter'
 import _isString from 'lodash/isString'
 
-import base_metadata from '../../../api/base_metadata.js'
+import base_metadata, { get_default_specialty_modality_pair } from '../../../api/base_metadata.js'
 
 function valid_modality_for_specialty (modality, specialty) {
-  if (! specialty) return false
-  if (! modality) return false
+  if (!specialty) return false
+  if (!modality) return false
   if (specialty.modalities === 'all') return true
   return specialty.modalities.includes(modality.name)
 }
 
 /*
-  This mixin adds metadata navigation functionality to a component. 
+  This mixin adds metadata navigation functionality to a component.
   It adds a current_modality and current_specialty to the data object and methods
-  to manipulate these, making sure the pair is always valid. It also computes 
+  to manipulate these, making sure the pair is always valid. It also computes
   emits changed events for these data items and computes modality and specialty lists
   including in the latter only the valid specialties for the current modality.
 */
@@ -57,7 +57,7 @@ export default {
 
   methods: {
     get_valid_specialties: function () {
-      let specialties = Object.values(this.metadata.specialties)
+      let specialties = _values(this.metadata.specialties)
       specialties = _filter(specialties,
         s => (valid_modality_for_specialty(this.current_modality, s)))
       specialties = _sortBy(specialties, _property('nickname'))
@@ -66,7 +66,7 @@ export default {
 
     set_modality: function (new_modality) {
       let new_modality_name = new_modality
-      if (! _isString(new_modality_name)) {
+      if (!_isString(new_modality_name)) {
         new_modality_name = new_modality_name.name
       }
       this.current_modality = this.metadata.modalities[new_modality_name]
@@ -77,10 +77,14 @@ export default {
 
     set_specialty: function (new_specialty) {
       let new_specialty_name = new_specialty
-      if (! _isString(new_specialty_name)) {
+      if (!_isString(new_specialty_name)) {
         new_specialty_name = new_specialty_name.name
       }
       this.current_specialty = this.metadata.specialties[new_specialty_name]
+    },
+
+    get_default_specialty_modality_pair : function() {
+      return get_default_specialty_modality_pair(true)
     }
   }
 }
