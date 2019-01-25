@@ -1,13 +1,13 @@
 import SimpleSchema from 'simpl-schema'
-import { List as ImList, Map as ImMap, Set as ImSet, fromJS } from 'immutable'
+import { List as ImList, fromJS } from 'immutable'
 import _assign from 'lodash/assign'
-import _entries from 'lodash/entries'
 import _filter from 'lodash/filter'
+import mingo from 'mingo'
 
 import { collate } from './intl_util.js'
 import { get_db_promise, generate_uid, is_client, is_server, is_production } from './db_meteor.js'
 import { get_current_uid } from './user.js'
-import {get_default_specialty_modality_pair} from './base_metadata.js'
+import { get_default_specialty_modality_pair } from './base_metadata.js'
 
 /*
   DB backend interface specification:
@@ -211,10 +211,18 @@ function transform_record (record, search_fields) {
 }
 
 function transform_selector (selector, options, search_expression) {
-  const new_selector = _assign({}, selector)
-
+  let new_selector = _assign({}, selector)
   const search_array = split_and_collate_text(search_expression, false)
-  if (search_array.length > 0) new_selector[aux_fieldname] = { '$all': search_array }
+
+  if (search_array.length > 0) {
+    new_selector = {
+      $and : [
+        { [aux_fieldname] : { '$all': search_array } },
+        new_selector
+      ]
+    }
+  }
+
   return new_selector
 }
 
@@ -254,16 +262,7 @@ function _transform_hardcoded_stuff(items, schema, search_fields, sort_key) {
     return 0
   })
 
-  let output_wordmap = new ImMap()
-  output.forEach((o) => {
-    o.get(aux_fieldname).forEach((w) => {
-      let temp = output_wordmap.get(w) || new ImSet()
-      temp = temp.add(o)
-      output_wordmap = output_wordmap.set(w, temp)
-    })
-  })
-
-  return { items: output, wordmap : output_wordmap }
+  return { items: output }
 }
 
 function load_hardcoded_stuff() {
@@ -394,48 +393,6 @@ function _sorted_index_of (list, item, comparator) {
   return -1
 }
 
-function _filter_items (items, items_wordmap, selector) {
-  let valid_items
-  if ((items_wordmap) && (selector['$all'] !== undefined)) {
-    for (let i = 0; i < selector['$all'].length; i += 1) {
-      const w = selector['$all'][i]
-      const new_records = items_wordmap.get(w)
-      if (!new_records) return new ImList()
-
-      if (!valid_items) valid_items = new_records
-      else valid_items = valid_items.intersect(new_records)
-
-      if (valid_items.size === 0) return new ImList()
-    }
-  }
-
-  selector = _entries(selector)
-  return items.filter((i) => {
-    let retval = true
-
-    selector.forEach(([k, v]) => {
-      if (k === '$all') {
-        if (valid_items) {
-          if (!valid_items.has(i)) {
-            retval = false
-          }
-        } else {
-          v.forEach((w) => {
-            if (_sorted_index_of(i.get(aux_fieldname), w,
-              (a, b) => a.localeCompare(b)) < 0) {
-              retval = false
-            }
-          })
-        }
-      } else if (i.get(k) !== v) {
-        retval = false
-      }
-    })
-
-    return retval
-  })
-}
-
 // Merge fixed items with items fetched from DB, assuming both lists are compatibly
 // sorted.
 function _merge_sorted_lists(l1, l2, comparator) {
@@ -476,6 +433,7 @@ class ExpandedCursor {
   constructor (cursor, fixed_items, selector, options, sort_key) {
     this._cursor = cursor
     this._selector = selector
+    this._mingo_query = new mingo.Query(selector)
     this._options = options
     this._sort_key = sort_key
     this._comparator = ((a, b) => {
@@ -487,8 +445,8 @@ class ExpandedCursor {
       return a.get('_id').localeCompare(b.get('_id'))
     })
 
-    // These should have already been filtered by the caller
-    this._fixed_items = fixed_items.sort(this._comparator)
+    this._fixed_items = this._filter_items(fixed_items)
+    this._fixed_items = this._fixed_items.sort(this._comparator)
     this._dataset = this._fixed_items
 
     this.fetch = this.fetch.bind(this)
@@ -508,17 +466,27 @@ class ExpandedCursor {
     }
   }
 
+  _filter_items(items) {
+    // TODO: make this work directly with immutable
+    const query = this._mingo_query
+    return items.filter(i => (query.test(i.toJS())))
+  }
+
   fetch() {
     return this._cursor.fetch().then((data) => {
       // Locally filter items fetched from DB, since they unconditionally include
       // user-owned items. Fixed items had already been filtered before this
       // cursor was created.
-      data = _filter_items(data, undefined, this._selector)
+      data = this._filter_items(data)
       return _merge_sorted_lists(this._fixed_items, data, this._comparator)
     })
   }
 
   item_added(doc) {
+    if (!this._mingo_query.test(doc.toJS())) {
+      // ignore locally filtered-out items
+      return
+    }
     const idx = _sorted_insert_index(this._dataset, doc, this._comparator)
     this._dataset = this._dataset.insert(idx, doc)
     this.notify_observers()
@@ -526,10 +494,14 @@ class ExpandedCursor {
 
   item_changed(new_doc, old_doc) {
     let idx = _sorted_index_of(this._dataset, old_doc, this._comparator)
-    if (idx < 0) {
-      throw new Error(`item_changed: item with id ${old_doc.get('_id')} not found in dataset`)
+    if (idx >= 0) {
+      // Old doc had not been filtered out. Temporarily remove it
+      this._dataset = this._dataset.delete(idx)
     }
-    this._dataset = this._dataset.delete(idx)
+    if (!this._mingo_query.test(new_doc.toJS())) {
+      // ignore locally filtered-out items
+      return
+    }
     idx = _sorted_insert_index(this._dataset, new_doc, this._comparator)
     this._dataset = this._dataset.insert(idx, new_doc)
     this.notify_observers()
@@ -537,11 +509,10 @@ class ExpandedCursor {
 
   item_removed(old_doc) {
     const idx = _sorted_index_of(this._dataset, old_doc, this._comparator)
-    if (idx < 0) {
-      throw new Error(`item_changed: item with id ${old_doc.get('_id')} not found in dataset`)
+    if (idx >= 0) {
+      this._dataset = this._dataset.delete(idx)
+      this.notify_observers()
     }
-    this._dataset = this._dataset.delete(idx)
-    this.notify_observers()
   }
 
   notify_observers() {
@@ -574,8 +545,7 @@ class ExpandedCursor {
   }
 }
 
-// Selector must be an object that will be matched field by field with the
-// incoming records assuming equality predicates and implicit logic AND.
+// Selector is a more or less generic MongoDB selector
 // search_expression will be split and collated into keywords, and an array
 // query into the auxiliary field will be added to selector.
 function _do_find(collection, hardcoded_collection, selector, options, sort_key) {
@@ -584,11 +554,9 @@ function _do_find(collection, hardcoded_collection, selector, options, sort_key)
   }
   if (!_ready) return null
 
-  options = _assign({}, options, { sort : { [ sort_key ] : 1, _id : 1 } } )
-  const fixed_items = _filter_items(hardcoded_collection.items,
-    hardcoded_collection.wordmap, selector)
-  return new ExpandedCursor(collection.find(selector, options), fixed_items, selector,
-    options, sort_key)
+  options = _assign({}, options, { sort : { [ sort_key ] : 1, _id : 1 } })
+  return new ExpandedCursor(collection.find(selector, options), hardcoded_collection.items,
+    selector, options, sort_key)
 }
 
 function find_templates (selector, options, search_expression = '', sort_key = 'nickname') {
