@@ -31,7 +31,7 @@
               class="dropdown-content"
             >
               <li
-                v-for="template in report_templates.get(specialty.name)"
+                v-for="template in modality_templates[specialty.name]"
                 :key="template._id"
               >
                 <a
@@ -78,6 +78,8 @@
 
 <script>
 
+import { Map as ImMap } from 'immutable'
+
 import * as db from '../../api/db.js'
 import DropdownTrigger from './DropdownTrigger.vue'
 import LoginMenu from './LoginMenu.vue'
@@ -94,38 +96,60 @@ export default {
 
   props: {
     templateDropdowns: Boolean,
-    tabs: Boolean
+    tabs: Boolean,
   },
+
   data: function () {
     return {
+      all_templates : new ImMap(),
       materialize_classes: [ 'tabs' ],
       materialize_recursive: true
     }
   },
 
   computed: {
+    modality_templates : function() {
+      const modality_templates = this.all_templates.get(this.current_modality.name)
+      if (modality_templates) {
+        return modality_templates.toJS()
+      }
 
-    report_templates: function () {
-      let entries = this.datasets.default
-      if (entries === null) return new Map()
-
-      entries = entries.groupBy(t => (t.get('specialty')))
-      entries = entries.sortBy(
-        (v, k) => (k),
-        (a, b) => (a.localeCompare(b))
-      )
-      const output = new Map()
-      entries.forEach((v, k) => {
-        output.set(k, v.toJS())
-      })
-      return output
+      return {}
     }
   },
 
   watch: {
-    current_modality: function () {
-      this.refresh_datasets()
-    }
+    'datasets.default' : {
+      immediate : true,
+      handler : function(new_value, old_value) {
+        const entries = new_value
+
+        if (entries === null) {
+          this.all_templates = new ImMap()
+          return
+        }
+        if (entries.equals(old_value)) {
+          return
+        }
+
+        let entries_by_modality = entries.groupBy(t => (t.get('modality')))
+        entries_by_modality = entries_by_modality.sortBy(
+          (v, k) => (k),
+          (a, b) => (a.localeCompare(b))
+        )
+
+        entries_by_modality = entries_by_modality.map((v) => {
+          let entries_by_specialty = v.groupBy(t => (t.get('specialty')))
+          entries_by_specialty = entries_by_specialty.sortBy(
+            (vs, ks) => (ks),
+            (a, b) => (a.localeCompare(b))
+          )
+          return entries_by_specialty
+        })
+
+        this.all_templates = entries_by_modality
+      }
+    },
   },
 
   methods: {
@@ -134,6 +158,10 @@ export default {
     },
 
     find_function: function () {
+      if (this.injectedDatasets) {
+        throw new Error('Should not be here.')
+      }
+
       const selector = {
         modality: this.current_modality.name,
       }

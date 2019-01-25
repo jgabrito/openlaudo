@@ -8,6 +8,7 @@
       tabs
       :initial-modality="initialModality"
       :initial-specialty="initialSpecialty"
+      :injected-datasets="injected_templates"
       @template-chosen="template_chosen"
       @specialty-changed="set_specialty"
       @modality-changed="set_modality"
@@ -165,11 +166,8 @@
             <AssetList
               expanded
               class="flex-grow-1"
-              :modality="current_modality"
-              :specialty="current_specialty"
-              :search-expression="search_expression"
               :asset-interface="descriptor_interface"
-              :extra-filters="asset_list_extra_filters"
+              :injected-datasets="injected_descriptors"
               @asset-chosen="format_descriptor"
             />
           </div>
@@ -193,11 +191,12 @@ import DescriptorDialog from './DescriptorDialog.js'
 import TemplateSaveDialog from './TemplateSaveDialog.vue'
 import ClickableTemplateList from './ClickableTemplateList.vue'
 
+import * as db from '../../api/db.js'
 import { descriptor_interface } from './asset_interfaces.js'
 import { editor_insert_stuff } from './quill_utils.js'
 import materialize_mixin from './mixins/materialize_mixin';
+import db_mixin from './mixins/db_mixin.js'
 import { userid_mixin } from '../../api/user.js'
-import { get_system_uid } from '../../api/db';
 
 export default {
 
@@ -207,13 +206,22 @@ export default {
     ClickableTemplateList,
   },
   mixins : [
-    materialize_mixin, userid_mixin
+    materialize_mixin, userid_mixin, db_mixin
   ],
 
   props: {
     initialModality : Object,
     initialSpecialty : Object,
-    localVue : Object
+    localVue : Object,
+    datasetNames : {
+      type : Array,
+      default : function() {
+        return [
+          'descriptors',
+          'templates'
+        ]
+      }
+    }
   },
 
   data : function() {
@@ -244,15 +252,29 @@ export default {
   },
 
   computed : {
-    asset_list_extra_filters : function() {
-      if (this.user_id) {
-        return {
-          owner_id : {
-            $in : [ this.user_id, get_system_uid() ]
-          }
-        }
+    // Descriptors to be injected as default dataset into AssetList
+    injected_descriptors : function() {
+      const modality = this.current_modality
+      const specialty = this.current_specialty
+      const search_expression = this.search_expression
+      const selector = {
+        modality : modality.name,
+        specialty : specialty.name
       }
-      return {}
+      const descriptors = this.datasets.descriptors
+
+      return { default : db.filter_items(descriptors, selector, search_expression) }
+    },
+
+    // Templates to be injected as default dataset into TemplateNav
+    injected_templates : function() {
+      return { default : this.datasets.templates }
+    }
+  },
+
+  watch : {
+    user_id : function() {
+      this.refresh_datasets()
     }
   },
 
@@ -350,6 +372,19 @@ export default {
 
     clickable_templates_received : function(cards) {
       this.has_cards = (cards.length > 0)
+    },
+
+    find_function : function() {
+      const selector = {}
+      if (this.user_id) {
+        selector.owner_id = {
+          $in : [ this.user_id, db.get_system_uid() ]
+        }
+      }
+      return {
+        descriptors : db.find_descriptors(selector, {}, '', 'title'),
+        templates : db.find_templates(selector, {}, '', 'nickname')
+      }
     }
   }
 }

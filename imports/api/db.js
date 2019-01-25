@@ -639,9 +639,16 @@ function validate_descriptor(d) {
   }
 }
 
+// Hacky...
+function filter_items(items, selector, search_expression) {
+  selector = transform_selector(selector, {}, search_expression)
+  const query = new mingo.Query(selector)
+  return items.filter(i => (query.test(i.toJS())))
+}
+
 export {
   db_ready_promise, is_db_ready, get_system_uid,
   find_templates, upsert_template, validate_template, empty_template,
   find_descriptors, upsert_descriptor, validate_descriptor, empty_descriptor,
-  get_capabilities
+  get_capabilities, filter_items
 }

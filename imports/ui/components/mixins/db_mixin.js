@@ -16,18 +16,45 @@ export default {
       default : function() {
         return [ 'default' ]
       }
+    },
+
+    // If this property is set by a parent component, then this component will
+    // not initiate any DB subscription and will expect to receive all its data
+    // from the parent component
+    injectedDatasets : {
+      type : Object,
+      default : function() {
+        return null
+      }
     }
   },
 
   data: function () {
     const datasets = {}
     this.datasetNames.forEach((n) => {
-      datasets[n] = null
+      datasets[n] = new ImList()
     })
     return {
       datasets,
       db_ready: false,
       searching: false
+    }
+  },
+
+  watch: {
+    injectedDatasets : {
+      immediate : true,
+      handler : function() {
+        if (!this.injectedDatasets) {
+          this.refresh_datasets()
+          return
+        }
+
+        _entries(this.injectedDatasets).forEach(([n, d]) => {
+          this._schedule_update(n, d)
+        })
+        this._throttled_update()
+      }
     }
   },
 
@@ -65,6 +92,7 @@ export default {
     },
 
     refresh_datasets: function (active = false) {
+      if (this.injectedDatasets) return
       if (!this.db_ready) return
 
       this.cleanup_cursors()
@@ -116,7 +144,7 @@ export default {
     }
   },
 
-  created: function () {
+  beforeCreate: function () {
     db.db_ready_promise().then(() => {
       this.db_ready = true
       this.refresh_datasets(true)
@@ -137,6 +165,7 @@ export default {
     )
 
     this._updates = { }
+
     this._schedule_update = (name, dataset) => {
       this._updates[name] = dataset
       this._throttled_update()

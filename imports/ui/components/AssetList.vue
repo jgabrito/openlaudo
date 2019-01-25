@@ -120,23 +120,54 @@ export default {
         appropriate entry in the DB backend and returns a promise for the data
   */
   props: {
-    modality: Object,
-    specialty: Object,
-    searchExpression: String,
+    modality: {
+      type : Object,
+      default : function() {
+        return null
+      }
+    },
+    specialty: {
+      type : Object,
+      default : function() {
+        return null
+      }
+    },
+    searchExpression: {
+      type : String,
+      default : function() {
+        return ''
+      }
+    },
     extraFilters: {
       type : Object,
       default : function() {
         return {}
       }
     },
-    expanded: Boolean,
-    assetInterface: Object,
-    disabled: Boolean,
+    expanded: {
+      type : Boolean,
+      default : function() {
+        return false
+      }
+    },
+    assetInterface: {
+      type : Object,
+      default : function() {
+        return null
+      }
+    },
+    disabled: {
+      type : Boolean,
+      default: function() {
+        return false
+      }
+    }
   },
 
   data: function () {
     return {
       selected_asset_id_stack: [],
+      assets : [],
       current_asset: null
     }
   },
@@ -147,11 +178,6 @@ export default {
       if (current_asset) return current_asset._id
       return null
     },
-
-    assets: function () {
-      if (!this.datasets.default) return []
-      return this.datasets.default.toJS()
-    }
   },
 
   watch: {
@@ -172,11 +198,14 @@ export default {
     },
 
     selected_asset_id_stack : function() {
-      this.dataset_watcher()
+      this.dataset_watcher(this.datasets.default, this.datasets.default)
     },
 
-    'datasets.default' : function () {
-      this.dataset_watcher()
+    'datasets.default' : {
+      immediate : true,
+      handler : function (new_value, old_value) {
+        this.dataset_watcher(new_value, old_value)
+      }
     },
 
     current_asset: function () {
@@ -203,15 +232,19 @@ export default {
       return this.current_asset
     },
 
-    dataset_watcher : function () {
-      const dataset = this.datasets.default
+    dataset_watcher : function(new_dataset, old_dataset) {
+      const dataset = new_dataset
       const current_asset = this.current_asset
       const selected_asset_id_stack = this.selected_asset_id_stack
       let new_current_asset = null
 
       if (!dataset) {
         this.current_asset = null
+        this.assets = []
         return
+      }
+      if (!dataset.equals(old_dataset)) {
+        this.assets = dataset.toJS()
       }
 
       for (let i = selected_asset_id_stack.length - 1; i >= 0; i -= 1) {
@@ -241,6 +274,9 @@ export default {
     },
 
     find_function: function () {
+      if (this.injectedDatasets) {
+        throw new Error('Should not be here.')
+      }
       const selector = _assign(
         {
           modality: this.modality.name,
