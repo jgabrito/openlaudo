@@ -2,38 +2,73 @@
 <template>
   <nav class="nav-extended">
     <div class="nav-wrapper">
-      <a v-if="tabs" href="#!" class="brand-logo right">Open Laudo</a>
+      <a
+        v-if="tabs"
+        href="#!"
+        class="brand-logo right"
+      >
+        Open Laudo
+      </a>
 
       <ul class="left hide-on-med-and-down">
-        <li v-if="tabs"> <LoginMenu></LoginMenu> </li>
-        <li v-for="specialty in specialties"
-          v-bind:key="get_specialty_id(specialty)"
-          v-bind:class="{ active : (specialty === current_specialty) }" >
-          <DropdownTrigger class="specialty_a" v-if="templateDropdowns" v-bind:text-content="specialty.nickname"
-            v-bind:target="get_specialty_id(specialty)"
-            v-on:click="set_specialty(specialty.name)" >
-            <ul v-bind:id="get_specialty_id(specialty)" class="dropdown-content">
-              <li v-for="template in report_templates.get(specialty.name)"
-                v-bind:key="template._id">
-                <a href="#!" v-on:click="$emit('template-chosen', template)">
-                  {{template.nickname}}
+        <li v-if="tabs">
+          <LoginMenu />
+        </li>
+        <li
+          v-for="specialty in specialties"
+          :key="get_specialty_id(specialty)"
+          :class="{ active : (specialty === current_specialty) }"
+        >
+          <DropdownTrigger
+            v-if="templateDropdowns"
+            class="specialty_a"
+            :text-content="specialty.nickname"
+            :target="get_specialty_id(specialty)"
+            @click="set_specialty(specialty.name)"
+          >
+            <ul
+              :id="get_specialty_id(specialty)"
+              class="dropdown-content"
+            >
+              <li
+                v-for="template in report_templates.get(specialty.name)"
+                :key="template._id"
+              >
+                <a
+                  href="#!"
+                  :class="get_template_class(template)"
+                  @click="$emit('template-chosen', template)"
+                >
+                  {{ template.nickname }}
                 </a>
               </li>
             </ul>
           </DropdownTrigger>
-          <a v-else href="#!" class="specialty_a" v-on:click="set_specialty(specialty.name)">
+          <a
+            v-else
+            href="#!"
+            class="specialty_a"
+            @click="set_specialty(specialty.name)"
+          >
             {{ specialty.nickname }}
           </a>
         </li>
       </ul>
     </div>
     <div class="nav-content">
-      <ul v-bind:class="{tabs : tabs}">
-        <li v-for="modality in modalities" v-bind:key="modality.name"
-            v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
-          <a href="#" class="modality_a" v-on:click="set_modality(modality.name)"
-             v-bind:class="{ tab : tabs , active : (modality === current_modality) }">
-            {{modality.nickname}}
+      <ul :class="{tabs : tabs}">
+        <li
+          v-for="modality in modalities"
+          :key="modality.name"
+          :class="{ tab : tabs , active : (modality === current_modality) }"
+        >
+          <a
+            href="#"
+            class="modality_a"
+            :class="{ tab : tabs , active : (modality === current_modality) }"
+            @click="set_modality(modality.name)"
+          >
+            {{ modality.nickname }}
           </a>
         </li>
       </ul>
@@ -49,8 +84,18 @@ import LoginMenu from './LoginMenu.vue'
 import metadata_mixin from './mixins/metadata_mixin.js'
 import materialize_mixin from './mixins/materialize_mixin.js'
 import db_mixin from './mixins/db_mixin.js'
+import { userid_mixin } from '../../api/user.js';
 
 export default {
+
+  components: { DropdownTrigger, LoginMenu },
+
+  mixins: [ metadata_mixin, materialize_mixin, db_mixin, userid_mixin ],
+
+  props: {
+    templateDropdowns: Boolean,
+    tabs: Boolean
+  },
   data: function () {
     return {
       dataset: null, // Immutable
@@ -59,20 +104,13 @@ export default {
     }
   },
 
-  props: {
-    templateDropdowns: Boolean,
-    tabs: Boolean
-  },
-
-  components: { DropdownTrigger, LoginMenu },
-
   computed: {
 
     report_templates: function () {
       let entries = this.dataset
       if (entries === null) return new Map()
 
-      entries = entries.groupBy((t) => (t.get('specialty')))
+      entries = entries.groupBy(t => (t.get('specialty')))
       entries = entries.sortBy(
         (v, k) => (k),
         (a, b) => (a.localeCompare(b))
@@ -85,23 +123,42 @@ export default {
     }
   },
 
-  methods: {
-    get_specialty_id: function (specialty) {
-      return `${this.current_modality.name}-${specialty.name}`
-    },
-
-    find_function: function () {
-      return db.find_templates({ modality: this.current_modality.name }, {}, "", 'nickname' )
-    }
-  },
-
   watch: {
     current_modality: function () {
       this.refresh_dataset()
     }
   },
 
-  mixins: [ metadata_mixin, materialize_mixin, db_mixin ]
+  methods: {
+    get_specialty_id: function (specialty) {
+      return `${this.current_modality.name}-${specialty.name}`
+    },
+
+    find_function: function () {
+      const selector = {
+        modality: this.current_modality.name,
+      }
+
+      if (this.user_id) {
+        selector.owner_id = {
+          $in : [ this.user_id, db.get_system_uid() ]
+        }
+      } else {
+        selector.owner_id = db.get_system_uid()
+      }
+
+      return db.find_templates(selector, {}, '', 'nickname' )
+    },
+
+    get_template_class : function(template) {
+      if ((this.user_id) && (template.owner_id === this.user_id)) {
+        return {
+          bold : true
+        }
+      }
+      return { }
+    }
+  }
 }
 
 </script>
@@ -122,6 +179,10 @@ export default {
 
   .modality_a:hover {
     background-color: #80808040 !important;
+  }
+
+  .bold {
+    font-weight: bold;
   }
 
 </style>
