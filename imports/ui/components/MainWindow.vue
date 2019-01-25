@@ -169,6 +169,7 @@
               :specialty="current_specialty"
               :search-expression="search_expression"
               :asset-interface="descriptor_interface"
+              :extra-filters="asset_list_extra_filters"
               @asset-chosen="format_descriptor"
             />
           </div>
@@ -195,6 +196,8 @@ import ClickableTemplateList from './ClickableTemplateList.vue'
 import { descriptor_interface } from './asset_interfaces.js'
 import { editor_insert_stuff } from './quill_utils.js'
 import materialize_mixin from './mixins/materialize_mixin';
+import { userid_mixin } from '../../api/user.js'
+import { get_system_uid } from '../../api/db';
 
 export default {
 
@@ -204,7 +207,7 @@ export default {
     ClickableTemplateList,
   },
   mixins : [
-    materialize_mixin
+    materialize_mixin, userid_mixin
   ],
 
   props: {
@@ -237,6 +240,19 @@ export default {
       },
       materialize_classes : [ 'tabs' ],
       materialize_recursive : true
+    }
+  },
+
+  computed : {
+    asset_list_extra_filters : function() {
+      if (this.user_id) {
+        return {
+          owner_id : {
+            $in : [ this.user_id, get_system_uid() ]
+          }
+        }
+      }
+      return {}
     }
   },
 

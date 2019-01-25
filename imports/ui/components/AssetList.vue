@@ -180,7 +180,7 @@ export default {
     },
 
     current_asset: function () {
-      if (! this.disabled) {
+      if (!this.disabled) {
         this.$emit('asset-changed', this.current_asset)
       }
     }
@@ -246,8 +246,11 @@ export default {
           modality: this.modality.name,
           specialty: this.specialty.name
         },
+
+        // TODO: should make this more generic with a boolean $and ?
         this.extraFilters
       )
+
       return this.assetInterface.find_assets(
         selector,
         {},
