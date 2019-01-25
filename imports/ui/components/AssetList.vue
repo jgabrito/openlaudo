@@ -149,33 +149,33 @@ export default {
     },
 
     assets: function () {
-      if (!this.dataset) return []
-      return this.dataset.toJS()
+      if (!this.datasets.default) return []
+      return this.datasets.default.toJS()
     }
   },
 
   watch: {
     modality: function () {
-      this.refresh_dataset(true)
+      this.refresh_datasets(true)
     },
 
     specialty: function () {
-      this.refresh_dataset(true)
+      this.refresh_datasets(true)
     },
 
     searchExpression: function () {
-      this.refresh_dataset(false)
+      this.refresh_datasets(false)
     },
 
     extraFilters : function() {
-      this.refresh_dataset(false)
+      this.refresh_datasets(false)
     },
 
     selected_asset_id_stack : function() {
       this.dataset_watcher()
     },
 
-    dataset: function () {
+    'datasets.default' : function () {
       this.dataset_watcher()
     },
 
@@ -204,12 +204,12 @@ export default {
     },
 
     dataset_watcher : function () {
-      const dataset = this.dataset
+      const dataset = this.datasets.default
       const current_asset = this.current_asset
       const selected_asset_id_stack = this.selected_asset_id_stack
       let new_current_asset = null
 
-      if (!this.dataset) {
+      if (!dataset) {
         this.current_asset = null
         return
       }
@@ -251,12 +251,14 @@ export default {
         this.extraFilters
       )
 
-      return this.assetInterface.find_assets(
-        selector,
-        {},
-        this.searchExpression,
-        this.assetInterface.sort_key
-      )
+      return {
+        default : this.assetInterface.find_assets(
+          selector,
+          {},
+          this.searchExpression,
+          this.assetInterface.sort_key
+        )
+      }
     }
   }
 }

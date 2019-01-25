@@ -98,7 +98,6 @@ export default {
   },
   data: function () {
     return {
-      dataset: null, // Immutable
       materialize_classes: [ 'tabs' ],
       materialize_recursive: true
     }
@@ -107,7 +106,7 @@ export default {
   computed: {
 
     report_templates: function () {
-      let entries = this.dataset
+      let entries = this.datasets.default
       if (entries === null) return new Map()
 
       entries = entries.groupBy(t => (t.get('specialty')))
@@ -125,7 +124,7 @@ export default {
 
   watch: {
     current_modality: function () {
-      this.refresh_dataset()
+      this.refresh_datasets()
     }
   },
 
@@ -147,7 +146,7 @@ export default {
         selector.owner_id = db.get_system_uid()
       }
 
-      return db.find_templates(selector, {}, '', 'nickname' )
+      return { default : db.find_templates(selector, {}, '', 'nickname' ) }
     },
 
     get_template_class : function(template) {

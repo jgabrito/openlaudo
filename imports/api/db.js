@@ -523,14 +523,16 @@ class ExpandedCursor {
 
   observe(callback) {
     const _id = generate_uid()
-    this._observers.push({
+    const retval = {
       _id,
       callback,
       stop : () => {
         this._observers = _filter(this._observers, o => (o._id !== _id))
       }
-    })
+    }
+    this._observers.push(retval)
     callback(this._dataset)
+    return retval
   }
 
   clear() {
