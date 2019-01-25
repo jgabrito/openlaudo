@@ -497,7 +497,7 @@ export default {
 
   created: function () {
     // Start periodic polling of pending upserts
-    this._submit_interval = setInterval(() => { this.submit_upserts() }, 5000)
+    this._submit_interval = setInterval(() => { this.submit_upserts() }, 20000)
   },
 
   beforeDestroy: function () {
