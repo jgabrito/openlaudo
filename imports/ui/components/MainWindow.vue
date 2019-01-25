@@ -112,62 +112,47 @@
         <div class="d-flex flex-row">
           <ul class="tabs">
             <li class="tab">
-              <a class="sidebar_tab sidebar_tab_enabled active" 
-                href="#descriptor_list_container">
+              <a
+                class="sidebar_tab sidebar_tab_enabled active"
+                href="#descriptor_list_container"
+              >
                 Achados
               </a>
             </li>
-            <li class="tab" v-bind:class="{ disabled : (cards.length === 0) }">
-              <a class="sidebar_tab" 
-                v-bind:class="{sidebar_tab_enabled : (cards.length > 0)}"
-                href="#clickable_template_container">
+            <li
+              class="tab"
+              :class="{ disabled : (! has_cards) }"
+            >
+              <a
+                class="sidebar_tab"
+                :class="{sidebar_tab_enabled : has_cards}"
+                href="#clickable_template_container"
+              >
                 Forms clicáveis
               </a>
-            </li>          
+            </li>
           </ul>
         </div>
 
         <!-- FORMS CLICKS -->
-        <div id='clickable_template_container' class='flex-grow-1 mt-4 pt-4'>
-          <ul
-            id="clickable_template_cards"
-            ref="clickable_template_cards"
-            class="collapsible popout"
-          >
-            <li
-              v-for="card in cards"
-              :key="card.id"
-            >
-              <div class="collapsible-header d-flex flex-row">
-                <img
-                  :src="card.src"
-                  class="circle vignette "
-                >
-                <span
-                  class="headline white--text flex-grow-1"
-                  style="margin-top:20px;"
-                  v-html="card.title"
-                />
-              </div>
-              <div
-                id="form_div"
-                class="collapsible-body white"
-              >
-                <span
-                  class="headline white--text"
-                  v-html="card.description"
-                />
-                <!-- HERE ENTERS THE CLICK FORM -->
-                <!-- HERE ENTERS THE CLICK FORM -->
-                <!-- HERE ENTERS THE CLICK FORM -->
-              </div>
-            </li>
-          </ul>
-        </div>
+        <ClickableTemplateList
+          id="clickable_template_container"
+          class="flex-grow-1 mt-4 pt-4"
+          :modality="current_modality"
+          :specialty="current_specialty"
+          :get-quill="get_quill"
+          @cards_changed="clickable_templates_received"
+        />
 
         <!-- DESCRIPTORS DESCRIPTORS -->
-        <div id='descriptor_list_container' class='flex-grow-1 mt-4'>
-          <div id='descriptor_list_inner_container' class="d-flex flex-column h-100">
+        <div
+          id="descriptor_list_container"
+          class="flex-grow-1 mt-4"
+        >
+          <div
+            id="descriptor_list_inner_container"
+            class="d-flex flex-column h-100"
+          >
             <div>
               <input
                 id="descriptor_search_input"
@@ -201,30 +186,26 @@ import 'materialize-css/dist/js/materialize.min.js'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'pretty-checkbox/dist/pretty-checkbox.min.css'
 
-import _keys from 'lodash/keys'
-import _sortBy from 'lodash/sortBy'
-
 import TemplateNav from './TemplateNav.vue'
 import AssetList from './AssetList.vue'
 import DescriptorDialog from './DescriptorDialog.js'
 import TemplateSaveDialog from './TemplateSaveDialog.vue'
+import ClickableTemplateList from './ClickableTemplateList.vue'
+
 import { descriptor_interface } from './asset_interfaces.js'
-import form_templates from './form_templates.js'
-import { submit_laudo } from './click_templates.js'
 import { editor_insert_stuff } from './quill_utils.js'
 import materialize_mixin from './mixins/materialize_mixin';
 
-import ultrasound_icon from '../assets/images/ultrasound_icon.png'
-
 export default {
-  mixins : [
-    materialize_mixin
-  ],
 
   components : {
     TemplateNav,
     AssetList,
+    ClickableTemplateList,
   },
+  mixins : [
+    materialize_mixin
+  ],
 
   props: {
     initialModality : Object,
@@ -238,7 +219,7 @@ export default {
       current_specialty : this.initialSpecialty,
       search_expression : '',
       editor_content : [],
-      cards : [],
+      has_cards : false,
       descriptor_interface,
       quill_config : {
         modules: {
@@ -259,23 +240,6 @@ export default {
     }
   },
 
-  watch : {
-    current_modality : function() {
-      this.update_click_templates()
-    },
-
-    current_specialty : function() {
-      this.update_click_templates()
-    }
-  },
-
-  mounted : function() {
-    window.click_template_dispatcher = this.click_template_dispatcher
-    this.$nextTick(() => {
-      window.M.Collapsible.init(this.$refs.clickable_template_cards.$el)
-    })
-  },
-
   methods: {
     set_modality : function(modality) {
       this.current_modality = modality
@@ -286,73 +250,11 @@ export default {
     },
 
     template_chosen : function(template) {
-      const quill = this.$refs.editor.editor
-      editor_insert_stuff(quill, template.body, true)
+      editor_insert_stuff(this.get_quill(), template.body, true)
     },
 
     format_descriptor : function(descriptor) {
-      const quill = this.$refs.editor.editor
-      editor_insert_stuff(quill, [{ insert: descriptor.body }], false)
-    },
-
-    update_click_templates : function() {
-      // change click form
-      const new_cards = []
-      let templates = form_templates[this.current_modality.name]
-      if (templates) templates = templates[this.current_specialty.name]
-      if (templates) {
-        // if there is a clickable form for this modality/specialty pair in the
-        // form_templates.js file, render it on the cover of the expansible box
-        // with button to generate report
-        const names = _sortBy(_keys(templates))
-        names.forEach((name) => {
-          const content = templates[name]
-          if (submit_laudo[name] === undefined) {
-            console.log(`Form for template ${name} defined, but dispatcher not found.`)
-            return
-          }
-          const id = Math.round(1e10 * Math.random()).toString()
-          const card = {
-            id: id,
-            title: `
-              <div class="fb-button form-group field-button-${id} d-flex flex-row flex-nowrap justify-content-between">
-                <div class='flex-grow'>
-                  ${content.nickname}
-                </div>
-                <button type="button" class="btn btn-success" name="button-${id}" 
-                  id="button-${id}" 
-                    onclick="click_template_dispatcher('${name}'); event.stopPropagation();">
-                  Laudo
-                </button>
-              </div>
-            `,
-            description: content.template,
-            src: ultrasound_icon
-          }
-          new_cards.push(card)
-        })
-      }
-
-      if (new_cards.length > 0) {
-        // calls func tha changes vue object
-        this.cards = new_cards
-        setTimeout(
-          function () {
-            const elems = document.querySelectorAll('.form_select_init')
-            window.M.FormSelect.init(elems)
-          },
-          500
-        )
-        setTimeout(
-          function () {
-            const elems = document.querySelectorAll('.collapsible')
-            window.M.Collapsible.init(elems)
-          },
-          500
-        )
-      } else {
-        this.cards = []
-      }
+      editor_insert_stuff(this.get_quill(), [{ insert: descriptor.body }], false)
     },
 
     show_descriptor_edit_dialog : function() {
@@ -376,7 +278,7 @@ export default {
         methods: {
           on_dialog_close : function() {
             this.$destroy()
-            this.$el.parentElement.removeChild(this.$el)  
+            this.$el.parentElement.removeChild(this.$el)
           }
         },
         components: {
@@ -409,7 +311,7 @@ export default {
         methods: {
           on_dialog_close : function() {
             dialog.$destroy()
-            dialog.$el.parentElement.removeChild(dialog.$el)  
+            dialog.$el.parentElement.removeChild(dialog.$el)
           }
         },
         components: {
@@ -419,15 +321,19 @@ export default {
     },
 
     copy_editor_content : function() {
-      const quill = this.$refs.editor.editor
+      const quill = this.get_quill()
       const len = quill.getLength()
       quill.setSelection(0, len)
       document.execCommand('copy')
       quill.setSelection(len, len)
     },
 
-    click_template_dispatcher : function(name) {
-      submit_laudo[name](this.$refs.editor.editor)
+    get_quill : function() {
+      return this.$refs.editor.editor
+    },
+
+    clickable_templates_received : function(cards) {
+      this.has_cards = (cards.length > 0)
     }
   }
 }
@@ -435,28 +341,6 @@ export default {
 </script>
 
 <style scoped>
-
-.vignette {
-  max-width: 60px;
-  max-height: 60px;
-    margin-right: 4%;
-}
-
-#clickable_template_cards {
-  margin-top: 0px
-}
-
-.collapsible-header {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  padding-right: 10px;
-  padding-left: 10px;
-}
-
-.collapsible-body {
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
 
 .zero-margin {
   margin-left: 0px;
@@ -563,27 +447,6 @@ export default {
   padding-right: 10;
 }
 
-.form_sg {
-  width: 30%;
-}
-
-#form_div {
-  padding-top: 5px;
-}
-
-.idade-gestacional {
-  border: 1px solid #f1a7ae;
-  margin-bottom: 5px;
-}
-
-.fb-number-label {
-  margin-bottom: 0px;
-}
-
-label {
-  margin-bottom: 0px;
-}
-
 .sidebar_tab {
     text-decoration: none !important;
   }
@@ -591,6 +454,5 @@ label {
 .sidebar_tab_enabled:hover {
   background-color: #80808040 !important;
 }
-
 
 </style>

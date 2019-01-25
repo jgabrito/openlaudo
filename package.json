@@ -85,6 +85,9 @@
       ],
       "react/no-this-in-sfc": [
         "off"
+      ],
+      "no-continue": [
+        "off"
       ]
     }
   },

@@ -1,7 +1,5 @@
 /* eslint "no-unused-vars": "warn", "no-trailing-spaces" : "off", "comma-dangle" : "off" */
 
-import { calculate_history } from './click_templates.js'
-
 const form_templates = {
     ob_tardio : `<form id="rendered-form"><div class="rendered-form">
     <div class="">

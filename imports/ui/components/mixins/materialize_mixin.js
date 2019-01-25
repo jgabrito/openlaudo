@@ -14,7 +14,8 @@ export default {
           dismissible: true
         },
         select: {},
-        tabs: {}
+        tabs: {},
+        collapsible: {},
       },
       materialize_M: window.M
     }
@@ -26,7 +27,8 @@ export default {
         'select': this.materialize_M.FormSelect,
         'tabs': this.materialize_M.Tabs,
         'modal': this.materialize_M.Modal,
-        'dropdown': this.materialize_M.Dropdown
+        'dropdown': this.materialize_M.Dropdown,
+        'collapsible': this.materialize_M.Collapsible,
       }
       return this._materialize_controls.filter(c => (c instanceof name_to_class[classname]))
     },
@@ -57,9 +59,9 @@ export default {
 
     element_is_mine: function(element) {
       // Only touch elements that do not belong to any other child component, to avoid
-      // overlap issues.      
+      // overlap issues.
       let retval = true
-      
+
       this.$children.forEach((child) => {
         if (child.$el.contains(element)) {
           retval = false
@@ -78,13 +80,12 @@ export default {
           if (this.materialize_recursive) {
             const elems = this.$el.getElementsByTagName(name)
             for (let i = 0; i < elems.length; i += 1) {
-              if (! this.element_is_mine(elems[i])) continue
+              if (!this.element_is_mine(elems[i])) continue
               const instance = new ControlClass(elems[i], options)
               if (instance) this._materialize_controls.push(instance)
             }
           }
-        }
-        catch(err) {
+        } catch (err) {
           console.log(`Error initializing Materialize tag ${name}`)
           console.log(this)
           throw err
@@ -99,13 +100,12 @@ export default {
           if (this.materialize_recursive) {
             const elems = this.$el.getElementsByClassName(name)
             for (let i = 0; i < elems.length; i += 1) {
-              if (! this.element_is_mine(elems[i])) continue
+              if (!this.element_is_mine(elems[i])) continue
               const instance = new ControlClass(elems[i], options)
               if (instance) this._materialize_controls.push(instance)
             }
           }
-        }
-        catch(err) {
+        } catch (err) {
           console.log(`Error initializing Materialize class ${name}`)
           console.log(this)
           throw err
@@ -135,6 +135,11 @@ export default {
       }
 
       if (this.materialize_classes.includes('textarea')) this.resize_textareas()
+
+      if (this.materialize_classes.includes('collapsible')) {
+        _do_initialize_class(this.materialize_M.Collapsible, 'collapsible',
+          this.materialize_options['collapsible'])
+      }
     }
   },
 

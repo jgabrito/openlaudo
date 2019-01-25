@@ -1398,4 +1398,8 @@ function change_presentation() {
   }
 }
 
-export { submit_laudo, calculate_history }
+const adhoc_handlers = {
+  'calculate_history' : calculate_history
+}
+
+export { submit_laudo, adhoc_handlers }
