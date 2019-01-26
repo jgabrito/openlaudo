@@ -199,6 +199,7 @@ import { editor_insert_stuff } from './quill_utils.js'
 import materialize_mixin from './mixins/materialize_mixin';
 import db_mixin from './mixins/db_mixin.js'
 import { userid_mixin } from '../../api/user.js'
+import { AutoCompleteEngine } from './autocomplete.js'
 
 export default {
 
@@ -243,6 +244,14 @@ export default {
               'ACHADOS' : () => { this.show_descriptor_edit_dialog() },
               'COPIAR' : () => { this.copy_editor_content() },
             }
+          },
+          mention: {
+            allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
+            mentionDenotationChars: ['#'],
+            minChars : 2,
+            dataAttributes : [ 'id', 'value', 'body', 'title' ],
+            source : this.generate_autocomplete_candidates,
+            customSelectItem : this.autocomplete_candidate_selected,
           }
         },
         theme: 'snow',
@@ -406,6 +415,37 @@ export default {
       } else {
         throw new Error(`Unknown dataset name: ${name}`)
       }
+    },
+
+    generate_autocomplete_candidates: function(search_term, render_list, mention_char) {
+      if (!this._autocomplete) {
+        this._autocomplete = new AutoCompleteEngine()
+      }
+
+      const selector = {
+        modality : this.current_modality.name,
+        specialty : this.current_specialty.name,
+      }
+      if (this.user_id) {
+        selector.owner_id = this.user_id
+      }
+
+      let candidates = this._autocomplete.generate_candidates(
+        this._datasets.descriptors, selector, search_term, 10
+      )
+
+      candidates = candidates.map(c => ({
+        id : c.item._id,
+        value : `<span>${c.item.title}</span>`,
+        title : c.item.title,
+        body : c.item.body,
+      }))
+
+      render_list(candidates, search_term)
+    },
+
+    autocomplete_candidate_selected : function(data) {
+      editor_insert_stuff(this.get_quill(), [{ insert: data.body }], false)
     }
   }
 }

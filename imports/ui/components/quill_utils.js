@@ -31,7 +31,18 @@ function editor_insert_stuff (quill, deltas, clear = false) {
   }
   update.ops = update.ops.concat(fix_attributes(deltas))
 
+  let deltas_length = 0
+  deltas.forEach((d) => {
+    deltas_length += d.insert.length
+  })
+
   quill.updateContents(update)
+
+  if (selection.length > 0) {
+    quill.setSelection(selection.index, deltas_length)
+  } else {
+    quill.setSelection(selection.index + deltas_length)
+  }
 }
 
 export { editor_insert_stuff }

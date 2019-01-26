@@ -4,7 +4,7 @@ import _assign from 'lodash/assign'
 import _filter from 'lodash/filter'
 import mingo from 'mingo'
 
-import { collate } from './intl_util.js'
+import { collate } from '../util/intl_util.js'
 import { get_db_promise, generate_uid, is_client, is_server, is_production } from './db_meteor.js'
 import { get_current_uid } from './user.js'
 import { get_default_specialty_modality_pair } from './base_metadata.js'
@@ -652,9 +652,35 @@ function filter_items(items, selector, search_expression) {
   return items.filter(i => (query.test(i.toJS())))
 }
 
+// This assumes the word is already trimmed and collated
+function _item_find_word (item, word, search_fields) {
+  const output = []
+  const bag_of_words = item.get(aux_fieldname)
+  if (!bag_of_words) return output
+  if (_sorted_index_of(bag_of_words, word, (a, b) => (a.localeCompare(b))) < 0) return output
+
+  search_fields.forEach((f) => {
+    const temp = collate(item.get(f))
+    let idx = 0
+    while (true) {
+      idx = temp.indexOf(word, idx)
+      if (idx < 0) break
+      output.push({ fieldname : f, idx })
+      idx += word.length
+    }
+  })
+
+  return output
+}
+
+function descriptor_find_word(item, word) {
+  return _item_find_word(item, word, descriptor_search_fields)
+}
+
 export {
   db_ready_promise, is_db_ready, get_system_uid,
   find_templates, upsert_template, validate_template, empty_template,
   find_descriptors, upsert_descriptor, validate_descriptor, empty_descriptor,
-  get_capabilities, filter_items
+  descriptor_find_word,
+  get_capabilities, filter_items,
 }
