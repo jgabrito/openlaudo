@@ -246,7 +246,9 @@ function _transform_hardcoded_stuff(items, schema, search_fields, sort_key) {
     })
     try {
       transform_record(i, search_fields)
-      schema.validate(i)
+      if (! is_production()) {
+        schema.validate(i)
+      }
       output = output.push(fromJS(i))
     } catch (error) {
       console.log('Error validating hardcoded item: ')
