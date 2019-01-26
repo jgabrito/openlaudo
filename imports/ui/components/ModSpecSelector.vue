@@ -109,7 +109,7 @@ export default {
 
       if (name === 'modality') {
         pair.modality = this.metadata.modalities[value]
-        this.set_modality(value)
+        this.set_modality(pair.modality)
 
         // Modality changes always entail a check if the currently selected specialty
         // is valid for the new modality, changing the former if necessary.
@@ -118,11 +118,12 @@ export default {
         let new_specialty = _find(valid_specialties, s => (s.name === current_specialty_name))
         if (!new_specialty) {
           new_specialty = valid_specialties[0]
+          this.set_specialty(new_specialty)
         }
         pair.specialty = new_specialty
       } else {
         pair[name] = this.metadata.specialties[value]
-        this.set_modality(value)
+        this.set_specialty(pair[name])
       }
 
       // There should be no such thing as an independent modality or specialty change.
