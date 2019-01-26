@@ -1,0 +1,3 @@
+[submodule "imports/startup/client/quill-mention"]
+	path = imports/startup/client/quill-mention
+	url = https://github.com/jgabrito/quill-mention.git
