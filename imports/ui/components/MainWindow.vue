@@ -4,11 +4,12 @@
     class="container-fluid d-flex flex-column h-100"
   >
     <TemplateNav
+      ref="template_nav"
       template-dropdowns
       tabs
       :initial-modality="initialModality"
       :initial-specialty="initialSpecialty"
-      :injected-datasets="injected_templates"
+      :own-subscription="false"
       @template-chosen="template_chosen"
       @specialty-changed="set_specialty"
       @modality-changed="set_modality"
@@ -164,10 +165,11 @@
             </div>
 
             <AssetList
+              ref="asset_list"
               expanded
               class="flex-grow-1"
               :asset-interface="descriptor_interface"
-              :injected-datasets="injected_descriptors"
+              :own-subscription="false"
               @asset-chosen="format_descriptor"
             />
           </div>
@@ -251,30 +253,21 @@ export default {
     }
   },
 
-  computed : {
-    // Descriptors to be injected as default dataset into AssetList
-    injected_descriptors : function() {
-      const modality = this.current_modality
-      const specialty = this.current_specialty
-      const search_expression = this.search_expression
-      const selector = {
-        modality : modality.name,
-        specialty : specialty.name
-      }
-      const descriptors = this.datasets.descriptors
-
-      return { default : db.filter_items(descriptors, selector, search_expression) }
-    },
-
-    // Templates to be injected as default dataset into TemplateNav
-    injected_templates : function() {
-      return { default : this.datasets.templates }
-    }
-  },
-
   watch : {
     user_id : function() {
       this.refresh_datasets()
+    },
+
+    current_modality : function() {
+      this.update_descriptors(this._datasets.descriptors, this._datasets.descriptors)
+    },
+
+    current_specialty : function() {
+      this.update_descriptors(this._datasets.descriptors, this._datasets.descriptors)
+    },
+
+    search_expression : function() {
+      this.update_descriptors(this._datasets.descriptors, this._datasets.descriptors)
     }
   },
 
@@ -384,6 +377,34 @@ export default {
       return {
         descriptors : db.find_descriptors(selector, {}, '', 'title'),
         templates : db.find_templates(selector, {}, '', 'nickname')
+      }
+    },
+
+    update_descriptors: function(new_value, old_value) {
+      const selector = {
+        modality : this.current_modality.name,
+        specialty : this.current_specialty.name
+      }
+      this.$refs.asset_list.inject_datasets(
+        {
+          default : db.filter_items(new_value, selector, this.search_expression)
+        }
+      )
+    },
+
+    update_templates: function (new_value, old_value) {
+      this.$refs.template_nav.inject_datasets(
+        { default : new_value }
+      )
+    },
+
+    dataset_changed : function (name, new_value, old_value) {
+      if (name === 'templates') {
+        this.update_templates(new_value, old_value)
+      } else if (name === 'descriptors') {
+        this.update_descriptors(new_value, old_value)
+      } else {
+        throw new Error(`Unknown dataset name: ${name}`)
       }
     }
   }

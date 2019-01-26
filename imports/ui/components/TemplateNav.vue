@@ -31,7 +31,7 @@
               class="dropdown-content"
             >
               <li
-                v-for="template in modality_templates[specialty.name]"
+                v-for="template in report_templates[specialty.name]"
                 :key="template._id"
               >
                 <a
@@ -101,64 +101,73 @@ export default {
 
   data: function () {
     return {
-      all_templates : new ImMap(),
+      report_templates : {},
       materialize_classes: [ 'tabs' ],
-      materialize_recursive: true
+      materialize_recursive: true,
     }
   },
 
-  computed: {
-    modality_templates : function() {
-      const modality_templates = this.all_templates.get(this.current_modality.name)
-      if (modality_templates) {
-        return modality_templates.toJS()
-      }
-
-      return {}
+  watch : {
+    current_modality : function() {
+      this.update_templates()
     }
   },
 
-  watch: {
-    'datasets.default' : {
-      immediate : true,
-      handler : function(new_value, old_value) {
-        const entries = new_value
-
-        if (entries === null) {
-          this.all_templates = new ImMap()
-          return
-        }
-        if (entries.equals(old_value)) {
-          return
-        }
-
-        let entries_by_modality = entries.groupBy(t => (t.get('modality')))
-        entries_by_modality = entries_by_modality.sortBy(
-          (v, k) => (k),
-          (a, b) => (a.localeCompare(b))
-        )
-
-        entries_by_modality = entries_by_modality.map((v) => {
-          let entries_by_specialty = v.groupBy(t => (t.get('specialty')))
-          entries_by_specialty = entries_by_specialty.sortBy(
-            (vs, ks) => (ks),
-            (a, b) => (a.localeCompare(b))
-          )
-          return entries_by_specialty
-        })
-
-        this.all_templates = entries_by_modality
-      }
-    },
+  beforeCreate : function() {
+    this._all_templates = new ImMap()
   },
 
   methods: {
+    update_templates : function() {
+      const modality_templates = this._all_templates.get(this.current_modality.name)
+      if (modality_templates) {
+        this.report_templates = modality_templates.toJS()
+      } else {
+        this.report_templates = {}
+      }
+    },
+
+    dataset_changed : function(name, new_value, old_value) {
+      if (name !== 'default') {
+        throw new Error('Only default dataset supported')
+      }
+
+      const entries = new_value
+
+      if (!entries) {
+        this._all_templates = new ImMap()
+        this.update_templates()
+        return
+      }
+      if (entries.equals(old_value)) {
+        return
+      }
+
+      let entries_by_modality = entries.groupBy(t => (t.get('modality')))
+      entries_by_modality = entries_by_modality.sortBy(
+        (v, k) => (k),
+        (a, b) => (a.localeCompare(b))
+      )
+
+      entries_by_modality = entries_by_modality.map((v) => {
+        let entries_by_specialty = v.groupBy(t => (t.get('specialty')))
+        entries_by_specialty = entries_by_specialty.sortBy(
+          (vs, ks) => (ks),
+          (a, b) => (a.localeCompare(b))
+        )
+        return entries_by_specialty
+      })
+
+      this._all_templates = entries_by_modality
+      this.update_templates()
+    },
+
     get_specialty_id: function (specialty) {
       return `${this.current_modality.name}-${specialty.name}`
     },
 
     find_function: function () {
-      if (this.injectedDatasets) {
+      if (!this.ownSubscription) {
         throw new Error('Should not be here.')
       }
 

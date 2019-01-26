@@ -198,14 +198,7 @@ export default {
     },
 
     selected_asset_id_stack : function() {
-      this.dataset_watcher(this.datasets.default, this.datasets.default)
-    },
-
-    'datasets.default' : {
-      immediate : true,
-      handler : function (new_value, old_value) {
-        this.dataset_watcher(new_value, old_value)
-      }
+      this.dataset_changed('default', this._datasets.default, this._datasets.default)
     },
 
     current_asset: function () {
@@ -232,8 +225,11 @@ export default {
       return this.current_asset
     },
 
-    dataset_watcher : function(new_dataset, old_dataset) {
-      const dataset = new_dataset
+    dataset_changed : function (name, new_value, old_value) {
+      if (name !== 'default') {
+        throw new Error('Only default dataset supported')
+      }
+      const dataset = new_value
       const current_asset = this.current_asset
       const selected_asset_id_stack = this.selected_asset_id_stack
       let new_current_asset = null
@@ -243,7 +239,7 @@ export default {
         this.assets = []
         return
       }
-      if (!dataset.equals(old_dataset)) {
+      if (!dataset.equals(old_value)) {
         this.assets = dataset.toJS()
       }
 
@@ -274,9 +270,10 @@ export default {
     },
 
     find_function: function () {
-      if (this.injectedDatasets) {
+      if (!this.ownSubscription) {
         throw new Error('Should not be here.')
       }
+
       const selector = _assign(
         {
           modality: this.modality.name,
