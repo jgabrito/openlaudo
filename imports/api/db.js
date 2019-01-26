@@ -246,7 +246,7 @@ function _transform_hardcoded_stuff(items, schema, search_fields, sort_key) {
     })
     try {
       transform_record(i, search_fields)
-      if (! is_production()) {
+      if (!is_production()) {
         schema.validate(i)
       }
       output = output.push(fromJS(i))
@@ -295,12 +295,16 @@ function bootstrap_test_db_if_development() {
   const test_descriptors = _hardcoded_descriptors.items.map((d) => {
     d = d.set('title', `${d.get('title')} - TEST`)
     d = d.set('_id', generate_uid())
-    return d
+    d = d.toJS()
+    transform_record(d, descriptor_search_fields)
+    return fromJS(d)
   })
   const test_templates = _hardcoded_templates.items.map((t) => {
     t = t.set('nickname', `${t.get('nickname')} - TEST`)
     t = t.set('_id', generate_uid() )
-    return t
+    t = t.toJS()
+    transform_record(t, template_search_fields)
+    return fromJS(t)
   })
 
   return descriptors_col.bulkInsert(test_descriptors.toJS())
