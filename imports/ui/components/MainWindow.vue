@@ -88,8 +88,14 @@
 
           <div class="d-flex flex-row">
             <button class="ql-COPIAR" />
-            <button class="ql-SALVAR" />
-            <button class="ql-ACHADOS" />
+            <button
+              v-if="user_id"
+              class="ql-SALVAR"
+            />
+            <button
+              v-if="user_id"
+              class="ql-ACHADOS"
+            />
           </div>
         </div>
 
