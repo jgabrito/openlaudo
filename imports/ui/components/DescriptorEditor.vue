@@ -36,11 +36,27 @@
       </label>
     </div>
 
+    <div class="input-field col-12">
+      <input
+        id="hotkey"
+        type="text"
+        :disabled="disableControls"
+        :value="get_value_for_control('hotkey')"
+        @input="control_value_changed('hotkey', $event.target.value)"
+      >
+      <label
+        for="hotkey"
+        class="active"
+      >
+        Hotkey
+      </label>
+    </div>
+
     <div class="input-field">
       <textarea
         id="body"
         type="text"
-        style="height:10rem;"
+        style="height:8rem;"
         :disabled="disableControls"
         :value="get_value_for_control('body')"
         @input="control_value_changed('body', $event.target.value)"
@@ -122,6 +138,9 @@ export default {
       if (name === 'modspec_pair') {
         input_asset.modality = value.modality.name
         input_asset.specialty = value.specialty.name
+      } else if (name === 'hotkey') {
+        // Force hotkeys to be alphanumeric; backend will not check this.
+        input_asset.hotkey = value.replace(/\W+/g, '')
       } else {
         input_asset[name] = value
       }
