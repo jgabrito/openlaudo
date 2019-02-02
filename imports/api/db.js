@@ -311,18 +311,30 @@ function bootstrap_test_db_if_development() {
     .then( () => templates_col.bulkInsert(test_templates.toJS()) )
 }
 
+
 function upgrade_db_if_necessary () {
+  const latest_db_version = 1
+
   // Run server-side only to initialize a new DB or upgrade an old one.
   if (!is_server()) return Promise.resolve()
 
   const metadata_col = _db_handle.get_collection('metadata')
 
+  const _upgrade_db_step = () => metadata_col.findOne()
+    .then((data) => {
+      if (data.version === latest_db_version) {
+        console.log(`DB version: ${latest_db_version}`)
+        _db_metadata = data
+        return
+      }
+
+      throw new Error('Should not be here.')
+    })
+
   return metadata_col.findOne()
     .then((data) => {
       if (data) {
-        console.log('No need to upgrade DB')
-        _db_metadata = data
-        return
+        return _upgrade_db_step()
       }
 
       // New database;
@@ -348,10 +360,8 @@ function upgrade_db_if_necessary () {
           console.log('Bootstraping test db if necessary')
           return bootstrap_test_db_if_development()
         })
-        .then( () => {
-          console.log('DB ready')
-          return metadata_col.insert(_db_metadata)
-        })
+        .then( () => metadata_col.insert(_db_metadata))
+        .then(_upgrade_db_step)
     })
 }
 
