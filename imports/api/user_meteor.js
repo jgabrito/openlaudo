@@ -1,5 +1,6 @@
 
 import { Meteor } from 'meteor/meteor'
+import { Tracker } from 'meteor/tracker'
 
 const get_current_uid = function() {
   return Meteor.userId()
@@ -26,7 +27,8 @@ const userid_mixin = {
   data : function() {
     return {
       login_providers : providers,
-      login_provider_names : provider_names
+      login_provider_names : provider_names,
+      user_id : null,
     }
   },
 
@@ -37,22 +39,38 @@ const userid_mixin = {
         throw new Error(`Unknown login provider: ${provider_name}`);
       }
 
-      provider._provider(provider._provider_data, (err) => {
-        if (err) {
-          console.log(`Login failed for provider ${provider_name}: ${err}`)
-        }
+      this.login_called().then((proceed) => {
+        if (!proceed) return
+
+        provider._provider(provider._provider_data, (err) => {
+          if (err) {
+            console.log(`Login failed for provider ${provider_name}: ${err}`)
+          }
+        })
       })
     },
 
     logout : function() {
-      Meteor.logout()
+      this.logout_called().then((proceed) => {
+        if (!proceed) return
+        Meteor.logout()
+      })
+    },
+
+    login_called : function() {
+      return Promise.resolve(true)
+    },
+
+    logout_called : function() {
+      return Promise.resolve(true)
     }
   },
 
-  meteor : {
-    user_id : function() {
-      return Meteor.userId();
-    }
+  created : function() {
+    this._tracker = Tracker.autorun(() => {
+      const user_id = Meteor.userId()
+      this.user_id = user_id
+    })
   }
 }
 

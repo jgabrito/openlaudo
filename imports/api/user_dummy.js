@@ -16,9 +16,19 @@ const userid_mixin = {
   methods : {
     login : function() {
       console.log('Login called')
+      this.login_called()
     },
     logout : function() {
       console.log('Logout called')
+      this.logout_called()
+    },
+
+    login_called : function() {
+      return Promise.resolve(true)
+    },
+
+    logout_called : function() {
+      return Promise.resolve(true)
     }
   }
 }

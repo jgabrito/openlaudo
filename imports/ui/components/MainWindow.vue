@@ -286,6 +286,15 @@ export default {
     }
   },
 
+  mounted : function() {
+    this.$root.$on('login', (name) => {
+      this.login(name)
+    })
+    this.$root.$on('logout', () => {
+      this.logout()
+    })
+  },
+
   methods: {
     set_modality : function(modality) {
       this.current_modality = modality
