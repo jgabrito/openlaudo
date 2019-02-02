@@ -83,13 +83,15 @@ export default {
       this._cursors = this.find_function()
       if (!this._cursors) return
 
+      if (active) {
+        this._datasets = this._new_datasets()
+      }
+
       if (db.get_capabilities()['events']) {
         this._observers = { }
         _entries(this._cursors).forEach(([n, c]) => {
           this._observers[n] = c.observe((dataset) => {
-            if (!dataset.equals(this._datasets[n])) {
-              this._schedule_update(n, dataset)
-            }
+            this._schedule_update(n, dataset)
           })
         })
       } else {
@@ -103,9 +105,7 @@ export default {
               if (this._db_promise !== my_promise) {
                 return
               }
-              if (!dataset.equals(this._datasets[n])) {
-                this._schedule_update(n, dataset)
-              }
+              this._schedule_update(n, dataset)
             }))
         )
           .catch(
@@ -153,7 +153,7 @@ export default {
         if (updated) {
           _entries(this._datasets).forEach(([n, d]) => {
             const old_d = old_datasets[n]
-            if (!d.equals(old_d)) {
+            if ((d.size === 0) || (!d.equals(old_d))) {
               this.dataset_changed(n, d, old_d)
               this.$emit('dataset_changed', n, d, old_d)
             }

@@ -9,13 +9,14 @@ import _entries from 'lodash/entries'
 import _keys from 'lodash/keys'
 import _pick from 'lodash/pick'
 
-import { validate_template, validate_descriptor } from './db.js'
+import { validate_template, validate_descriptor, validate_user_data } from './db.js'
 
 const _method_calls = new Set()
 
 const collections = {
   'templates' : new Mongo.Collection('templates'),
   'descriptors' : new Mongo.Collection('descriptors'),
+  'user_data' : new Mongo.Collection('user_data'),
   'metadata' : new Mongo.Collection('metadata')
 }
 
@@ -92,54 +93,34 @@ if (Meteor.isServer) {
     check(options, Match.Any)
     return _publication.bind(this)(collections.descriptors, selector, options)
   })
+
+  Meteor.publish('user_data', function(selector, options) {
+    check(selector, Match.Any)
+    check(options, Match.Any)
+
+    if (this.userId === null) {
+      // DB access restricted to logged-in users
+      return []
+    }
+
+    // Publish only current user data; no parameters needed
+    return collections.user_data.find({ _id : this.userId }, { limit : 1 })
+  })
 }
 
-// This function performs the actual upsert in response to the corresponding method call.
-// Input sanitization and authorization happen here.
-function _do_update (collection, doc, upsert, op_id, validator) {
+function _method_call_wrapper (fn, params) {
+  const { op_id } = params
+
   if (_method_calls.has(op_id)) {
     // Ignore method retry
     return
   }
   _method_calls.add(op_id)
 
-  let error
   let result
-
+  let error
   try {
-    if (this.userId === null) {
-      throw new Meteor.Error('Unauthorized')
-    }
-    const current_uid = this.userId
-
-    try {
-      validator(doc)
-    } catch (err) {
-      throw new Meteor.Error(err)
-    }
-
-    if (doc.owner_id !== current_uid) {
-      throw new Meteor.Error('Unauthorized')
-    }
-
-    if (Meteor.isServer) {
-      let orig = null;
-      if (doc._id !== undefined) {
-        orig = collection.findOne({ '_id' : doc._id })
-      }
-      if (orig && (orig.owner_id !== current_uid)) {
-        throw new Meteor.Error(`Record ${doc._id} belongs to another user.`)
-      }
-    }
-
-    // Document is OK. Perform actual update.
-    if (doc._id) {
-      if (collection.update({ '_id' : doc._id }, doc, { upsert })) {
-        result = doc._id
-      }
-    } else {
-      result = collection.insert(doc)
-    }
+    result = fn(params)
   } catch (err) {
     error = err
   }
@@ -151,26 +132,127 @@ function _do_update (collection, doc, upsert, op_id, validator) {
   return result
 }
 
+// This function performs the actual upsert in response to the corresponding method call.
+// Input sanitization and authorization happen here.
+function _do_update (params) {
+  const { collection, doc, upsert, validator } = params
+  let result
+
+  if (this.userId === null) {
+    throw new Meteor.Error('Unauthorized')
+  }
+  const current_uid = this.userId
+
+  try {
+    validator(doc)
+  } catch (err) {
+    throw new Meteor.Error(err)
+  }
+
+  if (doc.owner_id !== current_uid) {
+    throw new Meteor.Error('Unauthorized')
+  }
+
+  if (Meteor.isServer) {
+    let orig = null;
+    if (doc._id !== undefined) {
+      orig = collection.findOne({ '_id' : doc._id })
+    }
+    if (orig && (orig.owner_id !== current_uid)) {
+      throw new Meteor.Error(`Record ${doc._id} belongs to another user.`)
+    }
+  }
+
+  // Document is OK. Perform actual update.
+  if (doc._id) {
+    if (collection.update({ '_id' : doc._id }, doc, { upsert })) {
+      result = doc._id
+    }
+  } else {
+    result = collection.insert(doc)
+  }
+
+  return result
+}
+
+function _do_update_user_data (params) {
+  const { doc } = params
+  const collection = collections.user_data
+  let result
+
+  if (this.userId === null) {
+    throw new Meteor.Error('Unauthorized')
+  }
+  const current_uid = this.userId
+
+  try {
+    validate_user_data(doc)
+  } catch (err) {
+    throw new Meteor.Error(err)
+  }
+
+  if (!doc._id) {
+    doc._id = current_uid
+  } else if (doc._id !== current_uid) {
+    throw new Meteor.Error('Unauthorized')
+  }
+
+  // Document is OK. Perform actual update.
+  // Upsert always implied for user data
+  if (collection.update({ '_id' : doc._id }, doc, { upsert : true })) {
+    result = doc._id
+  }
+
+  return result
+}
+
+
 // Register methods
 Meteor.methods({
   update_template : function(doc, upsert, op_id) {
     check(doc, Object)
     check(upsert, Boolean)
     check(op_id, String)
-    return _do_update.bind(this)(collections.templates, doc, upsert, op_id, validate_template)
+    const params = {
+      collection : collections.templates,
+      doc,
+      upsert,
+      op_id,
+      validator : validate_template
+    }
+    return _method_call_wrapper.bind(this)(_do_update.bind(this), params)
   },
 
   update_descriptor : function(doc, upsert, op_id) {
     check(doc, Object)
     check(upsert, Boolean)
     check(op_id, String)
-    return _do_update.bind(this)(collections.descriptors, doc, upsert, op_id, validate_descriptor)
+    const params = {
+      collection : collections.descriptors,
+      doc,
+      upsert,
+      op_id,
+      validator : validate_descriptor
+    }
+    return _method_call_wrapper.bind(this)(_do_update.bind(this), params)
+  },
+
+  update_user_data : function(doc, upsert, op_id) {
+    check(doc, Object)
+    check(upsert, Boolean) // upsert is always true for user_data collection; ignore
+    check(op_id, String)
+    const params = {
+      doc,
+      op_id,
+    }
+    return _method_call_wrapper.bind(this)(_do_update_user_data.bind(this), params)
   }
 })
 
 const _method_names = {
   descriptors : 'update_descriptor',
-  templates : 'update_template'
+  templates : 'update_template',
+  user_data : 'update_user_data'
 }
 
 // Rate-limiting for method calls
@@ -278,7 +360,7 @@ class _Collection {
   }
 
   // Arguments: Mongo-style selector and options
-  find (selector, options) {
+  find (selector = {}, options = {}) {
     if (Meteor.isServer) {
       return new _Cursor(this._coll.find(selector, options))
     }
@@ -375,6 +457,7 @@ class _Collection {
 const collection_interfaces = {
   'templates' : new _Collection('templates'),
   'descriptors' : new _Collection('descriptors'),
+  'user_data' : new _Collection('user_data'),
   'metadata' : new _Collection('metadata')
 }
 

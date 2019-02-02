@@ -160,6 +160,23 @@ function empty_template() {
   }
 }
 
+const user_data_schema = new SimpleSchema({
+  _id: {
+    type: String,
+    optional: true
+  },
+  autocomplete : String, // stringified JSON of autocomplete engine state
+  editor_state : String, // stringified JSON of editor engine state
+})
+
+function empty_user_data() {
+  return {
+    autocomplete : JSON.stringify({}),
+    editor_state : JSON.stringify({})
+  }
+}
+
+
 // Module-global variables
 let _ready_promise = null
 let _ready = false
@@ -589,6 +606,16 @@ function find_descriptors (selector, options, search_expression = '', sort_key =
     options, sort_key)
 }
 
+function get_user_data () {
+  if (!is_client()) {
+    throw new Error('Client-side only.')
+  }
+  if (!_ready) return null
+
+  return new ExpandedCursor(_db_handle.get_collection('user_data').find({}, {}),
+    new ImList(), {}, {}, '_id')
+}
+
 function _transform_docs (docs, schema, search_fields) {
   const user_id = get_current_uid()
   if (!user_id) throw new Error('Could not get current user id.')
@@ -629,6 +656,17 @@ function upsert_template (doc) {
   return _db_handle.get_collection('templates').update(doc, true)
 }
 
+function upsert_user_data(doc) {
+  if (!is_client()) {
+    throw new Error('Client-side only.')
+  }
+  if (!_ready) {
+    return null
+  }
+
+  return _db_handle.get_collection('user_data').update(doc, true)
+}
+
 function get_capabilities() {
   if (!_ready) return null
   return _db_handle.get_capabilities()
@@ -653,6 +691,10 @@ function validate_descriptor(d) {
   if (!_check_sorted(d[aux_fieldname])) {
     throw new Error(`descriptor.${aux_fieldname} not sorted.`)
   }
+}
+
+function validate_user_data(d) {
+  user_data_schema.validate(d)
 }
 
 // Hacky...
@@ -693,4 +735,5 @@ export {
   find_descriptors, upsert_descriptor, validate_descriptor, empty_descriptor,
   descriptor_find_word,
   get_capabilities, filter_items,
+  get_user_data, upsert_user_data, validate_user_data, empty_user_data,
 }

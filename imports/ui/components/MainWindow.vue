@@ -187,6 +187,9 @@
 
 <script>
 
+import _filter from 'lodash/filter'
+import _debounce from 'lodash/debounce'
+
 import 'quill/dist/quill.snow.css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
@@ -227,7 +230,8 @@ export default {
       default : function() {
         return [
           'descriptors',
-          'templates'
+          'templates',
+          'user_data'
         ]
       }
     }
@@ -238,8 +242,10 @@ export default {
       current_modality : this.initialModality,
       current_specialty : this.initialSpecialty,
       search_expression : '',
-      editor_content : [],
+      editor_content : {},
       has_cards : false,
+      user_data_uptodate: false,
+      valid_user_id: false,
       descriptor_interface,
       quill_config : {
         modules: {
@@ -269,8 +275,13 @@ export default {
   },
 
   watch : {
-    user_id : function() {
-      this.refresh_datasets()
+    user_id : {
+      immediate : true,
+      handler : function() {
+        this.valid_user_id = true
+        this.user_data_uptodate = false
+        this.refresh_datasets(true)
+      }
     },
 
     current_modality : function() {
@@ -283,7 +294,38 @@ export default {
 
     search_expression : function() {
       this.update_descriptors(this._datasets.descriptors, this._datasets.descriptors)
+    },
+
+    editor_content : function() {
+      if (this.valid_user_id && this.user_id) {
+        this._throttled_upsert_user_data(
+          { editor_content : Array.from(this.editor_content.ops) }
+        )
+      }
     }
+  },
+
+  created : function() {
+    this._throttled_upsert_user_data = _debounce(
+      (data) => {
+        let new_user_data = this._datasets.user_data.get(0)
+        if (new_user_data) {
+          new_user_data = new_user_data.toJS()
+        }
+        else {
+          new_user_data = db.empty_user_data()
+        }
+        const editor_state = JSON.parse(new_user_data.editor_state)
+        const editor_content = data.editor_content || editor_state.inserts || []
+        new_user_data.editor_state = JSON.stringify({ inserts : editor_content })
+        return db.upsert_user_data(new_user_data)
+      },
+      5000,
+      {
+        leading : false,
+        trailing : true
+      }
+    )
   },
 
   mounted : function() {
@@ -400,7 +442,8 @@ export default {
       }
       return {
         descriptors : db.find_descriptors(selector, {}, '', 'title'),
-        templates : db.find_templates(selector, {}, '', 'nickname')
+        templates : db.find_templates(selector, {}, '', 'nickname'),
+        user_data : db.get_user_data(),
       }
     },
 
@@ -422,11 +465,32 @@ export default {
       )
     },
 
+    update_user_data: function (new_value, old_value) {
+      if (!this.valid_user_id) return
+
+      if (new_value.size !== 0) {
+        const user_data = new_value.get(0)
+        const editor_state = JSON.parse(user_data.get('editor_state'))
+        const saved_nontrivial_inserts = _filter(editor_state.inserts,
+          i => (i.insert.trim().length > 0))
+
+        if ((saved_nontrivial_inserts.length > 0) && (!this.user_data_uptodate)) {
+          // TODO: ask for confirmation before killing current contents
+          this.get_quill().setContents(editor_state.inserts)
+          this.get_quill().history.clear()
+        }
+
+        this.user_data_uptodate = true
+      }
+    },
+
     dataset_changed : function (name, new_value, old_value) {
       if (name === 'templates') {
         this.update_templates(new_value, old_value)
       } else if (name === 'descriptors') {
         this.update_descriptors(new_value, old_value)
+      } else if (name === 'user_data') {
+        this.update_user_data(new_value, old_value)
       } else {
         throw new Error(`Unknown dataset name: ${name}`)
       }
@@ -461,6 +525,19 @@ export default {
 
     autocomplete_candidate_selected : function(data) {
       editor_insert_stuff(this.get_quill(), [{ insert: data.body }], false)
+    },
+
+    login_called : function() {
+      this.valid_user_id = false
+      return Promise.resolve(true)
+    },
+
+    logout_called : function() {
+      const promise = this._throttled_upsert_user_data.flush() || Promise.resolve()
+      return promise.then(() => {
+        this.valid_user_id = false
+        return true
+      })
     }
   }
 }
