@@ -89,11 +89,11 @@
           <div class="d-flex flex-row">
             <button class="ql-COPIAR" />
             <button
-              v-if="user_id"
+              :disabled="! user_id"
               class="ql-SALVAR"
             />
             <button
-              v-if="user_id"
+              :disabled="! user_id"
               class="ql-ACHADOS"
             />
           </div>
