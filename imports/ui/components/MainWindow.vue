@@ -170,14 +170,16 @@
               >
             </div>
 
-            <AssetList
-              ref="asset_list"
-              expanded
-              class="flex-grow-1"
-              :asset-interface="descriptor_interface"
-              :own-subscription="false"
-              @asset-chosen="format_descriptor"
-            />
+            <div class="flex-grow-1" style="overflow-y : auto;">
+              <AssetList
+                ref="asset_list"
+                class="mr-1"
+                expanded
+                :asset-interface="descriptor_interface"
+                :own-subscription="false"
+                @asset-chosen="format_descriptor"
+              />
+            </div>
           </div>
         </div>
       </div>

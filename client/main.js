@@ -21,6 +21,7 @@ Meteor.startup(() => {
             reject()
           } else {
             resolve()
+            console.log(`Loaded ${name}`)
           }
           clearInterval(me)
         }
@@ -39,10 +40,13 @@ Meteor.startup(() => {
       Vue = content.Vue
       const { load_main_window } = content
 
+      console.log('Loaded Vue')
+
       // TODO: here Vue could be used to render some fancier intermediate screen
       load_promises.push(load_main_window().then((inner_content) => {
         MainWindow = inner_content.MainWindow
         resolved_count += 1
+        console.log('Loaded MainWindow')
       }))
 
       resolved_count += 1

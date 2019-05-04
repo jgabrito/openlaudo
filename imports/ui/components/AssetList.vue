@@ -1,9 +1,8 @@
 <template>
-  <div class="d-flex flex-column">
+  <div>
     <ul
       v-if="(! searching) && expanded"
       id="assets_ul"
-      class="flex-grow-1"
     >
       <li
         v-for="asset in assets"
@@ -23,7 +22,6 @@
     <ul
       v-else-if="(! searching)"
       id="assets_ul"
-      class="flex-grow-1"
     >
       <li
         v-for="asset in assets"
@@ -31,7 +29,7 @@
       >
         <a
           href="#!"
-          :class="{ selected : (current_asset_id === asset._id)}"
+          :class="{ selected : (current_asset_id === asset._id) , disabled : disabled}"
           @click="asset_clicked(asset)"
         >
           {{ assetInterface.get_title(asset) }}
@@ -40,7 +38,7 @@
     </ul>
     <div
       v-else
-      class="flex-grow-1 d-flex flex-column align-items-center justify-content-center"
+      class="d-flex flex-column align-items-center justify-content-center"
     >
       <div class="preloader-wrapper big active">
         <div class="spinner-layer spinner-red">
@@ -77,8 +75,13 @@
     display: block;
   }
 
-  #assets_ul li a.selected {
+  #assets_ul li a.selected:not(.disabled) {
     background-color: #b0b0b0;
+  }
+
+  #assets_ul li a.disabled {
+    color: #b0b0b0;
+    cursor: default;
   }
 
   #assets_ul li p {
@@ -95,7 +98,7 @@
     word-wrap: break-word;
   }
 
-  #assets_ul li a:hover:not(.header) {
+  #assets_ul li a:hover:not(.header):not(.disabled) {
     background-color: #eee;
   }
 

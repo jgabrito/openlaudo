@@ -46,7 +46,7 @@
         style="overflow-y : auto;"
       >
         <AssetList
-          v-if="(overwrite_template) && (user_id)"
+          :disabled="(! overwrite_template) || (! user_id)"
           :modality="current_modspec_pair.modality"
           :specialty="current_modspec_pair.specialty"
           search-expression=""
@@ -149,7 +149,8 @@ export default {
     container_classes: function () {
       return {
         'dialog_main_container': {
-          'modal': this.modal
+          'modal': this.modal,
+          'w-50': true,
         },
         'client_area': {
           'p-2': true,

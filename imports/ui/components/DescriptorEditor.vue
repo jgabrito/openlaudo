@@ -20,7 +20,7 @@
       @input="control_value_changed('modspec_pair', $event.target.value)"
     />
 
-    <div class="input-field col-12">
+    <div class="input-field">
       <input
         id="title"
         type="text"
@@ -36,7 +36,7 @@
       </label>
     </div>
 
-    <div class="input-field col-12">
+    <div class="input-field">
       <input
         id="hotkey"
         type="text"

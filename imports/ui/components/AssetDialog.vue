@@ -24,17 +24,19 @@
           >
         </div>
 
-        <AssetList
-          ref="asset_list"
-          :modality="current_modspec_pair.modality"
-          :specialty="current_modspec_pair.specialty"
-          :search-expression="search_expression"
-          :asset-interface="asset_interface"
-          :disabled="ongoing_addition"
-          class="flex-grow-1"
-          @asset-chosen="asset_chosen"
-          @asset-changed="asset_changed"
-        />
+        <div class="flex-grow-1" style="overflow-y : auto;">
+          <AssetList
+            ref="asset_list"
+            :modality="current_modspec_pair.modality"
+            :specialty="current_modspec_pair.specialty"
+            :search-expression="search_expression"
+            :asset-interface="asset_interface"
+            :disabled="ongoing_addition"
+            class="mr-1"
+            @asset-chosen="asset_chosen"
+            @asset-changed="asset_changed"
+          />
+        </div>
 
         <div class="p-2">
           <a
@@ -46,7 +48,7 @@
         </div>
       </div>
 
-      <div class="flex-grow-1 d-flex flex-column p-3 m-3 border">
+      <div class="flex-grow-1 p-3 m-3 border" style="overflow-y : auto;">
         <AssetEditor
           v-if="current_asset !== null"
           :key="current_asset._id"
@@ -207,7 +209,7 @@ export default {
         'dialog_main_container': {
           'modal': this.modal,
           'w-75': true,
-          'h-75': true
+          'h-100': true
         },
         'client_area': {
           'w-100': true,
