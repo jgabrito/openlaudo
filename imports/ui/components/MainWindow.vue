@@ -104,6 +104,7 @@
           class="flex-grow-1"
         >
           <quill
+            id="editor_inner_container"
             ref="editor"
             v-model="editor_content"
             class="h-100"
@@ -594,6 +595,10 @@ export default {
   overflow-y: auto;
   flex-basis: 0;
   -webkit-flex-basis: 0;
+}
+
+#editor_inner_container {
+  font-size: 15px;
 }
 
 #descriptor_list_container {

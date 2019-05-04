@@ -1,7 +1,5 @@
 <template>
-    <div>
         <div class="ui attached segment" ref="quill" @click.prevent="focusEditor"></div>
-    </div>
 </template>
 
 <script>
